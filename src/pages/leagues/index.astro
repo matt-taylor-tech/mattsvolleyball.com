@@ -30,7 +30,7 @@ const faqItems = [
   },
   {
     question: 'How much does it cost?',
-    answer: '$50 per team plus credit card processing fees. That covers the full season of 6 regular season games plus playoffs.',
+    answer: '$65 per player for Tuesday or Thursday, $55 per player for Wednesday, plus credit card processing fees. That covers the full regular season plus playoffs.',
   },
   {
     question: 'Are spectators allowed?',
@@ -76,6 +76,7 @@ const faqItems = [
         <LeagueCard
           day="Tuesday"
           format="4v4"
+          price="$65"
           description="Maximum 14 teams. Requires 1 female minimum per team. Welcomes all skill levels, typically intermediate to competitive."
           highlight="Two divisions: recreational and competitive with separate playoffs."
           details={[
@@ -89,11 +90,12 @@ const faqItems = [
         <LeagueCard
           day="Wednesday"
           format="4v4 Shuffle"
+          price="$55"
           description="Social focus with volleyball secondary. Individual sign-ups with weekly team redrafts. Meet new people every week!"
           highlight='Level Up format: winning teams advance and receive handicaps, keeping every match competitive.'
           details={[
             'Individual sign-ups. Teams re-drafted each week',
-            '6 regular season games plus 1 playoff week',
+            '7 regular season games plus 1 playoff week',
             'Approximately 2-hour sessions',
             'All skill levels welcome',
           ]}
@@ -102,6 +104,7 @@ const faqItems = [
         <LeagueCard
           day="Thursday"
           format="4v4"
+          price="$65"
           description="Maximum 14 teams. Identical structure to Tuesday league with 1 female minimum requirement."
           highlight="Two competitive divisions with separate playoffs."
           details={[

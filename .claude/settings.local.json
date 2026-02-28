@@ -10,7 +10,13 @@
       "Bash(while read f)",
       "Bash(do sed -i 's/#FFF8F0/#F5F0EA/g' \"$f\")",
       "Bash(done)",
-      "Bash(do sed -i 's/#0D2B3E/#231F20/g' \"$f\")"
+      "Bash(do sed -i 's/#0D2B3E/#231F20/g' \"$f\")",
+      "Bash(npm install @aws-sdk/client-s3)",
+      "Bash(npm run build)",
+      "Bash(node -e \":*)",
+      "Bash(node scripts/upload-champions.mjs --dry-run)",
+      "Bash(npm install sharp)",
+      "Bash(node scripts/upload-champions.mjs)"
     ]
   }
 }

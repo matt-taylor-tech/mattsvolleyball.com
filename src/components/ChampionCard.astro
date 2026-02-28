@@ -3,20 +3,19 @@ interface Props {
   teamName: string;
   season: string;
   year: number;
-  league: string;
-  division?: string;
   day: string;
+  division: string;
   photo?: string;
 }
 
-const { teamName, season, year, league, division, day, photo } = Astro.props;
+const { teamName, season, year, day, division, photo } = Astro.props;
 const r2Base = import.meta.env.PUBLIC_R2_BASE_URL || '';
 ---
 
 <div class="card group">
   <!-- Photo -->
   {photo ? (
-    <div class="aspect-video overflow-hidden">
+    <div class="aspect-square overflow-hidden">
       <img
         src={`${r2Base}${photo}`}
         alt={`${teamName} - ${season} ${year} Champions`}
@@ -25,7 +24,7 @@ const r2Base = import.meta.env.PUBLIC_R2_BASE_URL || '';
       />
     </div>
   ) : (
-    <div class="aspect-video img-placeholder">
+    <div class="aspect-square img-placeholder">
       <div class="text-center p-4">
         <svg class="w-12 h-12 mx-auto mb-2 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -44,8 +43,7 @@ const r2Base = import.meta.env.PUBLIC_R2_BASE_URL || '';
     </div>
     <h3 class="font-display font-bold text-lg text-ocean-600 mb-1">{teamName}</h3>
     <p class="text-sm text-ocean-600/60">
-      {season} {year} &middot; {day} {league}
-      {division && <span> &middot; {division}</span>}
+      {season} {year} &middot; {day} {division}
     </p>
   </div>
 </div>

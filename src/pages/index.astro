@@ -1,9 +1,9 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ChampionCard from '../components/ChampionCard.astro';
-import { getCollection } from 'astro:content';
+import { getChampions } from '../lib/champions';
 
-const champions = (await getCollection('champions')).sort((a, b) => b.data.year - a.data.year);
+const champions = await getChampions();
 ---
 
 <Layout title="Matt's Volleyball | Coed Sand Volleyball in Lake Norman">
@@ -33,7 +33,7 @@ const champions = (await getCollection('champions')).sort((a, b) => b.data.year 
         >
           Register Here
         </a>
-        <a href="/leagues/" class="btn-secondary">
+        <a href="/leagues/" class="btn-secondary text-xl py-4 px-10">
           View Leagues
         </a>
       </div>
@@ -121,8 +121,8 @@ const champions = (await getCollection('champions')).sort((a, b) => b.data.year 
           },
         ].map((item) => (
           <div class="text-center p-8">
-            <div class="w-14 h-14 bg-coral-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <svg class="w-7 h-7 text-coral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-14 h-14 bg-sand-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <svg class="w-7 h-7 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={item.icon} />
               </svg>
             </div>
@@ -180,13 +180,12 @@ const champions = (await getCollection('champions')).sort((a, b) => b.data.year 
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {champions.map((champ) => (
           <ChampionCard
-            teamName={champ.data.teamName}
-            season={champ.data.season}
-            year={champ.data.year}
-            league={champ.data.league}
-            division={champ.data.division}
-            day={champ.data.day}
-            photo={champ.data.photo}
+            teamName={champ.teamName}
+            season={champ.season}
+            year={champ.year}
+            division={champ.division}
+            day={champ.day}
+            photo={champ.photo}
           />
         ))}
       </div>

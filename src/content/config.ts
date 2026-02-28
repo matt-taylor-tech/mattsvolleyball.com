@@ -1,19 +1,5 @@
 import { defineCollection, z } from 'astro:content';
 
-const champions = defineCollection({
-  type: 'content',
-  schema: z.object({
-    teamName: z.string(),
-    season: z.string(),
-    year: z.number(),
-    league: z.string(),
-    division: z.string().optional(),
-    day: z.string(),
-    photo: z.string().optional(),
-    players: z.array(z.string()).optional(),
-  }),
-});
-
 const seasons = defineCollection({
   type: 'content',
   schema: z.object({
@@ -35,4 +21,4 @@ const seasons = defineCollection({
   }),
 });
 
-export const collections = { champions, seasons };
+export const collections = { seasons };

@@ -21,14 +21,14 @@
 @layer components {
   .btn-primary {
     @apply inline-block bg-coral-500 hover:bg-coral-600 text-white font-bold
-           py-3 px-8 rounded-xl transition-all duration-200
+           py-3 px-8 rounded-lg transition-all duration-200
            shadow-lg hover:shadow-xl hover:-translate-y-0.5
            text-lg tracking-wide;
   }
 
   .btn-secondary {
     @apply inline-block bg-ocean-600 hover:bg-ocean-700 text-white font-bold
-           py-3 px-8 rounded-xl transition-all duration-200
+           py-3 px-8 rounded-lg transition-all duration-200
            shadow-md hover:shadow-lg;
   }
 

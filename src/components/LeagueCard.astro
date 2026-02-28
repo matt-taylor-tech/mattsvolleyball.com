@@ -5,10 +5,11 @@ interface Props {
   description: string;
   details: string[];
   highlight?: string;
+  price?: string;
   registrationUrl?: string;
 }
 
-const { day, format, description, details, highlight, registrationUrl = 'https://app.teamlinkt.com/register/find/mattsvolleyball' } = Astro.props;
+const { day, format, description, details, highlight, price, registrationUrl = 'https://app.teamlinkt.com/register/find/mattsvolleyball' } = Astro.props;
 
 const dayColors: Record<string, string> = {
   Tuesday: 'from-coral-500 to-coral-600',
@@ -22,8 +23,18 @@ const gradientClass = dayColors[day] || 'from-ocean-500 to-ocean-600';
 <div class="card flex flex-col">
   <!-- Header -->
   <div class={`bg-gradient-to-r ${gradientClass} p-6 text-white`}>
-    <h3 class="font-display font-extrabold text-2xl">{day}</h3>
-    <p class="text-white/90 font-semibold">{format}</p>
+    <div class="flex items-start justify-between">
+      <div>
+        <h3 class="font-display font-extrabold text-2xl">{day}</h3>
+        <p class="text-white/90 font-semibold">{format}</p>
+      </div>
+      {price && (
+        <div class="text-right">
+          <span class="font-display font-extrabold text-2xl">{price}</span>
+          <p class="text-white/70 text-xs">per player</p>
+        </div>
+      )}
+    </div>
   </div>
 
   <!-- Body -->
@@ -39,7 +50,7 @@ const gradientClass = dayColors[day] || 'from-ocean-500 to-ocean-600';
     <ul class="space-y-2 mb-6 flex-1">
       {details.map((detail) => (
         <li class="flex items-start gap-2 text-sm text-ocean-600/80">
-          <svg class="w-5 h-5 text-coral-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-5 h-5 text-ocean-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
           </svg>
           {detail}

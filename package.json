@@ -11,7 +11,9 @@
   "dependencies": {
     "@astrojs/sitemap": "^3.2.0",
     "@astrojs/tailwind": "^5.1.0",
+    "@aws-sdk/client-s3": "^3.1000.0",
     "astro": "^4.16.0",
+    "sharp": "^0.34.5",
     "tailwindcss": "^3.4.0"
   }
 }
