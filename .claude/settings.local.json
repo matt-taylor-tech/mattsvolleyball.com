@@ -21,7 +21,8 @@
       "Bash(find /d/Github/mattsvolleyball.com/src -name \"*.astro\" -exec sed -i 's/#F5F0EA/#F7F6F3/g' {} +)",
       "WebFetch(domain:r2.afterhoursds.com)",
       "Bash(npm install lucide-astro)",
-      "Bash(npm ls lucide-astro)"
+      "Bash(npm ls lucide-astro)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" -X POST https://formspree.io/f/xgolbedw -H \"Content-Type: application/x-www-form-urlencoded\" -d \"name=Test+User&email=test@example.com&message=This+is+a+test+submission+from+Claude+Code\")"
     ]
   }
 }
