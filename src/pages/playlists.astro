@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { Music, Mic2, Volume2, Zap, Skull, Disc3 } from 'lucide-astro';
 ---
 
 <Layout title="Playlists | Matt's Volleyball" description="Curated music playlists for Matt's Volleyball game nights. The soundtrack to your sand volleyball experience.">
@@ -23,24 +24,48 @@ import Layout from '../layouts/Layout.astro';
       </p>
 
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[
-          { name: 'Mixes', icon: 'M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z', color: 'from-ocean-600 to-ocean-700' },
-          { name: 'Hip Hop', icon: 'M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m-4 0h8m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z', color: 'from-sand-400 to-sand-500' },
-          { name: 'Rap', icon: 'M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z', color: 'from-coral-500 to-coral-600' },
-          { name: 'Rock', icon: 'M13 10V3L4 14h7v7l9-11h-7z', color: 'from-ocean-700 to-ocean-800' },
-          { name: 'Metal', icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z', color: 'from-ocean-800 to-ocean-900' },
-          { name: 'Other', icon: 'M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z', color: 'from-ocean-500 to-ocean-700' },
-        ].map((genre) => (
-          <div class={`bg-gradient-to-br ${genre.color} rounded-2xl p-8 text-white text-center shadow-lg hover:shadow-xl transition-shadow`}>
-            <div class="w-14 h-14 bg-white/15 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={genre.icon} />
-              </svg>
-            </div>
-            <h2 class="font-display font-bold text-2xl">{genre.name}</h2>
-            <p class="text-white/60 text-sm mt-2">Coming soon</p>
+        <div class="bg-gradient-to-br from-ocean-600 to-ocean-700 rounded-2xl p-8 text-white text-center shadow-lg hover:shadow-xl transition-shadow">
+          <div class="w-14 h-14 bg-white/15 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <Disc3 class="w-7 h-7" />
           </div>
-        ))}
+          <h2 class="font-display font-bold text-2xl">Mixes</h2>
+          <p class="text-white/60 text-sm mt-2">Coming soon</p>
+        </div>
+        <div class="bg-gradient-to-br from-sand-400 to-sand-500 rounded-2xl p-8 text-white text-center shadow-lg hover:shadow-xl transition-shadow">
+          <div class="w-14 h-14 bg-white/15 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <Mic2 class="w-7 h-7" />
+          </div>
+          <h2 class="font-display font-bold text-2xl">Hip Hop</h2>
+          <p class="text-white/60 text-sm mt-2">Coming soon</p>
+        </div>
+        <div class="bg-gradient-to-br from-ocean-500 to-ocean-600 rounded-2xl p-8 text-white text-center shadow-lg hover:shadow-xl transition-shadow">
+          <div class="w-14 h-14 bg-white/15 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <Volume2 class="w-7 h-7" />
+          </div>
+          <h2 class="font-display font-bold text-2xl">Rap</h2>
+          <p class="text-white/60 text-sm mt-2">Coming soon</p>
+        </div>
+        <div class="bg-gradient-to-br from-ocean-700 to-ocean-800 rounded-2xl p-8 text-white text-center shadow-lg hover:shadow-xl transition-shadow">
+          <div class="w-14 h-14 bg-white/15 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <Zap class="w-7 h-7" />
+          </div>
+          <h2 class="font-display font-bold text-2xl">Rock</h2>
+          <p class="text-white/60 text-sm mt-2">Coming soon</p>
+        </div>
+        <div class="bg-gradient-to-br from-ocean-800 to-ocean-900 rounded-2xl p-8 text-white text-center shadow-lg hover:shadow-xl transition-shadow">
+          <div class="w-14 h-14 bg-white/15 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <Skull class="w-7 h-7" />
+          </div>
+          <h2 class="font-display font-bold text-2xl">Metal</h2>
+          <p class="text-white/60 text-sm mt-2">Coming soon</p>
+        </div>
+        <div class="bg-gradient-to-br from-ocean-500 to-ocean-700 rounded-2xl p-8 text-white text-center shadow-lg hover:shadow-xl transition-shadow">
+          <div class="w-14 h-14 bg-white/15 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <Music class="w-7 h-7" />
+          </div>
+          <h2 class="font-display font-bold text-2xl">Other</h2>
+          <p class="text-white/60 text-sm mt-2">Coming soon</p>
+        </div>
       </div>
 
       <p class="text-center text-ocean-600/50 mt-12 text-sm italic">

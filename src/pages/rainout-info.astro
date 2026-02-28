@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { Check, X, CircleCheck, CircleX } from 'lucide-astro';
 ---
 
 <Layout title="Rainout Info | Matt's Volleyball" description="Matt's Volleyball inclement weather and rainout policy. Learn when games are canceled and how they're rescheduled.">
@@ -20,7 +21,7 @@ import Layout from '../layouts/Layout.astro';
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
 
       <!-- Main Policy -->
-      <div class="bg-coral-500/5 border-l-4 border-coral-500 px-6 py-5 rounded-r-lg mb-12">
+      <div class="bg-ocean-600/5 border-l-4 border-ocean-500 px-6 py-5 rounded-r-lg mb-12">
         <p class="text-ocean-800 text-lg font-semibold leading-relaxed">
           Cancellations due to inclement weather will be decided and emailed to registered league players by 4:00 PM on game day.
         </p>
@@ -39,23 +40,17 @@ import Layout from '../layouts/Layout.astro';
         <div class="card p-6 md:p-8">
           <div class="flex items-center gap-3 mb-4">
             <span class="w-10 h-10 bg-ocean-500 rounded-full flex items-center justify-center text-white">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
+              <CircleCheck class="w-5 h-5" />
             </span>
             <h2 class="font-display font-bold text-xl text-ocean-600">Will Likely Play In</h2>
           </div>
           <ul class="space-y-3">
             <li class="flex items-start gap-3 text-ocean-700">
-              <svg class="w-5 h-5 text-ocean-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
+              <Check class="w-5 h-5 text-ocean-500 shrink-0 mt-0.5" />
               Light drizzle or moderate rain
             </li>
             <li class="flex items-start gap-3 text-ocean-700">
-              <svg class="w-5 h-5 text-ocean-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
+              <Check class="w-5 h-5 text-ocean-500 shrink-0 mt-0.5" />
               Wet sand from previous rain, but no current rain
             </li>
           </ul>
@@ -64,30 +59,22 @@ import Layout from '../layouts/Layout.astro';
         <!-- Won't Play -->
         <div class="card p-6 md:p-8">
           <div class="flex items-center gap-3 mb-4">
-            <span class="w-10 h-10 bg-coral-600 rounded-full flex items-center justify-center text-white">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-              </svg>
+            <span class="w-10 h-10 bg-ocean-700 rounded-full flex items-center justify-center text-white">
+              <CircleX class="w-5 h-5" />
             </span>
             <h2 class="font-display font-bold text-xl text-ocean-600">Will NOT Play In</h2>
           </div>
           <ul class="space-y-3">
             <li class="flex items-start gap-3 text-ocean-700">
-              <svg class="w-5 h-5 text-coral-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X class="w-5 h-5 text-ocean-700 shrink-0 mt-0.5" />
               Any lightning sightings
             </li>
             <li class="flex items-start gap-3 text-ocean-700">
-              <svg class="w-5 h-5 text-coral-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X class="w-5 h-5 text-ocean-700 shrink-0 mt-0.5" />
               Flooded courts
             </li>
             <li class="flex items-start gap-3 text-ocean-700">
-              <svg class="w-5 h-5 text-coral-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X class="w-5 h-5 text-ocean-700 shrink-0 mt-0.5" />
               Heavy rain
             </li>
           </ul>

@@ -1,4 +1,6 @@
 ---
+import { Trophy } from 'lucide-astro';
+
 interface Props {
   teamName: string;
   season: string;
@@ -38,11 +40,7 @@ const r2Base = import.meta.env.PUBLIC_R2_BASE_URL || '';
   <div class="p-5">
     <div class="flex items-center gap-2 mb-2">
       <span class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-ocean-600 bg-sand-200 px-2.5 py-1 rounded-lg">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24">
-          <path d="M6 4h12v1a5 5 0 01-4 4.9V13h2a1 1 0 011 1v1H7v-1a1 1 0 011-1h2V9.9A5 5 0 016 5V4z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M5 4h1V5a2 2 0 01-2.83-.59A1 1 0 014 3h1m14 1h-1v1a2 2 0 002.83-.59A1 1 0 0020 3h-1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M7 17h10v1a2 2 0 01-2 2H9a2 2 0 01-2-2v-1z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
+        <Trophy class="w-3.5 h-3.5" />
         Champions
       </span>
     </div>

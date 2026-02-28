@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import ChampionCard from '../components/ChampionCard.astro';
 import { getChampions } from '../lib/champions';
+import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart } from 'lucide-astro';
 
 const champions = await getChampions();
 ---
@@ -103,33 +104,27 @@ const champions = await getChampions();
       <h2 class="section-heading text-center mb-4">Why Play Here?</h2>
       <p class="section-subheading text-center mb-12">More than just volleyball. It's a community.</p>
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {[
-          {
-            title: 'Inclusive Leagues',
-            desc: 'Choose your preferred play style, from casual fun to competitive matches.',
-            icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
-          },
-          {
-            title: 'Regular Gamedays',
-            desc: 'Join us throughout the week for your dose of beach volleyball excitement.',
-            icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
-          },
-          {
-            title: 'Supportive Community',
-            desc: 'Make new friends, build lasting memories, and celebrate the spirit of the game.',
-            icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
-          },
-        ].map((item) => (
-          <div class="text-center p-8">
-            <div class="w-14 h-14 bg-sand-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <svg class="w-7 h-7 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={item.icon} />
-              </svg>
-            </div>
-            <h3 class="font-display font-bold text-lg text-ocean-600 mb-2">{item.title}</h3>
-            <p class="text-ocean-600/70 text-sm leading-relaxed">{item.desc}</p>
+        <div class="text-center p-8">
+          <div class="w-14 h-14 bg-sand-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Users class="w-7 h-7 text-ocean-600" />
           </div>
-        ))}
+          <h3 class="font-display font-bold text-lg text-ocean-600 mb-2">Inclusive Leagues</h3>
+          <p class="text-ocean-600/70 text-sm leading-relaxed">Choose your preferred play style, from casual fun to competitive matches.</p>
+        </div>
+        <div class="text-center p-8">
+          <div class="w-14 h-14 bg-sand-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <CalendarDays class="w-7 h-7 text-ocean-600" />
+          </div>
+          <h3 class="font-display font-bold text-lg text-ocean-600 mb-2">Regular Gamedays</h3>
+          <p class="text-ocean-600/70 text-sm leading-relaxed">Join us throughout the week for your dose of beach volleyball excitement.</p>
+        </div>
+        <div class="text-center p-8">
+          <div class="w-14 h-14 bg-sand-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Heart class="w-7 h-7 text-ocean-600" />
+          </div>
+          <h3 class="font-display font-bold text-lg text-ocean-600 mb-2">Supportive Community</h3>
+          <p class="text-ocean-600/70 text-sm leading-relaxed">Make new friends, build lasting memories, and celebrate the spirit of the game.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -140,65 +135,34 @@ const champions = await getChampions();
       <h2 class="section-heading text-center mb-4">What to Expect</h2>
       <p class="section-subheading text-center mb-12">It's not just volleyball. It's the full experience.</p>
       <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          {
-            title: 'Drinks',
-            desc: 'Raise a toast to victory with handcrafted cocktails and curated beer selection, elevating your sand volleyball experience with every sip.',
-          },
-          {
-            title: 'Food',
-            desc: "Savor delicious bites from Saeed's diverse menu, offering a range of tasty treats to satisfy your cravings between sets.",
-          },
-          {
-            title: 'Courtside Seating',
-            desc: 'Experience the action up close where you can feel the energy of the game and cheer on your favorite teams.',
-          },
-          {
-            title: 'Music',
-            desc: 'Groove to curated playlists keeping the atmosphere lively and energized throughout the games.',
-          },
-        ].map((item, i) => (
-          <div class="card p-6 text-center">
-            <div class="w-12 h-12 bg-sand-200 rounded-xl flex items-center justify-center mx-auto mb-4">
-              {i === 0 && (
-                <svg class="w-6 h-6 text-ocean-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M8 2l1.5 9H12l1.5-9" />
-                  <path d="M6.5 11c0 2 2.5 3 5.5 3s5.5-1 5.5-3" />
-                  <path d="M12 14v4" />
-                  <path d="M8 21h8" />
-                  <path d="M12 18h0" />
-                </svg>
-              )}
-              {i === 1 && (
-                <svg class="w-6 h-6 text-ocean-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M18 8h1a4 4 0 010 8h-1" />
-                  <path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z" />
-                  <path d="M6 1v3" />
-                  <path d="M10 1v3" />
-                  <path d="M14 1v3" />
-                </svg>
-              )}
-              {i === 2 && (
-                <svg class="w-6 h-6 text-ocean-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 2v8" />
-                  <path d="M4.93 10.93l2.83-2.83" />
-                  <path d="M2 18h20" />
-                  <path d="M19.07 10.93l-2.83-2.83" />
-                  <path d="M6 18l2-8h8l2 8" />
-                </svg>
-              )}
-              {i === 3 && (
-                <svg class="w-6 h-6 text-ocean-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M9 18V5l12-2v13" />
-                  <circle cx="6" cy="18" r="3" />
-                  <circle cx="18" cy="16" r="3" />
-                </svg>
-              )}
-            </div>
-            <h3 class="font-display font-bold text-lg text-ocean-600 mb-2">{item.title}</h3>
-            <p class="text-ocean-600/70 text-sm leading-relaxed">{item.desc}</p>
+        <div class="card p-6 text-center">
+          <div class="w-12 h-12 bg-sand-200 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <Beer class="w-6 h-6 text-ocean-600" />
           </div>
-        ))}
+          <h3 class="font-display font-bold text-lg text-ocean-600 mb-2">Drinks</h3>
+          <p class="text-ocean-600/70 text-sm leading-relaxed">Raise a toast to victory with handcrafted cocktails and curated beer selection, elevating your sand volleyball experience with every sip.</p>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="w-12 h-12 bg-sand-200 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <UtensilsCrossed class="w-6 h-6 text-ocean-600" />
+          </div>
+          <h3 class="font-display font-bold text-lg text-ocean-600 mb-2">Food</h3>
+          <p class="text-ocean-600/70 text-sm leading-relaxed">Savor delicious bites from Saeed's diverse menu, offering a range of tasty treats to satisfy your cravings between sets.</p>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="w-12 h-12 bg-sand-200 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <Umbrella class="w-6 h-6 text-ocean-600" />
+          </div>
+          <h3 class="font-display font-bold text-lg text-ocean-600 mb-2">Courtside Seating</h3>
+          <p class="text-ocean-600/70 text-sm leading-relaxed">Experience the action up close where you can feel the energy of the game and cheer on your favorite teams.</p>
+        </div>
+        <div class="card p-6 text-center">
+          <div class="w-12 h-12 bg-sand-200 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <Music class="w-6 h-6 text-ocean-600" />
+          </div>
+          <h3 class="font-display font-bold text-lg text-ocean-600 mb-2">Music</h3>
+          <p class="text-ocean-600/70 text-sm leading-relaxed">Groove to curated playlists keeping the atmosphere lively and energized throughout the games.</p>
+        </div>
       </div>
     </div>
   </section>
@@ -252,7 +216,7 @@ const champions = await getChampions();
       </div>
 
       <div class="text-center mt-8">
-        <a href="/champions/" class="inline-flex items-center gap-2 text-coral-500 hover:text-coral-600 font-semibold transition-colors">
+        <a href="/champions/" class="inline-flex items-center gap-2 text-ocean-600 hover:text-ocean-700 font-semibold transition-colors">
           View All Champions
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -305,7 +269,7 @@ const champions = await getChampions();
           class="inline-flex items-center gap-3 bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl transition-colors"
         >
           <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M3.18 23.98a1.94 1.94 0 01-.88-.66 1.93 1.93 0 01-.3-1V1.68c0-.38.1-.72.3-1 .16-.27.47-.5.88-.66L13.6 12 3.18 23.98zm1.81-1.08L15.93 12 5 1.1l-.01 21.8zM17.15 12l3.34-3.34c.47.27.81.72.81 1.34 0 .62-.34 1.07-.81 1.34L17.15 12zm-1.5 1.5L5.56 23.6l12.09-7.05-2-3.05zm0-3L5.56.4l12.09 7.05-2 3.05z" />
+            <path d="M22.018 13.298l-3.919 2.218-3.515-3.493 3.543-3.521 3.891 2.202a1.49 1.49 0 010 2.594zM1.337.924a1.486 1.486 0 00-.112.568v21.017c0 .217.045.419.124.6l11.155-11.087L1.337.924zm12.207 10.065l3.258-3.238L3.45.195a1.466 1.466 0 00-.946-.179l11.04 10.973zm0 2.067l-11 10.933c.298.036.612-.016.906-.183l13.324-7.54-3.23-3.21z" />
           </svg>
           <div class="text-left">
             <div class="text-xs text-white/60">Get it on</div>
