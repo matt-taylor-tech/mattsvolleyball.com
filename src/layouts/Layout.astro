@@ -24,7 +24,9 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={`${r2Base}/logos/vbenginelite.png`} />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={`${r2Base}/logos/vbenginelite.png`} />
     <link rel="icon" type="image/x-icon" href={`${r2Base}/favicon.ico`} />
     <title>{title}</title>
   </head>

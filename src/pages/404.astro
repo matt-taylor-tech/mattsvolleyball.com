@@ -1,0 +1,24 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Page Not Found | Matt's Volleyball" description="The page you're looking for doesn't exist.">
+  <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white py-20 md:py-28">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="font-display font-black text-7xl sm:text-8xl md:text-9xl mb-4">404</h1>
+      <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
+        That ball went out of bounds.
+      </p>
+    </div>
+    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full mt-8">
+      <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="#F7F6F3" />
+    </svg>
+  </section>
+
+  <section class="py-16 md:py-24 text-center">
+    <div class="max-w-xl mx-auto px-4">
+      <p class="text-ocean-600/70 mb-8">The page you're looking for doesn't exist or has been moved.</p>
+      <a href="/" class="btn-primary">Back to Home</a>
+    </div>
+  </section>
+</Layout>
