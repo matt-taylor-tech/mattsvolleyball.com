@@ -1,6 +1,59 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { Music, Mic2, Volume2, Zap, Skull, Disc3 } from 'lucide-astro';
+
+const categories = [
+  {
+    name: 'Mixes',
+    playlists: [
+      { title: 'Volleyball Mix - All Genres', id: '4SXjEaCI7gbbLdTSzbdO0U' },
+      { title: 'All Hip Hop/Rap Mix', id: '3dCcp0lpMk2QpecFEzZBFm' },
+      { title: 'Metal/Rock Mix', id: '6nR5FebRJSc3oCVIZsYn7m' },
+    ],
+  },
+  {
+    name: 'Hip Hop',
+    playlists: [
+      { title: 'Old School Hip Hop', id: '053wvc5njxC6kENqqPFW0z' },
+      { title: 'HitforBrains Hip Hop', id: '4R4BCqXbUtAydZmHsKHoRa' },
+      { title: '90s/00s Hip Hop', id: '0QtPQ3fW3RPmBGdlwTLfKl' },
+    ],
+  },
+  {
+    name: 'Rap',
+    playlists: [
+      { title: 'Lyrical Rap', id: '3Qo8DLqzSdviWmDUwTlNQc' },
+      { title: 'LockedIn', id: '1Cwc8ckj42pBnud9ooAPAu' },
+      { title: '90s/00s Rap', id: '2Ly4nHxHxVo2StoWWL8U2c' },
+    ],
+  },
+  {
+    name: 'Rock',
+    playlists: [
+      { title: 'Classic Rock', id: '0BzWaqwMVSzelZBDkSk4t5' },
+      { title: 'Alternative Rock', id: '5MLNDnk4pR9AOKT4Cp77SZ' },
+      { title: 'Hard Rock', id: '6EDL1lbef6nSFrQCPLC5Kf' },
+    ],
+  },
+  {
+    name: 'Metal',
+    playlists: [
+      { title: 'Melodic Metal', id: '1sBbMpv3ooLlbgfMK5kpJf' },
+      { title: 'Power Metal', id: '37RVu4A3LRyDK4DnNNpbkk' },
+      { title: 'Metal/Rock Mix', id: '6nR5FebRJSc3oCVIZsYn7m' },
+    ],
+  },
+  {
+    name: 'Other',
+    playlists: [
+      { title: 'HitforBrains Old School', id: '1OifrFOFZw7eg5wtOUwFtf' },
+      { title: 'Ladies Night', id: '7ANuTzJaWSIlqsXJFeMtVc' },
+      { title: 'Beach Music', id: '7L8vg8AcYmdBPZVHEvizN3' },
+      { title: 'Trance', id: '1GxxWh4UcQ4pWFvI0PXaVC' },
+      { title: 'Reggae', id: '0yf5lfJ2X2l1Qjn66CpGZQ' },
+      { title: 'sui POP', id: '0zfBQYZR2tmKTbvliiMEOT' },
+    ],
+  },
+];
 ---
 
 <Layout title="Playlists | Matt's Volleyball" description="Curated music playlists for Matt's Volleyball game nights. The soundtrack to your sand volleyball experience.">
@@ -18,59 +71,26 @@ import { Music, Mic2, Volume2, Zap, Skull, Disc3 } from 'lucide-astro';
   </section>
 
   <section class="py-12 md:py-20">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-      <p class="text-center text-ocean-600/70 mb-12 max-w-xl mx-auto">
-        Groove to the beats courtside. Here are our curated playlists organized by genre.
-      </p>
-
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div class="bg-gradient-to-br from-ocean-600 to-ocean-700 rounded-2xl p-8 text-white text-center shadow-lg hover:shadow-xl transition-shadow">
-          <div class="w-14 h-14 bg-white/15 rounded-xl flex items-center justify-center mx-auto mb-4">
-            <Disc3 class="w-7 h-7" />
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      {categories.map((category) => (
+        <div class="mb-16 last:mb-0">
+          <h2 class="section-heading mb-8">{category.name}</h2>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {category.playlists.map((playlist) => (
+              <iframe
+                title={playlist.title}
+                src={`https://open.spotify.com/embed/playlist/${playlist.id}?utm_source=generator&theme=0`}
+                width="100%"
+                height="352"
+                style="border:0"
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"
+                class="rounded-xl"
+              />
+            ))}
           </div>
-          <h2 class="font-display font-bold text-2xl">Mixes</h2>
-          <p class="text-white/60 text-sm mt-2">Coming soon</p>
         </div>
-        <div class="bg-gradient-to-br from-sand-400 to-sand-500 rounded-2xl p-8 text-white text-center shadow-lg hover:shadow-xl transition-shadow">
-          <div class="w-14 h-14 bg-white/15 rounded-xl flex items-center justify-center mx-auto mb-4">
-            <Mic2 class="w-7 h-7" />
-          </div>
-          <h2 class="font-display font-bold text-2xl">Hip Hop</h2>
-          <p class="text-white/60 text-sm mt-2">Coming soon</p>
-        </div>
-        <div class="bg-gradient-to-br from-ocean-500 to-ocean-600 rounded-2xl p-8 text-white text-center shadow-lg hover:shadow-xl transition-shadow">
-          <div class="w-14 h-14 bg-white/15 rounded-xl flex items-center justify-center mx-auto mb-4">
-            <Volume2 class="w-7 h-7" />
-          </div>
-          <h2 class="font-display font-bold text-2xl">Rap</h2>
-          <p class="text-white/60 text-sm mt-2">Coming soon</p>
-        </div>
-        <div class="bg-gradient-to-br from-ocean-700 to-ocean-800 rounded-2xl p-8 text-white text-center shadow-lg hover:shadow-xl transition-shadow">
-          <div class="w-14 h-14 bg-white/15 rounded-xl flex items-center justify-center mx-auto mb-4">
-            <Zap class="w-7 h-7" />
-          </div>
-          <h2 class="font-display font-bold text-2xl">Rock</h2>
-          <p class="text-white/60 text-sm mt-2">Coming soon</p>
-        </div>
-        <div class="bg-gradient-to-br from-ocean-800 to-ocean-900 rounded-2xl p-8 text-white text-center shadow-lg hover:shadow-xl transition-shadow">
-          <div class="w-14 h-14 bg-white/15 rounded-xl flex items-center justify-center mx-auto mb-4">
-            <Skull class="w-7 h-7" />
-          </div>
-          <h2 class="font-display font-bold text-2xl">Metal</h2>
-          <p class="text-white/60 text-sm mt-2">Coming soon</p>
-        </div>
-        <div class="bg-gradient-to-br from-ocean-500 to-ocean-700 rounded-2xl p-8 text-white text-center shadow-lg hover:shadow-xl transition-shadow">
-          <div class="w-14 h-14 bg-white/15 rounded-xl flex items-center justify-center mx-auto mb-4">
-            <Music class="w-7 h-7" />
-          </div>
-          <h2 class="font-display font-bold text-2xl">Other</h2>
-          <p class="text-white/60 text-sm mt-2">Coming soon</p>
-        </div>
-      </div>
-
-      <p class="text-center text-ocean-600/50 mt-12 text-sm italic">
-        Playlist links will be added soon. Check back for Spotify and Apple Music links.
-      </p>
+      ))}
     </div>
   </section>
 </Layout>
