@@ -74,44 +74,56 @@ function parseChampionKey(key: string): Champion | null {
 }
 
 export async function getChampions(): Promise<Champion[]> {
-  const accountId = import.meta.env.R2_ACCOUNT_ID;
-  const accessKeyId = import.meta.env.R2_ACCESS_KEY_ID;
-  const secretAccessKey = import.meta.env.R2_SECRET_ACCESS_KEY;
-  const bucket = import.meta.env.R2_BUCKET_NAME;
+  // Trim env vars to strip hidden chars (Cloudflare Pages can inject \r, BOM, etc.)
+  const accountId = (import.meta.env.R2_ACCOUNT_ID ?? '').trim();
+  const accessKeyId = (import.meta.env.R2_ACCESS_KEY_ID ?? '').trim();
+  const secretAccessKey = (import.meta.env.R2_SECRET_ACCESS_KEY ?? '').trim();
+  const bucket = (import.meta.env.R2_BUCKET_NAME ?? '').trim();
 
   if (!accountId || !accessKeyId || !secretAccessKey || !bucket) {
     console.warn('[champions] R2 credentials not configured, skipping.');
     return [];
   }
 
-  const client = new S3Client({
-    region: 'auto',
-    endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
-    credentials: { accessKeyId, secretAccessKey },
-  });
+  let client: S3Client;
+  try {
+    client = new S3Client({
+      region: 'auto',
+      endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+      credentials: { accessKeyId, secretAccessKey },
+    });
+  } catch (err) {
+    console.error('[champions] Failed to create S3 client:', err);
+    return [];
+  }
 
   const champions: Champion[] = [];
   let continuationToken: string | undefined;
 
-  do {
-    const command = new ListObjectsV2Command({
-      Bucket: bucket,
-      Prefix: BUCKET_PREFIX,
-      ContinuationToken: continuationToken,
-    });
+  try {
+    do {
+      const command = new ListObjectsV2Command({
+        Bucket: bucket,
+        Prefix: BUCKET_PREFIX,
+        ContinuationToken: continuationToken,
+      });
 
-    const response = await client.send(command);
+      const response = await client.send(command);
 
-    for (const obj of response.Contents ?? []) {
-      if (!obj.Key) continue;
-      const champ = parseChampionKey(obj.Key);
-      if (champ) champions.push(champ);
-    }
+      for (const obj of response.Contents ?? []) {
+        if (!obj.Key) continue;
+        const champ = parseChampionKey(obj.Key);
+        if (champ) champions.push(champ);
+      }
 
-    continuationToken = response.IsTruncated
-      ? response.NextContinuationToken
-      : undefined;
-  } while (continuationToken);
+      continuationToken = response.IsTruncated
+        ? response.NextContinuationToken
+        : undefined;
+    } while (continuationToken);
+  } catch (err) {
+    console.error('[champions] R2 listing failed:', err);
+    return [];
+  }
 
   // Sort newest first: year desc, then season order desc
   champions.sort((a, b) => {
