@@ -6,7 +6,11 @@
       "Bash(npx astro build)",
       "Bash(npm install @astrojs/sitemap@latest)",
       "Bash(npm ls astro @astrojs/sitemap)",
-      "Bash(npm install @astrojs/sitemap@3.2.0)"
+      "Bash(npm install @astrojs/sitemap@3.2.0)",
+      "Bash(while read f)",
+      "Bash(do sed -i 's/#FFF8F0/#F5F0EA/g' \"$f\")",
+      "Bash(done)",
+      "Bash(do sed -i 's/#0D2B3E/#231F20/g' \"$f\")"
     ]
   }
 }
