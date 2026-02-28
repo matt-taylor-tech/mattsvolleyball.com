@@ -1,0 +1,55 @@
+---
+interface Props {
+  items: { question: string; answer: string }[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="space-y-3">
+  {items.map((item, i) => (
+    <div class="faq-item border border-sand-200 rounded-xl overflow-hidden bg-white">
+      <button
+        class="faq-trigger w-full flex items-center justify-between p-5 text-left font-semibold text-ocean-700 hover:text-coral-500 transition-colors"
+        aria-expanded="false"
+        aria-controls={`faq-${i}`}
+      >
+        <span>{item.question}</span>
+        <svg class="faq-icon w-5 h-5 shrink-0 ml-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      <div
+        id={`faq-${i}`}
+        class="faq-content hidden px-5 pb-5"
+      >
+        <p class="text-ocean-600/80 leading-relaxed">{item.answer}</p>
+      </div>
+    </div>
+  ))}
+</div>
+
+<script>
+  document.querySelectorAll('.faq-trigger').forEach((trigger) => {
+    trigger.addEventListener('click', () => {
+      const item = trigger.closest('.faq-item')!;
+      const content = item.querySelector('.faq-content')!;
+      const icon = item.querySelector('.faq-icon')!;
+      const isOpen = content.classList.contains('hidden') === false;
+
+      // Close all others
+      document.querySelectorAll('.faq-item').forEach((other) => {
+        if (other !== item) {
+          other.querySelector('.faq-content')?.classList.add('hidden');
+          other.querySelector('.faq-icon')?.classList.remove('rotate-180');
+          other.querySelector('.faq-trigger')?.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      // Toggle current
+      content.classList.toggle('hidden', isOpen);
+      icon.classList.toggle('rotate-180', !isOpen);
+      trigger.setAttribute('aria-expanded', String(!isOpen));
+    });
+  });
+</script>

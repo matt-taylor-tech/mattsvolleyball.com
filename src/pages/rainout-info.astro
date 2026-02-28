@@ -1,0 +1,96 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Rainout Info — Matt's Volleyball" description="Matt's Volleyball inclement weather and rainout policy. Learn when games are canceled and how they're rescheduled.">
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white py-20 md:py-28">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">Rainout Info</h1>
+      <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
+        Inclement weather policy for league games.
+      </p>
+    </div>
+    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full mt-8">
+      <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="#FFF8F0" />
+    </svg>
+  </section>
+
+  <section class="py-12 md:py-20">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Main Policy -->
+      <div class="bg-coral-500/5 border-l-4 border-coral-500 px-6 py-5 rounded-r-lg mb-12">
+        <p class="text-ocean-800 text-lg font-semibold leading-relaxed">
+          Cancellations due to inclement weather will be decided and emailed to registered league players by 4:00 PM on game day.
+        </p>
+      </div>
+
+      <div class="mb-12">
+        <h2 class="section-heading mb-4">Rescheduling</h2>
+        <p class="text-ocean-700 leading-relaxed">
+          Canceled games will be moved to the end of the season's schedule.
+        </p>
+      </div>
+
+      <!-- Conditions -->
+      <div class="grid sm:grid-cols-2 gap-8">
+        <!-- Will Play -->
+        <div class="card p-6 md:p-8">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white text-lg">✅</span>
+            <h2 class="font-display font-bold text-xl text-ocean-600">Will Likely Play In</h2>
+          </div>
+          <ul class="space-y-3">
+            <li class="flex items-start gap-3 text-ocean-700">
+              <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Light drizzle or moderate rain
+            </li>
+            <li class="flex items-start gap-3 text-ocean-700">
+              <svg class="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              Wet sand from previous rain, but no current rain
+            </li>
+          </ul>
+        </div>
+
+        <!-- Won't Play -->
+        <div class="card p-6 md:p-8">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center text-white text-lg">🚫</span>
+            <h2 class="font-display font-bold text-xl text-ocean-600">Will NOT Play In</h2>
+          </div>
+          <ul class="space-y-3">
+            <li class="flex items-start gap-3 text-ocean-700">
+              <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Any lightning sightings
+            </li>
+            <li class="flex items-start gap-3 text-ocean-700">
+              <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Flooded courts
+            </li>
+            <li class="flex items-start gap-3 text-ocean-700">
+              <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Heavy rain
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-12 bg-sand-100 rounded-2xl p-6 border border-sand-200 text-center">
+        <p class="text-ocean-600/80 text-sm">
+          Check your email and the TeamLinkt app for real-time updates on game day.
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>

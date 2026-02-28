@@ -1,0 +1,48 @@
+---
+import Layout from '../layouts/Layout.astro';
+import GalleryGrid from '../components/GalleryGrid.astro';
+---
+
+<Layout title="Image Gallery — Matt's Volleyball" description="Photos from Matt's Volleyball sand volleyball leagues in Lake Norman. Action shots, team photos, and championship celebrations.">
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white py-20 md:py-28">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">Gallery</h1>
+      <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
+        Action shots, team photos, and championship celebrations.
+      </p>
+    </div>
+    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full mt-8">
+      <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="#FFF8F0" />
+    </svg>
+  </section>
+
+  <section class="py-12 md:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <p class="text-center text-ocean-600/60 mb-12 max-w-xl mx-auto">
+        Photos will be migrated from our WordPress site. Check back soon for all the action!
+      </p>
+      <GalleryGrid count={16} />
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-16 md:py-20 bg-sand-200">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="font-display font-extrabold text-3xl text-ocean-600 mb-4">
+        Want to be in the next photo?
+      </h2>
+      <p class="text-ocean-600/80 text-lg mb-8">
+        Join a league and make some memories on the sand.
+      </p>
+      <a
+        href="https://app.teamlinkt.com/register/find/mattsvolleyball"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn-primary"
+      >
+        Register Now
+      </a>
+    </div>
+  </section>
+</Layout>

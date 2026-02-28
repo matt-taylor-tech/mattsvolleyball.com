@@ -1,0 +1,149 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Shuffle League — Matt's Volleyball" description="Learn about the Wednesday shuffle league format at Matt's Volleyball. Teams are re-drafted weekly with the Level Up handicap system.">
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white py-20 md:py-28">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">Shuffle League</h1>
+      <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
+        This is a social league first, volleyball second.
+      </p>
+    </div>
+    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full mt-8">
+      <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="#FFF8F0" />
+    </svg>
+  </section>
+
+  <section class="py-12 md:py-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- How It Works -->
+      <div class="mb-16">
+        <h2 class="section-heading mb-6">How It Works</h2>
+        <div class="text-ocean-700 leading-relaxed space-y-4">
+          <p>
+            Teams are re-drafted weekly, allowing players to meet everyone in the league by season's end through constant new pairings.
+          </p>
+          <p>
+            Players arrive by 6:30 PM for balanced team drafting and play "Level Up." Teams begin at Level 1, advancing one level per win. Starting at Level 2, handicaps apply based on the current level.
+          </p>
+          <p>
+            After pool play, the top four teams advance to a single-elimination championship bracket with handicaps removed.
+          </p>
+        </div>
+      </div>
+
+      <!-- The Five Levels -->
+      <div class="mb-16">
+        <h2 class="section-heading mb-8">The Five Levels</h2>
+        <div class="space-y-4">
+          <div class="card p-6 border-l-4 border-green-400">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="w-10 h-10 bg-green-400 rounded-full flex items-center justify-center text-white font-display font-bold">1</span>
+              <h3 class="font-display font-bold text-xl text-ocean-600">Level 1 — Standard Play</h3>
+            </div>
+            <p class="text-ocean-700 leading-relaxed">Standard play, occasionally with social icebreaker handicaps (learning teammates' names, high-fives).</p>
+          </div>
+
+          <div class="card p-6 border-l-4 border-yellow-400">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center text-white font-display font-bold">2</span>
+              <h3 class="font-display font-bold text-xl text-ocean-600">Level 2 — Mild Restrictions</h3>
+            </div>
+            <p class="text-ocean-700 leading-relaxed">Mild restrictions like "all sets must be bump sets" or calling "mine" before touches.</p>
+          </div>
+
+          <div class="card p-6 border-l-4 border-orange-400">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="w-10 h-10 bg-orange-400 rounded-full flex items-center justify-center text-white font-display font-bold">3</span>
+              <h3 class="font-display font-bold text-xl text-ocean-600">Level 3 — Moderate Restrictions</h3>
+            </div>
+            <p class="text-ocean-700 leading-relaxed">Moderate restrictions such as "only female players can attack" or opposing teams selecting defensive assignments.</p>
+          </div>
+
+          <div class="card p-6 border-l-4 border-red-400">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="w-10 h-10 bg-red-400 rounded-full flex items-center justify-center text-white font-display font-bold">4</span>
+              <h3 class="font-display font-bold text-xl text-ocean-600">Level 4 — Tough Restrictions</h3>
+            </div>
+            <p class="text-ocean-700 leading-relaxed">Tough restrictions including underhand serves or no blocking at the net.</p>
+          </div>
+
+          <div class="card p-6 border-l-4 border-purple-500">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-display font-bold">5</span>
+              <h3 class="font-display font-bold text-xl text-ocean-600">Level 5 — Extreme Restrictions</h3>
+            </div>
+            <p class="text-ocean-700 leading-relaxed">Extreme restrictions like prohibiting jumping or limiting touches to one per possession.</p>
+          </div>
+        </div>
+        <p class="text-ocean-600/70 text-sm mt-4 italic">Handicaps rotate weekly to ensure variety.</p>
+      </div>
+
+      <!-- Baseline Rules -->
+      <div class="mb-16">
+        <h2 class="section-heading mb-6">Baseline Rules (All Levels)</h2>
+        <div class="bg-white rounded-2xl shadow-md p-6 md:p-8">
+          <ul class="space-y-3">
+            {[
+              'No net touching or interference',
+              'No lifts or hand setting over the net',
+              'No open-handed tips',
+              "Server's foot cannot cross end line",
+              'Players call violations honestly',
+              'Disputes resolved by replaying points',
+            ].map((rule) => (
+              <li class="flex items-start gap-3 text-ocean-700">
+                <svg class="w-5 h-5 text-coral-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                {rule}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <!-- Why This Format Works -->
+      <div class="mb-16">
+        <h2 class="section-heading mb-6">Why This Format Works</h2>
+        <div class="grid sm:grid-cols-2 gap-6">
+          {[
+            { title: 'Variety', desc: 'Random handicaps and rotating teammates keep every week fresh and unpredictable.' },
+            { title: 'Social', desc: 'Prevents cliques — you\'ll play with and against everyone by the end of the season.' },
+            { title: 'Self-Balancing', desc: 'Stronger teams are handicapped as they win, keeping every match competitive.' },
+            { title: 'Skill Building', desc: 'Tests fundamental skills when standard techniques become unavailable.' },
+          ].map((item) => (
+            <div class="card p-6">
+              <h3 class="font-display font-bold text-lg text-ocean-600 mb-2">{item.title}</h3>
+              <p class="text-ocean-700 text-sm leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-16 md:py-20 bg-sand-200">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="font-display font-extrabold text-3xl text-ocean-600 mb-4">
+        Ready to shuffle?
+      </h2>
+      <p class="text-ocean-600/80 text-lg mb-8">
+        Sign up for Wednesday nights and meet the whole league.
+      </p>
+      <a
+        href="https://app.teamlinkt.com/register/find/mattsvolleyball"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn-primary"
+      >
+        Register Now
+      </a>
+    </div>
+  </section>
+</Layout>

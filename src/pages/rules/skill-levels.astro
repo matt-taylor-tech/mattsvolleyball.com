@@ -1,0 +1,82 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Skill Levels — Matt's Volleyball" description="Understand the skill level classifications at Matt's Volleyball. From beginner/recreational to advanced competitive play.">
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white py-20 md:py-28">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">Skill Levels</h1>
+      <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
+        Find the right division for your experience level.
+      </p>
+    </div>
+    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full mt-8">
+      <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="#FFF8F0" />
+    </svg>
+  </section>
+
+  <section class="py-12 md:py-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="space-y-8">
+
+        <!-- Beginner -->
+        <div class="card overflow-hidden">
+          <div class="bg-gradient-to-r from-green-400 to-green-500 p-6 text-white">
+            <h2 class="font-display font-extrabold text-2xl">Beginner / Recreational</h2>
+            <p class="text-white/90 font-semibold text-lg">C Level</p>
+          </div>
+          <div class="p-6 md:p-8">
+            <p class="text-ocean-700 leading-relaxed">
+              This level is for players who are new to the game or have limited experience. Participants at this level are still developing basic skills such as passing, serving, and hitting.
+            </p>
+          </div>
+        </div>
+
+        <!-- Intermediate -->
+        <div class="card overflow-hidden">
+          <div class="bg-gradient-to-r from-ocean-500 to-ocean-600 p-6 text-white">
+            <h2 class="font-display font-extrabold text-2xl">Intermediate</h2>
+            <p class="text-white/90 font-semibold text-lg">B / BB Level</p>
+          </div>
+          <div class="p-6 md:p-8">
+            <p class="text-ocean-700 leading-relaxed">
+              Intermediate players have a solid understanding of the game and can execute basic skills consistently. They may have a few years of experience and are working on refining their techniques and strategic understanding.
+            </p>
+          </div>
+        </div>
+
+        <!-- Advanced -->
+        <div class="card overflow-hidden">
+          <div class="bg-gradient-to-r from-coral-500 to-coral-600 p-6 text-white">
+            <h2 class="font-display font-extrabold text-2xl">Advanced</h2>
+            <p class="text-white/90 font-semibold text-lg">A Level</p>
+          </div>
+          <div class="p-6 md:p-8">
+            <p class="text-ocean-700 leading-relaxed">
+              Advanced players have a high level of skill and experience. They possess good ball control, can execute advanced techniques, and have a deep understanding of the game's strategy. This level often includes competitive players who may have participated in higher-level tournaments.
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="mt-12 bg-sand-100 rounded-2xl p-6 md:p-8 border border-sand-200">
+        <p class="text-ocean-600/80 leading-relaxed text-sm">
+          These skill levels are generalizations, and the specific criteria for each level can vary between different organizations, leagues, or tournaments. Players may also progress through these levels as they improve their skills and gain more experience in competitive play.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-16 md:py-20 bg-sand-200">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <p class="text-ocean-600/80 text-lg mb-6">Not sure where you fit? No worries — all levels are welcome.</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/leagues/" class="btn-primary">View Leagues</a>
+        <a href="/rules/" class="btn-secondary">Read the Rules</a>
+      </div>
+    </div>
+  </section>
+</Layout>

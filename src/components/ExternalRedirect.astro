@@ -1,0 +1,19 @@
+---
+interface Props {
+  url: string;
+  title?: string;
+}
+
+const { url, title = "Redirecting..." } = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="refresh" content={`0;url=${url}`} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <p>Redirecting to <a href={url}>{url}</a>...</p>
+  </body>
+</html>

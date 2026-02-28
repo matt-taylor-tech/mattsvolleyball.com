@@ -1,0 +1,292 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ChampionCard from '../components/ChampionCard.astro';
+import { getCollection } from 'astro:content';
+
+const champions = (await getCollection('champions')).sort((a, b) => b.data.year - a.data.year);
+---
+
+<Layout title="Matt's Volleyball — Coed Sand Volleyball in Lake Norman">
+  <!-- Hero -->
+  <section class="relative overflow-hidden bg-gradient-to-br from-ocean-600 via-ocean-700 to-ocean-800 text-white">
+    <div class="absolute inset-0 opacity-10">
+      <div class="absolute top-20 left-10 w-72 h-72 bg-coral-500 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-10 right-10 w-96 h-96 bg-sand-400 rounded-full blur-3xl"></div>
+    </div>
+    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-36 text-center">
+      <p class="text-coral-400 font-bold text-sm md:text-base uppercase tracking-widest mb-4">
+        Lake Norman's Premier Sand Volleyball League
+      </p>
+      <h1 class="font-display font-black text-4xl sm:text-5xl md:text-7xl mb-6 leading-tight">
+        Sign Up for<br />
+        <span class="text-coral-400">SPRING 2026!</span>
+      </h1>
+      <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto mb-10">
+        Get ready to dig, dive, and dominate with Matt's Volleyball — home to the hottest coed sand volleyball leagues in the Lake Norman area!
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a
+          href="https://app.teamlinkt.com/register/find/mattsvolleyball"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-primary text-xl py-4 px-10"
+        >
+          Register Here
+        </a>
+        <a href="/leagues/" class="btn-secondary">
+          View Leagues
+        </a>
+      </div>
+    </div>
+    <!-- Wave bottom -->
+    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full">
+      <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="#FFF8F0" />
+    </svg>
+  </section>
+
+  <!-- Welcome -->
+  <section class="py-16 md:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mx-auto text-center">
+        <h2 class="section-heading">Welcome to Matt's Volleyball</h2>
+        <p class="text-ocean-600/80 text-lg leading-relaxed mb-6">
+          We play year-round at Saeed's Bar &amp; Grill in Cornelius and Blythe Landing in Huntersville, with leagues and pickup running throughout the week.
+        </p>
+        <p class="text-ocean-600/80 text-lg leading-relaxed">
+          Our leagues are social first, volleyball second. All skill levels welcome — whether you're a seasoned player or picking up a volleyball for the first time.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Schedule -->
+  <section class="py-16 md:py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="section-heading text-center mb-12">Weekly Schedule</h2>
+      <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div class="text-center p-8 rounded-2xl bg-sand-50 border border-sand-200">
+          <div class="w-16 h-16 bg-coral-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-white font-display font-bold text-lg">Tu</span>
+          </div>
+          <h3 class="font-display font-bold text-xl text-ocean-600 mb-2">Tuesday</h3>
+          <p class="text-ocean-600/70 text-sm leading-relaxed">
+            4v4 leagues with competitive and recreational divisions. Teams stay together for the season.
+          </p>
+        </div>
+
+        <div class="text-center p-8 rounded-2xl bg-sand-50 border border-sand-200">
+          <div class="w-16 h-16 bg-ocean-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-white font-display font-bold text-lg">We</span>
+          </div>
+          <h3 class="font-display font-bold text-xl text-ocean-600 mb-2">Wednesday</h3>
+          <p class="text-ocean-600/70 text-sm leading-relaxed">
+            Shuffle league. Teams are re-drafted each week so you'll meet everyone. Play our Level Up format where winning teams take on progressive handicaps.
+          </p>
+        </div>
+
+        <div class="text-center p-8 rounded-2xl bg-sand-50 border border-sand-200">
+          <div class="w-16 h-16 bg-sand-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-white font-display font-bold text-lg">Th</span>
+          </div>
+          <h3 class="font-display font-bold text-xl text-ocean-600 mb-2">Thursday</h3>
+          <p class="text-ocean-600/70 text-sm leading-relaxed">
+            4v4 leagues with competitive and recreational divisions. Teams stay together for the season.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Play Here -->
+  <section class="py-16 md:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="section-heading text-center mb-4">Why Play Here?</h2>
+      <p class="section-subheading text-center mb-12">More than just volleyball — it's a community.</p>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {[
+          {
+            title: 'Inclusive Leagues',
+            desc: 'Choose your preferred play style, from casual fun to competitive matches.',
+            icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
+          },
+          {
+            title: 'Regular Gamedays',
+            desc: 'Join us throughout the week for your dose of beach volleyball excitement.',
+            icon: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
+          },
+          {
+            title: 'Supportive Community',
+            desc: 'Make new friends, build lasting memories, and celebrate the spirit of the game.',
+            icon: 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
+          },
+        ].map((item) => (
+          <div class="text-center p-8">
+            <div class="w-14 h-14 bg-coral-500/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <svg class="w-7 h-7 text-coral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={item.icon} />
+              </svg>
+            </div>
+            <h3 class="font-display font-bold text-lg text-ocean-600 mb-2">{item.title}</h3>
+            <p class="text-ocean-600/70 text-sm leading-relaxed">{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- What to Expect -->
+  <section class="py-16 md:py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="section-heading text-center mb-4">What to Expect</h2>
+      <p class="section-subheading text-center mb-12">It's not just volleyball — it's the full experience.</p>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+          {
+            title: 'Drinks',
+            desc: 'Raise a toast to victory with handcrafted cocktails and curated beer selection, elevating your sand volleyball experience with every sip.',
+            emoji: '🍹',
+          },
+          {
+            title: 'Food',
+            desc: "Savor delicious bites from Saeed's diverse menu, offering a range of tasty treats to satisfy your cravings between sets.",
+            emoji: '🍔',
+          },
+          {
+            title: 'Courtside Seating',
+            desc: 'Experience the action up close where you can feel the energy of the game and cheer on your favorite teams.',
+            emoji: '💺',
+          },
+          {
+            title: 'Music',
+            desc: 'Groove to curated playlists keeping the atmosphere lively and energized throughout the games.',
+            emoji: '🎵',
+          },
+        ].map((item) => (
+          <div class="card p-6 text-center">
+            <span class="text-4xl mb-4 block">{item.emoji}</span>
+            <h3 class="font-display font-bold text-lg text-ocean-600 mb-2">{item.title}</h3>
+            <p class="text-ocean-600/70 text-sm leading-relaxed">{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Champions -->
+  <section class="py-16 md:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="section-heading text-center mb-4">Hall of Champions</h2>
+      <p class="section-subheading text-center mb-12">Celebrating our league winners.</p>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {champions.map((champ) => (
+          <ChampionCard
+            teamName={champ.data.teamName}
+            season={champ.data.season}
+            year={champ.data.year}
+            league={champ.data.league}
+            division={champ.data.division}
+            day={champ.data.day}
+            photo={champ.data.photo}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Teamlinkt App -->
+  <section class="py-16 md:py-24 bg-gradient-to-br from-ocean-600 to-ocean-800 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="font-display font-extrabold text-3xl md:text-4xl mb-4">Get the TeamLinkt App</h2>
+      <p class="text-white/80 text-lg max-w-xl mx-auto mb-8">
+        View your schedule, RSVP to games, chat with your team, and submit your scores.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a
+          href="https://apps.apple.com/app/teamlinkt/id1048MPL"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-3 bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl transition-colors"
+        >
+          <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+          </svg>
+          <div class="text-left">
+            <div class="text-xs text-white/60">Download on the</div>
+            <div class="font-semibold">App Store</div>
+          </div>
+        </a>
+        <a
+          href="https://play.google.com/store/apps/details?id=com.teamlinkt"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-3 bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl transition-colors"
+        >
+          <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3.18 23.98a1.94 1.94 0 01-.88-.66 1.93 1.93 0 01-.3-1V1.68c0-.38.1-.72.3-1 .16-.27.47-.5.88-.66L13.6 12 3.18 23.98zm1.81-1.08L15.93 12 5 1.1l-.01 21.8zM17.15 12l3.34-3.34c.47.27.81.72.81 1.34 0 .62-.34 1.07-.81 1.34L17.15 12zm-1.5 1.5L5.56 23.6l12.09-7.05-2-3.05zm0-3L5.56.4l12.09 7.05-2 3.05z" />
+          </svg>
+          <div class="text-left">
+            <div class="text-xs text-white/60">Get it on</div>
+            <div class="font-semibold">Google Play</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Social CTA -->
+  <section class="py-16 md:py-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="section-heading mb-4">Connect on Social</h2>
+      <p class="section-subheading mb-10">Stay in the loop — join the conversation.</p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a
+          href="https://www.facebook.com/groups/mattsvolleyball/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center gap-3 bg-[#1877F2] hover:bg-[#1565C0] text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+        >
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg>
+          Facebook Group
+        </a>
+        <a
+          href="https://instagram.com/mattsvolleyball/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center gap-3 bg-gradient-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF] hover:opacity-90 text-white px-6 py-3 rounded-xl font-semibold transition-opacity"
+        >
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" /></svg>
+          Instagram
+        </a>
+        <a
+          href="https://chat.whatsapp.com/BQmVIkBv1bc7AN7KZlzxjU?mode=r_c"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center gap-3 bg-[#25D366] hover:bg-[#1DA851] text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+        >
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" /></svg>
+          WhatsApp
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="py-16 md:py-20 bg-sand-200">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="font-display font-extrabold text-3xl md:text-4xl text-ocean-600 mb-4">
+        Don't miss out!
+      </h2>
+      <p class="text-ocean-600/80 text-lg mb-8">
+        Sign up now and serve up some excitement with us.
+      </p>
+      <a
+        href="https://app.teamlinkt.com/register/find/mattsvolleyball"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn-primary text-xl py-4 px-12"
+      >
+        Register Now
+      </a>
+    </div>
+  </section>
+</Layout>

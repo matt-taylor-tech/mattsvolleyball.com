@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-sand-50 text-ocean-800 font-sans;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-block bg-coral-500 hover:bg-coral-600 text-white font-bold
+           py-3 px-8 rounded-full transition-all duration-200
+           shadow-lg hover:shadow-xl hover:-translate-y-0.5
+           text-lg tracking-wide;
+  }
+
+  .btn-secondary {
+    @apply inline-block bg-ocean-600 hover:bg-ocean-700 text-white font-bold
+           py-3 px-8 rounded-full transition-all duration-200
+           shadow-md hover:shadow-lg;
+  }
+
+  .section-heading {
+    @apply text-3xl md:text-4xl font-display font-extrabold text-ocean-600 mb-4;
+  }
+
+  .section-subheading {
+    @apply text-lg text-ocean-600/70 max-w-2xl mx-auto;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden;
+  }
+
+  .img-placeholder {
+    @apply bg-gradient-to-br from-sand-200 via-sand-300 to-sand-400
+           flex items-center justify-center text-sand-600/50;
+  }
+}
