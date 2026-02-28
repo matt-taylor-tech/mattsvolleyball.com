@@ -1,0 +1,58 @@
+---
+import Layout from '../layouts/Layout.astro';
+import ChampionCard from '../components/ChampionCard.astro';
+import { getChampions } from '../lib/champions';
+
+const champions = await getChampions();
+
+// Group champions by year + season for organized display
+const grouped = new Map<string, typeof champions>();
+for (const champ of champions) {
+  const key = `${champ.season} ${champ.year}`;
+  if (!grouped.has(key)) grouped.set(key, []);
+  grouped.get(key)!.push(champ);
+}
+---
+
+<Layout title="All Champions | Matt's Volleyball" description="Every champion from Matt's Volleyball sand volleyball leagues in Lake Norman.">
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white py-20 md:py-28">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">Hall of Champions</h1>
+      <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
+        Every team that's earned the title.
+      </p>
+    </div>
+    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full mt-8">
+      <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="#F7F6F3" />
+    </svg>
+  </section>
+
+  <section class="py-12 md:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {[...grouped.entries()].map(([label, champs]) => (
+        <div class="mb-16 last:mb-0">
+          <h2 class="font-display font-bold text-2xl text-ocean-600 mb-6 border-b border-sand-200 pb-2">{label}</h2>
+          <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {champs.map((champ) => (
+              <ChampionCard
+                teamName={champ.teamName}
+                season={champ.season}
+                year={champ.year}
+                division={champ.division}
+                day={champ.day}
+                photo={champ.photo}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {champions.length === 0 && (
+        <p class="text-center text-ocean-600/60 text-lg">
+          Champions will appear here once the first season wraps up.
+        </p>
+      )}
+    </div>
+  </section>
+</Layout>

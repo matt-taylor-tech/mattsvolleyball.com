@@ -12,7 +12,7 @@ import Layout from '../layouts/Layout.astro';
       </p>
     </div>
     <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full mt-8">
-      <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="#F5F0EA" />
+      <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="#F7F6F3" />
     </svg>
   </section>
 
@@ -38,7 +38,11 @@ import Layout from '../layouts/Layout.astro';
         <!-- Will Play -->
         <div class="card p-6 md:p-8">
           <div class="flex items-center gap-3 mb-4">
-            <span class="w-10 h-10 bg-ocean-500 rounded-full flex items-center justify-center text-white text-lg">✅</span>
+            <span class="w-10 h-10 bg-ocean-500 rounded-full flex items-center justify-center text-white">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </span>
             <h2 class="font-display font-bold text-xl text-ocean-600">Will Likely Play In</h2>
           </div>
           <ul class="space-y-3">
@@ -60,7 +64,11 @@ import Layout from '../layouts/Layout.astro';
         <!-- Won't Play -->
         <div class="card p-6 md:p-8">
           <div class="flex items-center gap-3 mb-4">
-            <span class="w-10 h-10 bg-coral-600 rounded-full flex items-center justify-center text-white text-lg">🚫</span>
+            <span class="w-10 h-10 bg-coral-600 rounded-full flex items-center justify-center text-white">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+              </svg>
+            </span>
             <h2 class="font-display font-bold text-xl text-ocean-600">Will NOT Play In</h2>
           </div>
           <ul class="space-y-3">
