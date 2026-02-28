@@ -8,7 +8,7 @@ interface Props {
   description?: string;
 }
 
-const { title, description = "Matt's Volleyball — the hottest coed sand volleyball leagues in the Lake Norman area! Play year-round at Saeed's Bar & Grill in Cornelius and Blythe Landing in Huntersville." } = Astro.props;
+const { title, description = "Matt's Volleyball - the hottest coed sand volleyball leagues in the Lake Norman area! Play year-round at Saeed's Bar & Grill in Cornelius and Blythe Landing in Huntersville." } = Astro.props;
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
 ---
 
@@ -24,7 +24,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalUrl} />
     <meta name="twitter:card" content="summary_large_image" />
-    <link rel="icon" type="image/png" href="/images/vbenginelite.png" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <title>{title}</title>
   </head>
   <body class="min-h-screen flex flex-col">

@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="Playlists — Matt's Volleyball" description="Curated music playlists for Matt's Volleyball game nights. The soundtrack to your sand volleyball experience.">
+<Layout title="Playlists | Matt's Volleyball" description="Curated music playlists for Matt's Volleyball game nights. The soundtrack to your sand volleyball experience.">
   <!-- Hero -->
   <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white py-20 md:py-28">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -24,11 +24,11 @@ import Layout from '../layouts/Layout.astro';
 
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {[
-          { name: 'Mixes', emoji: '🎧', color: 'from-purple-500 to-pink-500' },
-          { name: 'Hip Hop', emoji: '🎤', color: 'from-yellow-500 to-orange-500' },
-          { name: 'Rap', emoji: '🔥', color: 'from-red-500 to-rose-600' },
-          { name: 'Rock', emoji: '🎸', color: 'from-gray-600 to-gray-800' },
-          { name: 'Metal', emoji: '🤘', color: 'from-zinc-700 to-zinc-900' },
+          { name: 'Mixes', emoji: '🎧', color: 'from-ocean-600 to-ocean-700' },
+          { name: 'Hip Hop', emoji: '🎤', color: 'from-sand-400 to-sand-500' },
+          { name: 'Rap', emoji: '🔥', color: 'from-coral-500 to-coral-600' },
+          { name: 'Rock', emoji: '🎸', color: 'from-ocean-700 to-ocean-800' },
+          { name: 'Metal', emoji: '🤘', color: 'from-ocean-800 to-ocean-900' },
           { name: 'Other', emoji: '🎵', color: 'from-ocean-500 to-ocean-700' },
         ].map((genre) => (
           <div class={`bg-gradient-to-br ${genre.color} rounded-2xl p-8 text-white text-center shadow-lg hover:shadow-xl transition-shadow`}>
