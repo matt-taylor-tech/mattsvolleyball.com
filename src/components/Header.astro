@@ -49,8 +49,8 @@ function isActive(href: string): boolean {
               class:list={[
                 'px-4 py-2 rounded-lg text-sm font-semibold transition-colors',
                 isActive(link.href)
-                  ? 'text-coral-500 bg-coral-500/10'
-                  : 'text-ocean-700 hover:text-coral-500 hover:bg-sand-100',
+                  ? 'text-ocean-800 bg-sand-200'
+                  : 'text-ocean-700 hover:text-ocean-800 hover:bg-sand-100',
               ]}
             >
               {link.label}
@@ -68,7 +68,7 @@ function isActive(href: string): boolean {
                       href={child.href}
                       target={child.external ? '_blank' : undefined}
                       rel={child.external ? 'noopener noreferrer' : undefined}
-                      class="block px-4 py-2 text-sm text-ocean-700 hover:text-coral-500 hover:bg-sand-50 transition-colors"
+                      class="block px-4 py-2 text-sm text-ocean-700 hover:text-ocean-800 hover:bg-sand-50 transition-colors"
                     >
                       {child.label}
                       {child.external && (
@@ -88,7 +88,7 @@ function isActive(href: string): boolean {
           href="https://app.teamlinkt.com"
           target="_blank"
           rel="noopener noreferrer"
-          class="ml-2 text-sm font-semibold text-ocean-700 hover:text-coral-500 px-4 py-2 rounded-lg transition-colors"
+          class="ml-2 text-sm font-semibold text-ocean-700 hover:text-ocean-800 px-4 py-2 rounded-lg transition-colors"
         >
           Account
         </a>
@@ -129,8 +129,8 @@ function isActive(href: string): boolean {
               class:list={[
                 'px-4 py-3 rounded-lg font-semibold transition-colors',
                 isActive(link.href)
-                  ? 'text-coral-500 bg-coral-500/10'
-                  : 'text-ocean-700 hover:text-coral-500 hover:bg-sand-100',
+                  ? 'text-ocean-800 bg-sand-200'
+                  : 'text-ocean-700 hover:text-ocean-800 hover:bg-sand-100',
               ]}
             >
               {link.label}
@@ -140,7 +140,7 @@ function isActive(href: string): boolean {
                 href={child.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                class="pl-8 pr-4 py-2 text-sm text-ocean-600/70 hover:text-coral-500 transition-colors"
+                class="pl-8 pr-4 py-2 text-sm text-ocean-600/70 hover:text-ocean-800 transition-colors"
               >
                 {child.label} ↗
               </a>
@@ -152,7 +152,7 @@ function isActive(href: string): boolean {
           href="https://app.teamlinkt.com"
           target="_blank"
           rel="noopener noreferrer"
-          class="px-4 py-3 text-ocean-700 hover:text-coral-500 font-semibold transition-colors"
+          class="px-4 py-3 text-ocean-700 hover:text-ocean-800 font-semibold transition-colors"
         >
           Account ↗
         </a>

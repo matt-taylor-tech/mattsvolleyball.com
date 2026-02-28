@@ -144,29 +144,56 @@ const champions = await getChampions();
           {
             title: 'Drinks',
             desc: 'Raise a toast to victory with handcrafted cocktails and curated beer selection, elevating your sand volleyball experience with every sip.',
-            icon: 'M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
           },
           {
             title: 'Food',
             desc: "Savor delicious bites from Saeed's diverse menu, offering a range of tasty treats to satisfy your cravings between sets.",
-            icon: 'M3 3h18v2H3V3zm0 4h18v2H3V7zm0 4h12v2H3v-2zm16.707 1.707a1 1 0 00-1.414 0L15 16l-2.293-2.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l4-4a1 1 0 000-1.414z',
           },
           {
             title: 'Courtside Seating',
             desc: 'Experience the action up close where you can feel the energy of the game and cheer on your favorite teams.',
-            icon: 'M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z',
           },
           {
             title: 'Music',
             desc: 'Groove to curated playlists keeping the atmosphere lively and energized throughout the games.',
-            icon: 'M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z',
           },
-        ].map((item) => (
+        ].map((item, i) => (
           <div class="card p-6 text-center">
             <div class="w-12 h-12 bg-sand-200 rounded-xl flex items-center justify-center mx-auto mb-4">
-              <svg class="w-6 h-6 text-ocean-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={item.icon} />
-              </svg>
+              {i === 0 && (
+                <svg class="w-6 h-6 text-ocean-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M8 2l1.5 9H12l1.5-9" />
+                  <path d="M6.5 11c0 2 2.5 3 5.5 3s5.5-1 5.5-3" />
+                  <path d="M12 14v4" />
+                  <path d="M8 21h8" />
+                  <path d="M12 18h0" />
+                </svg>
+              )}
+              {i === 1 && (
+                <svg class="w-6 h-6 text-ocean-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 8h1a4 4 0 010 8h-1" />
+                  <path d="M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z" />
+                  <path d="M6 1v3" />
+                  <path d="M10 1v3" />
+                  <path d="M14 1v3" />
+                </svg>
+              )}
+              {i === 2 && (
+                <svg class="w-6 h-6 text-ocean-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2v8" />
+                  <path d="M4.93 10.93l2.83-2.83" />
+                  <path d="M2 18h20" />
+                  <path d="M19.07 10.93l-2.83-2.83" />
+                  <path d="M6 18l2-8h8l2 8" />
+                </svg>
+              )}
+              {i === 3 && (
+                <svg class="w-6 h-6 text-ocean-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 18V5l12-2v13" />
+                  <circle cx="6" cy="18" r="3" />
+                  <circle cx="18" cy="16" r="3" />
+                </svg>
+              )}
             </div>
             <h3 class="font-display font-bold text-lg text-ocean-600 mb-2">{item.title}</h3>
             <p class="text-ocean-600/70 text-sm leading-relaxed">{item.desc}</p>
