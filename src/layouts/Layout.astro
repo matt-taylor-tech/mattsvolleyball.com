@@ -8,6 +8,7 @@ interface Props {
   description?: string;
 }
 
+const r2Base = import.meta.env.PUBLIC_R2_BASE_URL || '';
 const { title, description = "Matt's Volleyball - the hottest coed sand volleyball leagues in the Lake Norman area! Play year-round at Saeed's Bar & Grill in Cornelius and Blythe Landing in Huntersville." } = Astro.props;
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -24,7 +25,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalUrl} />
     <meta name="twitter:card" content="summary_large_image" />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/x-icon" href={`${r2Base}/favicon.ico`} />
     <title>{title}</title>
 
     <!-- Google Analytics -->
