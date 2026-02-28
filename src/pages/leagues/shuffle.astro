@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import { Shuffle, Layers, BookOpen, Sparkles, Dices, Users, Scale, TrendingUp, Check, ArrowRight } from 'lucide-astro';
 ---
 
 <Layout title="Shuffle League | Matt's Volleyball" description="Learn about the Wednesday shuffle league format at Matt's Volleyball. Teams are re-drafted weekly with the Level Up handicap system.">
@@ -21,7 +22,7 @@ import Layout from '../../layouts/Layout.astro';
 
       <!-- How It Works -->
       <div class="mb-16">
-        <h2 class="section-heading mb-6">How It Works</h2>
+        <h2 class="section-heading mb-6"><Shuffle class="w-6 h-6 inline-block mr-2 -mt-1 text-ocean-500" />How It Works</h2>
         <div class="text-ocean-700 leading-relaxed space-y-4">
           <p>
             Teams are re-drafted weekly, allowing players to meet everyone in the league by season's end through constant new pairings.
@@ -37,7 +38,7 @@ import Layout from '../../layouts/Layout.astro';
 
       <!-- The Five Levels -->
       <div class="mb-16">
-        <h2 class="section-heading mb-8">The Five Levels</h2>
+        <h2 class="section-heading mb-8"><Layers class="w-6 h-6 inline-block mr-2 -mt-1 text-ocean-500" />The Five Levels</h2>
         <div class="space-y-4">
           <div class="card p-6 border-l-4 border-sand-300">
             <div class="flex items-center gap-3 mb-2">
@@ -84,7 +85,7 @@ import Layout from '../../layouts/Layout.astro';
 
       <!-- Baseline Rules -->
       <div class="mb-16">
-        <h2 class="section-heading mb-6">Baseline Rules (All Levels)</h2>
+        <h2 class="section-heading mb-6"><BookOpen class="w-6 h-6 inline-block mr-2 -mt-1 text-ocean-500" />Baseline Rules (All Levels)</h2>
         <div class="bg-white rounded-2xl shadow-md p-6 md:p-8">
           <ul class="space-y-3">
             {[
@@ -96,9 +97,7 @@ import Layout from '../../layouts/Layout.astro';
               'Disputes resolved by replaying points',
             ].map((rule) => (
               <li class="flex items-start gap-3 text-ocean-700">
-                <svg class="w-5 h-5 text-ocean-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
+                <Check class="w-5 h-5 text-ocean-600 shrink-0 mt-0.5" />
                 {rule}
               </li>
             ))}
@@ -108,19 +107,36 @@ import Layout from '../../layouts/Layout.astro';
 
       <!-- Why This Format Works -->
       <div class="mb-16">
-        <h2 class="section-heading mb-6">Why This Format Works</h2>
+        <h2 class="section-heading mb-6"><Sparkles class="w-6 h-6 inline-block mr-2 -mt-1 text-ocean-500" />Why This Format Works</h2>
         <div class="grid sm:grid-cols-2 gap-6">
-          {[
-            { title: 'Variety', desc: 'Random handicaps and rotating teammates keep every week fresh and unpredictable.' },
-            { title: 'Social', desc: 'Prevents cliques. You\'ll play with and against everyone by the end of the season.' },
-            { title: 'Self-Balancing', desc: 'Stronger teams are handicapped as they win, keeping every match competitive.' },
-            { title: 'Skill Building', desc: 'Tests fundamental skills when standard techniques become unavailable.' },
-          ].map((item) => (
-            <div class="card p-6">
-              <h3 class="font-display font-bold text-lg text-ocean-600 mb-2">{item.title}</h3>
-              <p class="text-ocean-700 text-sm leading-relaxed">{item.desc}</p>
+          <div class="card p-6">
+            <div class="flex items-center gap-2 mb-2">
+              <Dices class="w-5 h-5 text-ocean-500" />
+              <h3 class="font-display font-bold text-lg text-ocean-600">Variety</h3>
             </div>
-          ))}
+            <p class="text-ocean-700 text-sm leading-relaxed">Random handicaps and rotating teammates keep every week fresh and unpredictable.</p>
+          </div>
+          <div class="card p-6">
+            <div class="flex items-center gap-2 mb-2">
+              <Users class="w-5 h-5 text-ocean-500" />
+              <h3 class="font-display font-bold text-lg text-ocean-600">Social</h3>
+            </div>
+            <p class="text-ocean-700 text-sm leading-relaxed">Prevents cliques. You'll play with and against everyone by the end of the season.</p>
+          </div>
+          <div class="card p-6">
+            <div class="flex items-center gap-2 mb-2">
+              <Scale class="w-5 h-5 text-ocean-500" />
+              <h3 class="font-display font-bold text-lg text-ocean-600">Self-Balancing</h3>
+            </div>
+            <p class="text-ocean-700 text-sm leading-relaxed">Stronger teams are handicapped as they win, keeping every match competitive.</p>
+          </div>
+          <div class="card p-6">
+            <div class="flex items-center gap-2 mb-2">
+              <TrendingUp class="w-5 h-5 text-ocean-500" />
+              <h3 class="font-display font-bold text-lg text-ocean-600">Skill Building</h3>
+            </div>
+            <p class="text-ocean-700 text-sm leading-relaxed">Tests fundamental skills when standard techniques become unavailable.</p>
+          </div>
         </div>
       </div>
 
@@ -140,9 +156,10 @@ import Layout from '../../layouts/Layout.astro';
         href="https://app.teamlinkt.com/register/find/mattsvolleyball"
         target="_blank"
         rel="noopener noreferrer"
-        class="btn-primary"
+        class="btn-primary inline-flex items-center gap-2"
       >
         Register Now
+        <ArrowRight class="w-4 h-4" />
       </a>
     </div>
   </section>
