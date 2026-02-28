@@ -1,4 +1,5 @@
 ---
+const r2Base = import.meta.env.PUBLIC_R2_BASE_URL || '';
 const currentPath = Astro.url.pathname;
 
 const navLinks = [
@@ -30,7 +31,7 @@ function isActive(href: string): boolean {
       <!-- Logo -->
       <a href="/" class="flex items-center gap-3 shrink-0">
         <img
-          src="/logos/vbenginelite.png"
+          src={`${r2Base}/logos/vbenginelite.png`}
           alt="Matt's Volleyball"
           class="h-10 md:h-12 w-auto"
         />

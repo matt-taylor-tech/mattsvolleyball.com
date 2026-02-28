@@ -18,7 +18,8 @@
       "Bash(npm install sharp)",
       "Bash(node scripts/upload-champions.mjs)",
       "Bash(git ls-tree -r HEAD)",
-      "Bash(find /d/Github/mattsvolleyball.com/src -name \"*.astro\" -exec sed -i 's/#F5F0EA/#F7F6F3/g' {} +)"
+      "Bash(find /d/Github/mattsvolleyball.com/src -name \"*.astro\" -exec sed -i 's/#F5F0EA/#F7F6F3/g' {} +)",
+      "WebFetch(domain:r2.afterhoursds.com)"
     ]
   }
 }
