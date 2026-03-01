@@ -20,4 +20,4 @@ leagues:
     fee: "$50/team"
 ---
 
-Spring 2026 is here! Get ready for another great season of sand volleyball at Saeed's Bar & Grill and Blythe Landing. Registration is open — sign up your team or join as an individual today.
+Spring 2026 is here! Get ready for another great season of sand volleyball at Saeed's Bar & Grill and Blythe Landing. Registration is open - sign up your team or join as an individual today.
