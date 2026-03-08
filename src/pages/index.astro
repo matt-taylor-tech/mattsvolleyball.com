@@ -120,7 +120,7 @@ const champions = await getChampions();
       </div>
 
       <!-- Tailwind safelist for dynamically rendered classes -->
-      <span class="hidden space-y-2 text-ocean-500 text-ocean-600 text-ocean-700 font-display font-bold text-sm text-xs truncate sm:grid-cols-2"></span>
+      <span class="hidden space-y-2 text-ocean-500 text-ocean-500/70 text-ocean-600 text-ocean-700 font-display font-bold text-sm text-xs truncate sm:grid-cols-2 ml-[76px]"></span>
     </div>
   </section>
 
@@ -275,23 +275,34 @@ const champions = await getChampions();
       try {
         const body = new URLSearchParams();
         body.set('start', '0');
-        body.set('length', '10');
+        body.set('length', '50');
         body.set('status', 'upcoming');
 
         const res = await fetch('https://app.mattsvolleyball.com/leagues/getAllEvents/10757', { method: 'POST', body });
         const json = await res.json();
-        const games = (json.data || []) as Array<Record<string, string | number>>;
+        const allGames = (json.data || []) as Array<Record<string, string | number>>;
 
-        if (games.length === 0) {
+        if (allGames.length === 0) {
           loading.classList.add('hidden');
           return;
         }
+
+        // Get the first game's date, then include all games within 7 days
+        const firstTimestamp = allGames[0]['6'] as number;
+        const oneWeek = 7 * 24 * 60 * 60;
+        const games = allGames.filter((g) => (g['6'] as number) - firstTimestamp < oneWeek);
 
         function stripHtml(html: string): string {
           const tmp = document.createElement('div');
           tmp.innerHTML = html;
           const span = tmp.querySelector('.tooltips');
           if (span) return span.getAttribute('data-original-title') || span.textContent || '';
+          return tmp.textContent || '';
+        }
+
+        function extractLocationName(html: string): string {
+          const tmp = document.createElement('div');
+          tmp.innerHTML = html;
           return tmp.textContent || '';
         }
 
@@ -314,12 +325,16 @@ const champions = await getChampions();
                   const time = (g['1'] as string).split(' - ')[0];
                   const home = stripHtml(g['3'] as string);
                   const away = stripHtml(g['4'] as string);
+                  const court = extractLocationName(g['5'] as string);
                   return `
-                    <div class="flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-sm border border-sand-200">
-                      <span class="text-xs font-medium text-ocean-500 w-16 shrink-0">${time}</span>
-                      <span class="text-sm text-ocean-700 font-medium truncate">${home}</span>
-                      <span class="text-xs text-ocean-500 shrink-0">vs</span>
-                      <span class="text-sm text-ocean-700 font-medium truncate">${away}</span>
+                    <div class="bg-white rounded-xl px-4 py-3 shadow-sm border border-sand-200">
+                      <div class="flex items-center gap-3">
+                        <span class="text-xs font-medium text-ocean-500 w-16 shrink-0">${time}</span>
+                        <span class="text-sm text-ocean-700 font-medium truncate">${home}</span>
+                        <span class="text-xs text-ocean-500 shrink-0">vs</span>
+                        <span class="text-sm text-ocean-700 font-medium truncate">${away}</span>
+                      </div>
+                      <div class="text-xs text-ocean-500/70 mt-1 ml-[76px]">${court}</div>
                     </div>
                   `;
                 }).join('')}
