@@ -2,9 +2,13 @@
 import Layout from '../layouts/Layout.astro';
 import ChampionCard from '../components/ChampionCard.astro';
 import { getChampions } from '../lib/champions';
+import { getRegistrationData, formatDate, formatFullDate } from '../lib/registration';
 import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart } from 'lucide-astro';
 
 const champions = await getChampions();
+const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose } = await getRegistrationData();
+const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
+const heroHeading = seasonLabel || 'Sand Volleyball';
 ---
 
 <Layout title="Matt's Volleyball | Coed Sand Volleyball in Lake Norman">
@@ -19,24 +23,55 @@ const champions = await getChampions();
         Lake Norman's Premier Sand Volleyball League
       </p>
       <h1 class="font-display font-black text-4xl sm:text-5xl md:text-7xl mb-6 leading-tight">
-        Sign Up for<br />
-        <span class="text-coral-400">SPRING 2026!</span>
+        {regStatus === 'open' && seasonLabel && (
+          <Fragment>Sign Up for<br /><span class="text-coral-400">{seasonLabel.toUpperCase()}!</span></Fragment>
+        )}
+        {regStatus === 'coming-soon' && seasonLabel && (
+          <Fragment><span class="text-coral-400">{seasonLabel.toUpperCase()}</span><br />Is Coming!</Fragment>
+        )}
+        {regStatus === 'closed' && seasonLabel && (
+          <Fragment>Matt's<br /><span class="text-coral-400">Volleyball</span></Fragment>
+        )}
+        {!seasonLabel && (
+          <Fragment>Matt's<br /><span class="text-coral-400">Volleyball</span></Fragment>
+        )}
       </h1>
-      <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto mb-10">
+      <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto mb-4">
         Get ready to dig, dive, and dominate with Matt's Volleyball - home to the hottest coed sand volleyball leagues in the Lake Norman area!
       </p>
+
+      {seasonDates && (
+        <p class="text-white/60 text-sm md:text-base mb-6">
+          {seasonDates.start} – {seasonDates.end}
+          {regStatus === 'open' && (<Fragment> · Registration closes {formatDate(latestClose)}</Fragment>)}
+        </p>
+      )}
+      {!seasonDates && <div class="mb-6" />}
+
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <a
-          href="https://app.teamlinkt.com/register/find/mattsvolleyball"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="btn-primary text-xl py-4 px-10"
-        >
-          Register Here
-        </a>
-        <a href="/leagues/" class="btn-secondary text-xl py-4 px-10">
-          View Leagues
-        </a>
+        {regStatus === 'open' ? (
+          <a
+            href={REG_PAGE}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-primary text-xl py-4 px-10"
+          >
+            Register Now
+          </a>
+        ) : regStatus === 'coming-soon' ? (
+          <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-8 py-4 rounded-lg font-bold text-lg">
+            Registration Opens {formatFullDate(earliestOpen)}
+          </div>
+        ) : (
+          <a href="/leagues/" class="btn-primary text-xl py-4 px-10">
+            View Leagues
+          </a>
+        )}
+        {regStatus === 'open' && (
+          <a href="/leagues/" class="btn-secondary text-xl py-4 px-10">
+            View Leagues
+          </a>
+        )}
       </div>
     </div>
     <!-- Wave bottom -->
