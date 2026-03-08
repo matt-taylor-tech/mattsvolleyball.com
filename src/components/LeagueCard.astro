@@ -1,4 +1,6 @@
 ---
+import type { RegCard } from '../lib/registration';
+
 interface Props {
   day: string;
   format: string;
@@ -8,9 +10,11 @@ interface Props {
   price?: string;
   registrationUrl?: string;
   link?: { href: string; label: string };
+  regEntries?: RegCard[];
 }
 
-const { day, format, description, details, highlight, price, registrationUrl = 'https://app.teamlinkt.com/register/find/mattsvolleyball', link } = Astro.props;
+const { day, format, description, details, highlight, price, registrationUrl = 'https://app.teamlinkt.com/register/find/mattsvolleyball', link, regEntries } = Astro.props;
+const hasRegEntries = regEntries && regEntries.length > 0;
 
 const dayColors: Record<string, string> = {
   Tuesday: 'from-coral-500 to-coral-600',
@@ -64,16 +68,41 @@ const gradientClass = dayColors[day] || 'from-ocean-500 to-ocean-600';
       ))}
     </ul>
 
-    <!-- Registration CTA: dynamically updated by script -->
-    <div class="reg-cta">
-      <a
-        href={registrationUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        class="btn-primary text-center w-full"
-      >
-        Sign Up for {day} Now
-      </a>
+    <!-- Registration CTA -->
+    <div class="reg-cta space-y-3">
+      {hasRegEntries ? (
+        regEntries.map((entry) => {
+          const label = entry.name.replace(/^(tuesday|wednesday|thursday)\s+4v4\s*/i, '').trim() || entry.name;
+          return entry.isOpen ? (
+            <div>
+              <a href={entry.regUrl} target="_blank" rel="noopener noreferrer" class="btn-primary text-center w-full block">
+                Sign Up – {label}
+              </a>
+              <p class="text-xs text-ocean-600/70 text-center mt-1">
+                {entry.daysLeft} day{entry.daysLeft !== 1 ? 's' : ''} left · Closes {entry.closeDate}
+              </p>
+            </div>
+          ) : entry.isFuture ? (
+            <div>
+              <span class="block text-center w-full py-2 rounded-lg bg-sand-200 text-ocean-600/70 font-semibold text-sm">{label} – Coming Soon</span>
+              <p class="text-xs text-ocean-600/70 text-center mt-1">Opens {entry.openDate}</p>
+            </div>
+          ) : (
+            <div>
+              <span class="block text-center w-full py-2 rounded-lg bg-sand-200 text-ocean-600/70 font-semibold text-sm">{label} – Closed</span>
+            </div>
+          );
+        })
+      ) : (
+        <a
+          href={registrationUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-primary text-center w-full"
+        >
+          Sign Up for {day} Now
+        </a>
+      )}
     </div>
   </div>
 </div>

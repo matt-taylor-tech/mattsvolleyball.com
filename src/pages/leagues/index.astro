@@ -2,10 +2,19 @@
 import Layout from '../../layouts/Layout.astro';
 import LeagueCard from '../../components/LeagueCard.astro';
 import FAQAccordion from '../../components/FAQAccordion.astro';
-import { getRegistrationData, formatDate, formatFullDate } from '../../lib/registration';
+import { getRegistrationData, formatDate, formatFullDate, getDayFromName } from '../../lib/registration';
+import type { RegCard } from '../../lib/registration';
 
-const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose, regCards, hasEntries } = await getRegistrationData();
+const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose, regCards } = await getRegistrationData();
 const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
+
+// Group registration entries by day for the league cards
+const regByDay: Record<string, RegCard[]> = {};
+for (const card of regCards) {
+  const day = getDayFromName(card.name);
+  if (!regByDay[day]) regByDay[day] = [];
+  regByDay[day].push(card);
+}
 
 const faqItems = [
   { question: 'What equipment do I need?', answer: 'Bring athletic attire suitable for playing in sand. Mikasa volleyballs are provided, but you\'re welcome to bring your own.' },
@@ -83,45 +92,6 @@ const faqItems = [
     </svg>
   </section>
 
-  <!-- Registration Cards -->
-  {hasEntries && (
-    <section class="py-12 md:py-16">
-      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h3 class="font-display font-extrabold text-2xl text-ocean-600 text-center mb-8">Registration</h3>
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {regCards.map((card) => (
-              <div class="card overflow-hidden">
-                <div class={card.colorClass + ' px-4 py-3 text-white'}>
-                  <span class="font-display font-bold text-sm">{card.name}</span>
-                </div>
-                <div class="p-4 flex flex-col gap-3">
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs text-ocean-600/70">Closes {card.closeDate}</span>
-                    {card.isOpen && (
-                      <span class="text-sm text-ocean-600 font-medium">{card.daysLeft} day{card.daysLeft !== 1 ? 's' : ''} left</span>
-                    )}
-                    {card.isFuture && (
-                      <span class="text-sm text-ocean-600/70">Opens {card.openDate}</span>
-                    )}
-                    {!card.isOpen && !card.isFuture && (
-                      <span class="text-sm text-ocean-600/70">Closed</span>
-                    )}
-                  </div>
-                  {card.isOpen ? (
-                    <a href={card.regUrl} target="_blank" rel="noopener noreferrer" class="btn-primary text-center w-full text-sm !py-2">Register</a>
-                  ) : card.isFuture ? (
-                    <span class="block text-center w-full text-sm py-2 rounded-lg bg-sand-200 text-ocean-600/70 font-semibold">Coming Soon</span>
-                  ) : (
-                    <span class="block text-center w-full text-sm py-2 rounded-lg bg-sand-200 text-ocean-600/70 font-semibold">Closed</span>
-                  )}
-                </div>
-              </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  )}
-
   <!-- League Cards -->
   <section class="pb-16 md:pb-24">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -132,6 +102,7 @@ const faqItems = [
           price="$65"
           description="Maximum 14 teams. Requires 1 female minimum per team. Welcomes all skill levels, typically intermediate to competitive."
           highlight="Two divisions: recreational and competitive with separate playoffs."
+          regEntries={regByDay['tuesday']}
           details={[
             '6 regular season games over 6-7 weeks plus 1 playoff week',
             '1 game weekly plus 1 bye week',
@@ -146,6 +117,7 @@ const faqItems = [
           description="Social focus with volleyball secondary. Individual sign-ups with weekly team redrafts. Meet new people every week!"
           link={{ href: '/leagues/shuffle/', label: 'Learn how shuffle works →' }}
           highlight='Level Up format: winning teams advance and receive handicaps, keeping every match competitive.'
+          regEntries={regByDay['wednesday']}
           details={[
             'Individual sign-ups. Teams re-drafted each week',
             '7 regular season games plus 1 playoff week',
@@ -159,6 +131,7 @@ const faqItems = [
           price="$65"
           description="Maximum 14 teams. Identical structure to Tuesday league with 1 female minimum requirement."
           highlight="Two competitive divisions with separate playoffs."
+          regEntries={regByDay['thursday']}
           details={[
             '6 regular season games over 6-7 weeks plus 1 playoff week',
             '1 game weekly plus 1 bye week',
