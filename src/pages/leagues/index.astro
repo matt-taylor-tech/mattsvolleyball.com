@@ -79,7 +79,7 @@ const faqItems = [
   </section>
 
   <!-- Tailwind safelist for dynamic registration classes -->
-  <span class="hidden bg-sand-200 text-ocean-700 bg-ocean-500 bg-ocean-600 bg-coral-500 bg-sand-500 text-white text-white/90 text-ocean-600/70 text-ocean-600 inline-flex items-center gap-2 rounded-lg font-bold font-semibold text-sm text-xs animate-pulse w-2 h-2 rounded-full px-4 py-2 py-3 p-4 mb-6 card overflow-hidden font-display flex-col gap-3 flex justify-between btn-primary text-center w-full !py-2 block underline hover:text-ocean-700 section-heading"></span>
+  <span class="hidden bg-sand-200 text-ocean-700 bg-ocean-500 bg-ocean-600 bg-coral-500 bg-sand-500 text-white text-white/90 text-ocean-600/70 text-ocean-600 inline-flex items-center gap-2 rounded-lg font-bold font-semibold text-sm text-xs animate-pulse w-2 h-2 rounded-full px-4 py-2 py-3 p-4 mb-6 card overflow-hidden font-display flex-col gap-3 flex justify-between btn-primary text-center w-full !py-2 block underline hover:text-ocean-700 section-heading mb-1"></span>
 
   <!-- League Cards -->
   <section class="pb-16 md:pb-24">
@@ -226,7 +226,9 @@ const faqItems = [
     try {
       const res = await fetch(REG_API);
       if (!res.ok) throw new Error('API error');
-      const data: Record<string, SeasonGroup> = await res.json();
+      const json = await res.json();
+      const data: Record<string, SeasonGroup> = json.seasons;
+      const seasonDates: { start: string; end: string } | null = json.seasonDates;
 
       // Get the most recent season (highest season ID)
       const seasonIds = Object.keys(data).sort((a, b) => Number(b) - Number(a));
@@ -279,25 +281,29 @@ const faqItems = [
       let badgeHtml = '';
       let subtitleHtml = '';
 
+      const datesLine = seasonDates
+        ? `<p class="text-ocean-700 text-lg font-semibold mb-1">${seasonDates.start} – ${seasonDates.end}</p>`
+        : '';
+
       if (anyOpen) {
         badgeHtml = `
           <div class="inline-flex items-center gap-2 bg-sand-200 text-ocean-700 px-4 py-2 rounded-lg font-bold text-sm mb-6">
             <span class="w-2 h-2 bg-ocean-500 rounded-full animate-pulse"></span>
             Registration Open
           </div>`;
-        subtitleHtml = `<p class="text-ocean-600/70 text-lg">Registration closes ${formatDate(latestClose)}</p>`;
+        subtitleHtml = `${datesLine}<p class="text-ocean-600/70 text-lg">Registration closes ${formatDate(latestClose)}</p>`;
       } else if (allFuture) {
         badgeHtml = `
           <div class="inline-flex items-center gap-2 bg-sand-200 text-ocean-700 px-4 py-2 rounded-lg font-bold text-sm mb-6">
             Coming Soon
           </div>`;
-        subtitleHtml = `<p class="text-ocean-600/70 text-lg">Registration opens ${formatFullDate(earliestOpen)}</p>`;
+        subtitleHtml = `${datesLine}<p class="text-ocean-600/70 text-lg">Registration opens ${formatFullDate(earliestOpen)}</p>`;
       } else {
         badgeHtml = `
           <div class="inline-flex items-center gap-2 bg-sand-200 text-ocean-700 px-4 py-2 rounded-lg font-bold text-sm mb-6">
             Registration Closed
           </div>`;
-        subtitleHtml = `<p class="text-ocean-600/70 text-lg">Check back for next season</p>`;
+        subtitleHtml = `${datesLine}<p class="text-ocean-600/70 text-lg">Check back for next season</p>`;
       }
 
       seasonInfo.innerHTML = `
