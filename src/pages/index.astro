@@ -98,6 +98,32 @@ const champions = await getChampions();
     </div>
   </section>
 
+  <!-- Upcoming Games -->
+  <section class="py-16 md:py-24">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="section-heading text-center mb-4">Upcoming Games</h2>
+      <p class="section-subheading text-center mb-8">Next on the schedule.</p>
+
+      <div id="upcoming-loading" class="text-center py-8">
+        <div class="inline-block w-8 h-8 border-4 border-sand-300 border-t-ocean-600 rounded-full animate-spin"></div>
+      </div>
+
+      <div id="upcoming-container" class="hidden"></div>
+
+      <div class="text-center mt-6">
+        <a href="/leagues/schedule/" class="inline-flex items-center gap-2 text-ocean-600 hover:text-ocean-700 font-semibold transition-colors">
+          View Full Schedule
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+
+      <!-- Tailwind safelist for dynamically rendered classes -->
+      <span class="hidden space-y-2 text-ocean-500 text-ocean-600 text-ocean-700 font-display font-bold text-sm text-xs truncate sm:grid-cols-2"></span>
+    </div>
+  </section>
+
   <!-- Why Play Here -->
   <section class="py-16 md:py-24">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -238,6 +264,77 @@ const champions = await getChampions();
     next?.addEventListener('click', () => {
       slider?.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     });
+  </script>
+
+  <script>
+    (async () => {
+      const loading = document.getElementById('upcoming-loading');
+      const container = document.getElementById('upcoming-container');
+      if (!loading || !container) return;
+
+      try {
+        const body = new URLSearchParams();
+        body.set('start', '0');
+        body.set('length', '10');
+        body.set('status', 'upcoming');
+
+        const res = await fetch('https://app.mattsvolleyball.com/leagues/getAllEvents/10757', { method: 'POST', body });
+        const json = await res.json();
+        const games = (json.data || []) as Array<Record<string, string | number>>;
+
+        if (games.length === 0) {
+          loading.classList.add('hidden');
+          return;
+        }
+
+        function stripHtml(html: string): string {
+          const tmp = document.createElement('div');
+          tmp.innerHTML = html;
+          const span = tmp.querySelector('.tooltips');
+          if (span) return span.getAttribute('data-original-title') || span.textContent || '';
+          return tmp.textContent || '';
+        }
+
+        // Group by date
+        const grouped = new Map<string, typeof games>();
+        for (const g of games) {
+          const date = g['0'] as string;
+          const arr = grouped.get(date) || [];
+          arr.push(g);
+          grouped.set(date, arr);
+        }
+
+        let html = '';
+        for (const [date, dateGames] of grouped) {
+          html += `
+            <div class="mb-6">
+              <h3 class="font-display font-bold text-sm text-ocean-600 mb-2">${date}</h3>
+              <div class="grid sm:grid-cols-2 gap-2">
+                ${dateGames.map((g) => {
+                  const time = (g['1'] as string).split(' - ')[0];
+                  const home = stripHtml(g['3'] as string);
+                  const away = stripHtml(g['4'] as string);
+                  return `
+                    <div class="flex items-center gap-3 bg-white rounded-xl px-4 py-3 shadow-sm border border-sand-200">
+                      <span class="text-xs font-medium text-ocean-500 w-16 shrink-0">${time}</span>
+                      <span class="text-sm text-ocean-700 font-medium truncate">${home}</span>
+                      <span class="text-xs text-ocean-500 shrink-0">vs</span>
+                      <span class="text-sm text-ocean-700 font-medium truncate">${away}</span>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        }
+
+        loading.classList.add('hidden');
+        container.innerHTML = html;
+        container.classList.remove('hidden');
+      } catch {
+        loading.classList.add('hidden');
+      }
+    })();
   </script>
 
   <!-- Teamlinkt App -->
