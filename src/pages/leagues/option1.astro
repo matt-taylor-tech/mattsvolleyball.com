@@ -1,0 +1,339 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import LeagueCard from '../../components/LeagueCard.astro';
+import FAQAccordion from '../../components/FAQAccordion.astro';
+
+// ---------- Types ----------
+interface RegEntry {
+  AssociationRegistration: {
+    id: number;
+    name: string;
+    group_name: string;
+    open_datetime: string;
+    close_datetime: string;
+  };
+  Season: { id: number; name: string };
+}
+interface SeasonGroup {
+  label: string;
+  children: Record<string, { label: string; children: Record<string, { label: string; children: RegEntry[] }> }>;
+}
+
+// ---------- Fetch at build time ----------
+let seasonLabel = '';
+let regStatus: 'open' | 'coming-soon' | 'closed' = 'closed';
+let entries: RegEntry[] = [];
+let earliestOpen = '';
+let latestClose = '';
+let seasonDates: { start: string; end: string } | null = null;
+let apiFailed = false;
+
+try {
+  const res = await fetch('https://app.teamlinkt.com/register/find/mattsvolleyball', {
+    headers: { 'User-Agent': 'MattsVolleyball/1.0' },
+  });
+  const html = await res.text();
+  const match = html.match(/season_registration_grouped\s*=\s*(\{[\s\S]*?\});\s*\n/);
+
+  if (match) {
+    const data: Record<string, SeasonGroup> = JSON.parse(match[1]);
+    const seasonIds = Object.keys(data).sort((a, b) => Number(b) - Number(a));
+
+    if (seasonIds.length > 0) {
+      const season = data[seasonIds[0]];
+      seasonLabel = season.label;
+
+      for (const eventType of Object.values(season.children)) {
+        for (const container of Object.values(eventType.children)) {
+          entries.push(...container.children);
+        }
+      }
+
+      const now = new Date();
+      const anyOpen = entries.some((e) => {
+        const open = new Date(e.AssociationRegistration.open_datetime.replace(' ', 'T'));
+        const close = new Date(e.AssociationRegistration.close_datetime.replace(' ', 'T'));
+        return now >= open && now <= close;
+      });
+      const allFuture = entries.every((e) => {
+        const open = new Date(e.AssociationRegistration.open_datetime.replace(' ', 'T'));
+        return now < open;
+      });
+
+      regStatus = anyOpen ? 'open' : allFuture ? 'coming-soon' : 'closed';
+
+      earliestOpen = entries.reduce((min, e) => {
+        const d = e.AssociationRegistration.open_datetime;
+        return d < min ? d : min;
+      }, entries[0].AssociationRegistration.open_datetime);
+
+      latestClose = entries.reduce((max, e) => {
+        const d = e.AssociationRegistration.close_datetime;
+        return d > max ? d : max;
+      }, entries[0].AssociationRegistration.close_datetime);
+
+      // Sort by day of week
+      const dayOrder: Record<string, number> = { tuesday: 0, wednesday: 1, thursday: 2 };
+      entries.sort((a, b) => {
+        const da = dayOrder[getDayFromName(a.AssociationRegistration.name)] ?? 99;
+        const db = dayOrder[getDayFromName(b.AssociationRegistration.name)] ?? 99;
+        return da - db;
+      });
+
+      // Fetch season playing dates from a detail page
+      const firstId = entries[0]?.AssociationRegistration.id;
+      if (firstId) {
+        try {
+          const detailRes = await fetch(
+            `https://app.teamlinkt.com/register/go/mattsvolleyball/${firstId}`,
+            { headers: { 'User-Agent': 'MattsVolleyball/1.0' } },
+          );
+          const detailHtml = await detailRes.text();
+          // Find ALL date occurrences and pick the season dates (3rd and 4th dates, after reg open/close pairs)
+          const allDates = [...detailHtml.matchAll(/(\w+\.?\s+\d{1,2},?\s*\d{4})/g)].map((m) => m[1]);
+          // The pattern on the detail page: reg open, reg close, season start, season end
+          if (allDates.length >= 4) {
+            seasonDates = { start: allDates[4] ?? allDates[2], end: allDates[5] ?? allDates[3] };
+          }
+        } catch { /* non-critical */ }
+      }
+    }
+  }
+} catch {
+  apiFailed = true;
+}
+
+// ---------- Helpers ----------
+function getDayFromName(name: string): string {
+  const lower = name.toLowerCase();
+  if (lower.includes('tuesday')) return 'tuesday';
+  if (lower.includes('wednesday')) return 'wednesday';
+  if (lower.includes('thursday')) return 'thursday';
+  return 'other';
+}
+
+function formatDate(dateStr: string): string {
+  const d = new Date(dateStr.replace(' ', 'T'));
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function formatFullDate(dateStr: string): string {
+  const d = new Date(dateStr.replace(' ', 'T'));
+  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
+const dayColors: Record<string, string> = {
+  tuesday: 'bg-coral-500',
+  wednesday: 'bg-ocean-500',
+  thursday: 'bg-sand-500',
+  other: 'bg-ocean-600',
+};
+
+const hasEntries = entries.length > 0;
+const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
+
+// Precompute card data so we avoid > and >= in JSX templates
+const now = new Date();
+const regCards = entries.map((e) => {
+  const reg = e.AssociationRegistration;
+  const day = getDayFromName(reg.name);
+  const colorClass = dayColors[day] || dayColors.other;
+  const open = new Date(reg.open_datetime.replace(' ', 'T'));
+  const close = new Date(reg.close_datetime.replace(' ', 'T'));
+  const isOpen = now >= open && now <= close;
+  const isFuture = now < open;
+  const daysLeft = Math.ceil((close.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  const regUrl = `https://app.teamlinkt.com/register/go/mattsvolleyball/${reg.id}`;
+  return { name: reg.name, colorClass, isOpen, isFuture, daysLeft, regUrl, closeDate: formatDate(reg.close_datetime), openDate: formatDate(reg.open_datetime) };
+});
+
+const faqItems = [
+  { question: 'What equipment do I need?', answer: 'Bring athletic attire suitable for playing in sand. Mikasa volleyballs are provided, but you\'re welcome to bring your own.' },
+  { question: 'Is it beginner-friendly?', answer: 'Absolutely! Matt\'s Volleyball caters to players of all skill levels, including beginners. We have recreational divisions specifically designed for newer players.' },
+  { question: 'How do I form a team?', answer: 'You can create your own team and invite friends, or sign up as an individual and we\'ll place you on a team. Either way, you\'ll have a great time.' },
+  { question: 'Can I join multiple teams?', answer: 'Yes! You can join multiple teams across different league nights. We do our best to avoid scheduling conflicts when possible.' },
+  { question: 'What time are the games?', answer: 'Choose your weekly day. Games start at 6:30, 7:30, 8:30, or 9:30 PM. You\'ll receive your specific game time before the season starts.' },
+  { question: 'Is there an age requirement?', answer: 'Players must be at least 21 years old to participate in our leagues.' },
+  { question: 'How much does it cost?', answer: '$65 per player for Tuesday or Thursday, $55 per player for Wednesday, plus credit card processing fees. That covers the full regular season plus playoffs.' },
+  { question: 'Are spectators allowed?', answer: 'Spectators are welcome and encouraged! Come out, grab some food and drinks, and enjoy the matches.' },
+  { question: 'What happens with bad weather?', answer: 'We have an inclement weather / rainout policy. Check our rules page or your TeamLinkt app for updates on any schedule changes.' },
+];
+---
+
+<Layout title="Leagues | Matt's Volleyball" description="Sand volleyball leagues for all skill levels in Lake Norman. Tuesday & Thursday 4v4 leagues, Wednesday shuffle league. Sign up today!">
+  <!-- OPTION 1: Hero with season info merged in -->
+  <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white py-20 md:py-28">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      {regStatus === 'open' && (
+        <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-4 py-2 rounded-full font-bold text-sm mb-6">
+          <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+          Registration Open
+        </div>
+      )}
+      {regStatus === 'coming-soon' && (
+        <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-4 py-2 rounded-full font-bold text-sm mb-6">
+          Coming Soon
+        </div>
+      )}
+
+      <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">
+        {seasonLabel ? `${seasonLabel} Leagues` : 'Leagues'}
+      </h1>
+
+      {seasonDates && (
+        <p class="text-white/90 text-lg md:text-xl font-semibold mb-2">
+          {seasonDates.start} – {seasonDates.end}
+        </p>
+      )}
+
+      {regStatus === 'open' && (
+        <p class="text-white/70 text-lg mb-8">
+          Registration closes {formatDate(latestClose)}
+        </p>
+      )}
+      {regStatus === 'coming-soon' && (
+        <p class="text-white/70 text-lg mb-8">
+          Registration opens {formatFullDate(earliestOpen)}
+        </p>
+      )}
+      {regStatus === 'closed' && !apiFailed && (
+        <p class="text-white/70 text-lg mb-8">
+          Check back for next season
+        </p>
+      )}
+      {apiFailed && (
+        <p class="text-white/70 text-lg mb-8">
+          Volleyball for grownups who don't take themselves too seriously.
+        </p>
+      )}
+
+      {regStatus === 'open' && (
+        <a
+          href={REG_PAGE}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-primary text-lg"
+        >
+          Register Now
+        </a>
+      )}
+    </div>
+    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full mt-8">
+      <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="#F7F6F3" />
+    </svg>
+  </section>
+
+  <!-- Registration Cards (SSR) -->
+  {hasEntries && (
+    <section class="py-12 md:py-16">
+      <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h3 class="font-display font-extrabold text-2xl text-ocean-600 text-center mb-8">Registration</h3>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {regCards.map((card) => (
+              <div class="card overflow-hidden">
+                <div class={card.colorClass + ' px-4 py-3 text-white'}>
+                  <span class="font-display font-bold text-sm">{card.name}</span>
+                </div>
+                <div class="p-4 flex flex-col gap-3">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs text-ocean-600/70">Closes {card.closeDate}</span>
+                    {card.isOpen && (
+                      <span class="text-sm text-ocean-600 font-medium">{card.daysLeft} day{card.daysLeft !== 1 ? 's' : ''} left</span>
+                    )}
+                    {card.isFuture && (
+                      <span class="text-sm text-ocean-600/70">Opens {card.openDate}</span>
+                    )}
+                    {!card.isOpen && !card.isFuture && (
+                      <span class="text-sm text-ocean-600/70">Closed</span>
+                    )}
+                  </div>
+                  {card.isOpen ? (
+                    <a href={card.regUrl} target="_blank" rel="noopener noreferrer" class="btn-primary text-center w-full text-sm !py-2">Register</a>
+                  ) : card.isFuture ? (
+                    <span class="block text-center w-full text-sm py-2 rounded-lg bg-sand-200 text-ocean-600/70 font-semibold">Coming Soon</span>
+                  ) : (
+                    <span class="block text-center w-full text-sm py-2 rounded-lg bg-sand-200 text-ocean-600/70 font-semibold">Closed</span>
+                  )}
+                </div>
+              </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- League Cards -->
+  <section class="pb-16 md:pb-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-3 gap-8">
+        <LeagueCard
+          day="Tuesday"
+          format="4v4"
+          price="$65"
+          description="Maximum 14 teams. Requires 1 female minimum per team. Welcomes all skill levels, typically intermediate to competitive."
+          highlight="Two divisions: recreational and competitive with separate playoffs."
+          details={[
+            '6 regular season games over 6-7 weeks plus 1 playoff week',
+            '1 game weekly plus 1 bye week',
+            'Form your own team or join as individual',
+            'All skill levels welcome',
+          ]}
+        />
+        <LeagueCard
+          day="Wednesday"
+          format="4v4 Shuffle"
+          price="$55"
+          description="Social focus with volleyball secondary. Individual sign-ups with weekly team redrafts. Meet new people every week!"
+          highlight='Level Up format: winning teams advance and receive handicaps, keeping every match competitive.'
+          details={[
+            'Individual sign-ups. Teams re-drafted each week',
+            '7 regular season games plus 1 playoff week',
+            'Approximately 2-hour sessions',
+            'All skill levels welcome',
+          ]}
+        />
+        <LeagueCard
+          day="Thursday"
+          format="4v4"
+          price="$65"
+          description="Maximum 14 teams. Identical structure to Tuesday league with 1 female minimum requirement."
+          highlight="Two competitive divisions with separate playoffs."
+          details={[
+            '6 regular season games over 6-7 weeks plus 1 playoff week',
+            '1 game weekly plus 1 bye week',
+            'Form your own team or join as individual',
+            'All skill levels welcome',
+          ]}
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="py-16 md:py-24 bg-white">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="section-heading text-center mb-12">Frequently Asked Questions</h2>
+      <FAQAccordion items={faqItems} />
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-16 md:py-20 bg-sand-200">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="font-display font-extrabold text-3xl text-ocean-600 mb-4">
+        Ready to play?
+      </h2>
+      <p class="text-ocean-600/80 text-lg mb-8">
+        Sign up now and join the best sand volleyball community in Lake Norman.
+      </p>
+      <a
+        href={REG_PAGE}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn-primary text-xl"
+      >
+        Register Now
+      </a>
+    </div>
+  </section>
+</Layout>
