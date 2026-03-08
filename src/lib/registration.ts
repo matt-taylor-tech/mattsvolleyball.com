@@ -136,9 +136,12 @@ export async function getRegistrationData(): Promise<RegistrationData> {
           { headers: { 'User-Agent': 'MattsVolleyball/1.0' } },
         );
         const detailHtml = await detailRes.text();
-        const allDates = [...detailHtml.matchAll(/(\w+\.?\s+\d{1,2},?\s*\d{4})/g)].map((m) => m[1]);
-        if (allDates.length >= 4) {
-          seasonDates = { start: allDates[4] ?? allDates[2], end: allDates[5] ?? allDates[3] };
+        // Look specifically for "Season Dates" label followed by date range
+        const seasonDatesMatch = detailHtml.match(
+          /Season\s+Dates<\/label>[\s\S]*?(\w+\s+\d{1,2},?\s*\d{4})\s*to\s*(\w+\s+\d{1,2},?\s*\d{4})/
+        );
+        if (seasonDatesMatch) {
+          seasonDates = { start: seasonDatesMatch[1].trim(), end: seasonDatesMatch[2].trim() };
         }
       } catch { /* non-critical */ }
     }
