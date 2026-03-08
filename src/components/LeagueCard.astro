@@ -20,7 +20,7 @@ const dayColors: Record<string, string> = {
 const gradientClass = dayColors[day] || 'from-ocean-500 to-ocean-600';
 ---
 
-<div class="card flex flex-col">
+<div class="card flex flex-col" data-league-day={day.toLowerCase()}>
   <!-- Header -->
   <div class={`bg-gradient-to-r ${gradientClass} p-6 text-white`}>
     <div class="flex items-start justify-between">
@@ -58,13 +58,16 @@ const gradientClass = dayColors[day] || 'from-ocean-500 to-ocean-600';
       ))}
     </ul>
 
-    <a
-      href={registrationUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      class="btn-primary text-center w-full"
-    >
-      Sign Up for {day} Now
-    </a>
+    <!-- Registration CTA: dynamically updated by script -->
+    <div class="reg-cta">
+      <a
+        href={registrationUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn-primary text-center w-full"
+      >
+        Sign Up for {day} Now
+      </a>
+    </div>
   </div>
 </div>

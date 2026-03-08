@@ -70,16 +70,8 @@ const faqItems = [
     </div>
   </section>
 
-  <!-- Registration Cards (dynamic) -->
-  <section id="reg-section" class="pb-8 hidden">
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h3 class="font-display font-extrabold text-2xl text-ocean-600 text-center mb-8">Registration</h3>
-      <div id="reg-cards" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-    </div>
-  </section>
-
   <!-- Tailwind safelist for dynamic registration classes -->
-  <span class="hidden bg-sand-200 text-ocean-700 bg-ocean-500 bg-ocean-600 bg-coral-500 bg-sand-500 text-white text-white/90 text-ocean-600/70 text-ocean-600 inline-flex items-center gap-2 rounded-lg font-bold font-semibold text-sm text-xs animate-pulse w-2 h-2 rounded-full px-4 py-2 py-3 p-4 mb-6 card overflow-hidden font-display flex-col gap-3 flex justify-between btn-primary text-center w-full !py-2 block underline hover:text-ocean-700 section-heading mb-1"></span>
+  <span class="hidden bg-sand-200 text-ocean-700 bg-ocean-500 bg-ocean-600 text-ocean-600/70 text-ocean-600 inline-flex items-center gap-2 rounded-lg font-bold font-semibold text-sm text-xs animate-pulse w-2 h-2 rounded-full px-4 py-2 mb-6 mb-1 btn-primary text-center w-full block underline hover:text-ocean-700 section-heading mt-1 space-y-3"></span>
 
   <!-- League Cards -->
   <section class="pb-16 md:pb-24">
@@ -189,9 +181,6 @@ const faqItems = [
     };
   }
 
-  // Day ordering for sorting registration cards
-  const dayOrder: Record<string, number> = { tuesday: 0, wednesday: 1, thursday: 2 };
-
   function getDayFromName(name: string): string {
     const lower = name.toLowerCase();
     if (lower.includes('tuesday')) return 'tuesday';
@@ -199,13 +188,6 @@ const faqItems = [
     if (lower.includes('thursday')) return 'thursday';
     return 'other';
   }
-
-  const dayColors: Record<string, string> = {
-    tuesday: 'bg-coral-500',
-    wednesday: 'bg-ocean-500',
-    thursday: 'bg-sand-500',
-    other: 'bg-ocean-600',
-  };
 
   function formatDate(dateStr: string): string {
     const d = new Date(dateStr.replace(' ', 'T'));
@@ -220,8 +202,6 @@ const faqItems = [
   async function loadRegistration() {
     const seasonLoading = document.getElementById('season-loading')!;
     const seasonInfo = document.getElementById('season-info')!;
-    const regSection = document.getElementById('reg-section')!;
-    const regCards = document.getElementById('reg-cards')!;
 
     try {
       const res = await fetch(REG_API);
@@ -247,15 +227,9 @@ const faqItems = [
 
       if (entries.length === 0) throw new Error('No registrations');
 
-      // Sort by day of week
-      entries.sort((a, b) => {
-        const da = dayOrder[getDayFromName(a.AssociationRegistration.name)] ?? 99;
-        const db = dayOrder[getDayFromName(b.AssociationRegistration.name)] ?? 99;
-        return da - db;
-      });
+      const now = new Date();
 
       // Determine overall registration status
-      const now = new Date();
       const anyOpen = entries.some((e) => {
         const open = new Date(e.AssociationRegistration.open_datetime.replace(' ', 'T'));
         const close = new Date(e.AssociationRegistration.close_datetime.replace(' ', 'T'));
@@ -266,7 +240,6 @@ const faqItems = [
         return now < open;
       });
 
-      // Find earliest open and season start from first entry close + a few days
       const earliestOpen = entries.reduce((min, e) => {
         const d = e.AssociationRegistration.open_datetime;
         return d < min ? d : min;
@@ -312,51 +285,61 @@ const faqItems = [
         ${subtitleHtml}
       `;
 
-      // Render registration cards
-      regCards.innerHTML = entries.map((e) => {
-        const reg = e.AssociationRegistration;
-        const day = getDayFromName(reg.name);
-        const colorClass = dayColors[day] || dayColors.other;
-        const open = new Date(reg.open_datetime.replace(' ', 'T'));
-        const close = new Date(reg.close_datetime.replace(' ', 'T'));
-        const isOpen = now >= open && now <= close;
-        const isFuture = now < open;
-        const regUrl = `https://app.teamlinkt.com/register/go/mattsvolleyball/${reg.id}`;
+      // Group entries by day and inject registration status into LeagueCards
+      const byDay = new Map<string, RegEntry[]>();
+      for (const e of entries) {
+        const day = getDayFromName(e.AssociationRegistration.name);
+        const list = byDay.get(day) || [];
+        list.push(e);
+        byDay.set(day, list);
+      }
 
-        let statusHtml = '';
-        let buttonHtml = '';
+      document.querySelectorAll<HTMLElement>('[data-league-day]').forEach((card) => {
+        const day = card.dataset.leagueDay!;
+        const dayEntries = byDay.get(day);
+        const ctaEl = card.querySelector('.reg-cta');
+        if (!dayEntries || !ctaEl) return;
 
-        if (isOpen) {
-          const daysLeft = Math.ceil((close.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-          statusHtml = `<span class="text-sm text-ocean-600 font-medium">${daysLeft} day${daysLeft !== 1 ? 's' : ''} left</span>`;
-          buttonHtml = `<a href="${regUrl}" target="_blank" rel="noopener noreferrer" class="btn-primary text-center w-full text-sm !py-2">Register</a>`;
-        } else if (isFuture) {
-          statusHtml = `<span class="text-sm text-ocean-600/70">Opens ${formatDate(reg.open_datetime)}</span>`;
-          buttonHtml = `<span class="block text-center w-full text-sm py-2 rounded-lg bg-sand-200 text-ocean-600/70 font-semibold">Coming Soon</span>`;
-        } else {
-          statusHtml = `<span class="text-sm text-ocean-600/70">Closed ${formatDate(reg.close_datetime)}</span>`;
-          buttonHtml = `<span class="block text-center w-full text-sm py-2 rounded-lg bg-sand-200 text-ocean-600/70 font-semibold">Closed</span>`;
-        }
+        // Build registration links for this day's divisions
+        const ctaHtml = dayEntries.map((e) => {
+          const reg = e.AssociationRegistration;
+          const open = new Date(reg.open_datetime.replace(' ', 'T'));
+          const close = new Date(reg.close_datetime.replace(' ', 'T'));
+          const isOpen = now >= open && now <= close;
+          const isFuture = now < open;
+          const regUrl = `https://app.teamlinkt.com/register/go/mattsvolleyball/${reg.id}`;
 
-        return `
-          <div class="card overflow-hidden">
-            <div class="${colorClass} px-4 py-3 text-white">
-              <span class="font-display font-bold text-sm">${reg.name}</span>
-            </div>
-            <div class="p-4 flex flex-col gap-3">
-              <div class="flex items-center justify-between">
-                <span class="text-xs text-ocean-600/70">Closes ${formatDate(reg.close_datetime)}</span>
-                ${statusHtml}
-              </div>
-              ${buttonHtml}
-            </div>
-          </div>
-        `;
-      }).join('');
+          // Extract division label (e.g. "Competitive" or "Recreational")
+          const label = reg.name.replace(/^(tuesday|wednesday|thursday)\s+4v4\s*/i, '').trim() || reg.name;
+
+          if (isOpen) {
+            const daysLeft = Math.ceil((close.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+            return `
+              <div>
+                <a href="${regUrl}" target="_blank" rel="noopener noreferrer" class="btn-primary text-center w-full block">
+                  Sign Up – ${label}
+                </a>
+                <p class="text-xs text-ocean-600/70 text-center mt-1">${daysLeft} day${daysLeft !== 1 ? 's' : ''} left · Closes ${formatDate(reg.close_datetime)}</p>
+              </div>`;
+          } else if (isFuture) {
+            return `
+              <div>
+                <span class="block text-center w-full py-2 rounded-lg bg-sand-200 text-ocean-600/70 font-semibold text-sm">${label} – Coming Soon</span>
+                <p class="text-xs text-ocean-600/70 text-center mt-1">Opens ${formatDate(reg.open_datetime)}</p>
+              </div>`;
+          } else {
+            return `
+              <div>
+                <span class="block text-center w-full py-2 rounded-lg bg-sand-200 text-ocean-600/70 font-semibold text-sm">${label} – Closed</span>
+              </div>`;
+          }
+        }).join('');
+
+        ctaEl.innerHTML = `<div class="space-y-3">${ctaHtml}</div>`;
+      });
 
       seasonLoading.classList.add('hidden');
       seasonInfo.classList.remove('hidden');
-      regSection.classList.remove('hidden');
 
     } catch {
       // Fallback: show static info
