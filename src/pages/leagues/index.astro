@@ -2,71 +2,94 @@
 import Layout from '../../layouts/Layout.astro';
 import LeagueCard from '../../components/LeagueCard.astro';
 import FAQAccordion from '../../components/FAQAccordion.astro';
+import { getRegistrationData, formatDate, formatFullDate, getDayFromName } from '../../lib/registration';
+import type { RegCard } from '../../lib/registration';
+
+const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose, regCards } = await getRegistrationData();
+const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
+
+// Group registration entries by day for the league cards
+const regByDay: Record<string, RegCard[]> = {};
+for (const card of regCards) {
+  const day = getDayFromName(card.name);
+  if (!regByDay[day]) regByDay[day] = [];
+  regByDay[day].push(card);
+}
 
 const faqItems = [
-  {
-    question: 'What equipment do I need?',
-    answer: 'Bring athletic attire suitable for playing in sand. Mikasa volleyballs are provided, but you\'re welcome to bring your own.',
-  },
-  {
-    question: 'Is it beginner-friendly?',
-    answer: 'Absolutely! Matt\'s Volleyball caters to players of all skill levels, including beginners. We have recreational divisions specifically designed for newer players.',
-  },
-  {
-    question: 'How do I form a team?',
-    answer: 'You can create your own team and invite friends, or sign up as an individual and we\'ll place you on a team. Either way, you\'ll have a great time.',
-  },
-  {
-    question: 'Can I join multiple teams?',
-    answer: 'Yes! You can join multiple teams across different league nights. We do our best to avoid scheduling conflicts when possible.',
-  },
-  {
-    question: 'What time are the games?',
-    answer: 'Choose your weekly day. Games start at 6:30, 7:30, 8:30, or 9:30 PM. You\'ll receive your specific game time before the season starts.',
-  },
-  {
-    question: 'Is there an age requirement?',
-    answer: 'Players must be at least 21 years old to participate in our leagues.',
-  },
-  {
-    question: 'How much does it cost?',
-    answer: '$65 per player for Tuesday or Thursday, $55 per player for Wednesday, plus credit card processing fees. That covers the full regular season plus playoffs.',
-  },
-  {
-    question: 'Are spectators allowed?',
-    answer: 'Spectators are welcome and encouraged! Come out, grab some food and drinks, and enjoy the matches.',
-  },
-  {
-    question: 'What happens with bad weather?',
-    answer: 'We have an inclement weather / rainout policy. Check our rules page or your TeamLinkt app for updates on any schedule changes.',
-  },
+  { question: 'What equipment do I need?', answer: 'Bring athletic attire suitable for playing in sand. Mikasa volleyballs are provided, but you\'re welcome to bring your own.' },
+  { question: 'Is it beginner-friendly?', answer: 'Absolutely! Matt\'s Volleyball caters to players of all skill levels, including beginners. We have recreational divisions specifically designed for newer players.' },
+  { question: 'How do I form a team?', answer: 'You can create your own team and invite friends, or sign up as an individual and we\'ll place you on a team. Either way, you\'ll have a great time.' },
+  { question: 'Can I join multiple teams?', answer: 'Yes! You can join multiple teams across different league nights. We do our best to avoid scheduling conflicts when possible.' },
+  { question: 'What time are the games?', answer: 'Choose your weekly day. Games start at 6:30, 7:30, 8:30, or 9:30 PM. You\'ll receive your specific game time before the season starts.' },
+  { question: 'Is there an age requirement?', answer: 'Players must be at least 21 years old to participate in our leagues.' },
+  { question: 'How much does it cost?', answer: '$65 per player for Tuesday or Thursday, $55 per player for Wednesday, plus credit card processing fees. That covers the full regular season plus playoffs.' },
+  { question: 'Are spectators allowed?', answer: 'Spectators are welcome and encouraged! Come out, grab some food and drinks, and enjoy the matches.' },
+  { question: 'What happens with bad weather?', answer: 'We have an inclement weather / rainout policy. Check our rules page or your TeamLinkt app for updates on any schedule changes.' },
 ];
 ---
 
 <Layout title="Leagues | Matt's Volleyball" description="Sand volleyball leagues for all skill levels in Lake Norman. Tuesday & Thursday 4v4 leagues, Wednesday shuffle league. Sign up today!">
   <!-- Hero -->
-  <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white py-20 md:py-28">
+  <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white pt-20 md:pt-28">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">Leagues</h1>
-      <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
-        Volleyball for grownups who don't take themselves too seriously.
-      </p>
+      {regStatus === 'open' && (
+        <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-4 py-2 rounded-full font-bold text-sm mb-6">
+          <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+          Registration Open
+        </div>
+      )}
+      {regStatus === 'coming-soon' && (
+        <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-4 py-2 rounded-full font-bold text-sm mb-6">
+          Coming Soon
+        </div>
+      )}
+
+      <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">
+        {seasonLabel ? `${seasonLabel} Leagues` : 'Leagues'}
+      </h1>
+
+      {seasonDates && (
+        <p class="text-white/90 text-lg md:text-xl font-semibold mb-2">
+          {seasonDates.start} – {seasonDates.end}
+        </p>
+      )}
+
+      {regStatus === 'open' && (
+        <p class="text-white/70 text-lg mb-8">
+          Registration closes {formatDate(latestClose)}
+        </p>
+      )}
+      {regStatus === 'coming-soon' && (
+        <p class="text-white/70 text-lg mb-8">
+          Registration opens {formatFullDate(earliestOpen)}
+        </p>
+      )}
+      {regStatus === 'closed' && seasonLabel && (
+        <p class="text-white/70 text-lg mb-8">
+          Check back for next season
+        </p>
+      )}
+      {!seasonLabel && (
+        <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto mb-8">
+          Volleyball for grownups who don't take themselves too seriously.
+        </p>
+      )}
+
+      {regStatus === 'open' && (
+        <a
+          href={REG_PAGE}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-primary text-lg"
+        >
+          Register Now
+        </a>
+      )}
     </div>
-    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full mt-8">
+    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full">
       <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="#F7F6F3" />
     </svg>
-  </section>
-
-  <!-- Season Info -->
-  <section class="py-12 md:py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <div class="inline-flex items-center gap-2 bg-sand-200 text-ocean-700 px-4 py-2 rounded-lg font-bold text-sm mb-6">
-        <span class="w-2 h-2 bg-ocean-500 rounded-full animate-pulse"></span>
-        Registration Open
-      </div>
-      <h2 class="section-heading">Spring 2026</h2>
-      <p class="text-ocean-600/70 text-lg">Starts early March, 2026</p>
-    </div>
   </section>
 
   <!-- League Cards -->
@@ -79,6 +102,7 @@ const faqItems = [
           price="$65"
           description="Maximum 14 teams. Requires 1 female minimum per team. Welcomes all skill levels, typically intermediate to competitive."
           highlight="Two divisions: recreational and competitive with separate playoffs."
+          regEntries={regByDay['tuesday']}
           details={[
             '6 regular season games over 6-7 weeks plus 1 playoff week',
             '1 game weekly plus 1 bye week',
@@ -86,13 +110,14 @@ const faqItems = [
             'All skill levels welcome',
           ]}
         />
-
         <LeagueCard
           day="Wednesday"
           format="4v4 Shuffle"
           price="$55"
           description="Social focus with volleyball secondary. Individual sign-ups with weekly team redrafts. Meet new people every week!"
+          link={{ href: '/leagues/shuffle/', label: 'Learn how shuffle works →' }}
           highlight='Level Up format: winning teams advance and receive handicaps, keeping every match competitive.'
+          regEntries={regByDay['wednesday']}
           details={[
             'Individual sign-ups. Teams re-drafted each week',
             '7 regular season games plus 1 playoff week',
@@ -100,13 +125,13 @@ const faqItems = [
             'All skill levels welcome',
           ]}
         />
-
         <LeagueCard
           day="Thursday"
           format="4v4"
           price="$65"
           description="Maximum 14 teams. Identical structure to Tuesday league with 1 female minimum requirement."
           highlight="Two competitive divisions with separate playoffs."
+          regEntries={regByDay['thursday']}
           details={[
             '6 regular season games over 6-7 weeks plus 1 playoff week',
             '1 game weekly plus 1 bye week',
@@ -136,7 +161,7 @@ const faqItems = [
         Sign up now and join the best sand volleyball community in Lake Norman.
       </p>
       <a
-        href="https://app.teamlinkt.com/register/find/mattsvolleyball"
+        href={REG_PAGE}
         target="_blank"
         rel="noopener noreferrer"
         class="btn-primary text-xl"

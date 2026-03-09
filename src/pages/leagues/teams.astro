@@ -1,5 +1,171 @@
 ---
-import ExternalRedirect from '../../components/ExternalRedirect.astro';
+import Layout from '../../layouts/Layout.astro';
+import { Users } from 'lucide-astro';
 ---
 
-<ExternalRedirect url="https://app.mattsvolleyball.com/mattsvolleyball/Teams" title="Teams | Matt's Volleyball" />
+<Layout title="Teams | Matt's Volleyball" description="View all teams across Matt's Volleyball leagues.">
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white pt-20 md:pt-28">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">Teams</h1>
+      <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
+        All teams across every division.
+      </p>
+    </div>
+    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full">
+      <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="#F7F6F3" />
+    </svg>
+  </section>
+
+  <section class="py-12 md:py-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Division Tabs -->
+      <div class="flex flex-wrap gap-2 mb-8" id="division-tabs">
+        <button data-division="276787" class="tab-btn active">Tue Competitive</button>
+        <button data-division="276786" class="tab-btn">Tue Recreational</button>
+        <button data-division="276790" class="tab-btn">Wed Shuffle</button>
+        <button data-division="276788" class="tab-btn">Thu Competitive</button>
+        <button data-division="276789" class="tab-btn">Thu Recreational</button>
+      </div>
+
+      <!-- Team Search -->
+      <div class="mb-8">
+        <input
+          type="text"
+          id="team-search"
+          placeholder="Search by team name..."
+          class="w-full sm:w-72 px-4 py-2 rounded-full border border-sand-300 text-ocean-700 placeholder:text-sand-500 focus:outline-none focus:border-ocean-500 focus:ring-1 focus:ring-ocean-500 text-sm"
+        />
+      </div>
+
+      <!-- Loading State -->
+      <div id="teams-loading" class="text-center py-12">
+        <div class="inline-block w-8 h-8 border-4 border-sand-300 border-t-ocean-600 rounded-full animate-spin"></div>
+        <p class="text-ocean-600/70 mt-3">Loading teams...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div id="teams-empty" class="text-center py-12 hidden">
+        <Users class="w-12 h-12 text-sand-400 mx-auto mb-3" />
+        <p class="text-ocean-600/70">No teams found.</p>
+      </div>
+
+      <!-- Teams Container -->
+      <div id="teams-container" class="hidden"></div>
+
+      <!-- Tailwind safelist for dynamically rendered classes -->
+      <span class="hidden card p-5 sm:p-6 grid sm:grid-cols-2 lg:grid-cols-3 w-12 h-12 rounded-full object-cover bg-sand-100 text-ocean-500 text-ocean-700 text-ocean-600/70 font-display font-bold text-lg text-sm"></span>
+
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .tab-btn {
+    @apply px-3 py-2 rounded-full text-xs sm:text-sm font-medium transition-colors;
+    @apply bg-white text-ocean-600 border border-sand-300 hover:bg-sand-50;
+  }
+  .tab-btn.active {
+    @apply bg-ocean-600 text-white border-ocean-600;
+  }
+</style>
+
+<script>
+  const API_URL = 'https://app.mattsvolleyball.com/leagues/getTeams/10757/51955';
+  let currentDivision = '276787';
+  let currentTeams: Team[] = [];
+  let searchQuery = '';
+
+  interface Team {
+    id: number;
+    name: string;
+    imageUrl: string;
+    groups: string;
+  }
+
+  async function fetchTeams(divisionId: string): Promise<Team[]> {
+    const body = new URLSearchParams();
+    body.set('group_ids[division]', divisionId);
+    body.set('season_id', '51955');
+
+    const res = await fetch(API_URL, { method: 'POST', body });
+    return await res.json();
+  }
+
+  function render(teams: Team[]) {
+    const container = document.getElementById('teams-container')!;
+    const loading = document.getElementById('teams-loading')!;
+    const empty = document.getElementById('teams-empty')!;
+
+    loading.classList.add('hidden');
+
+    if (teams.length === 0) {
+      container.classList.add('hidden');
+      empty.classList.remove('hidden');
+      return;
+    }
+
+    empty.classList.add('hidden');
+    container.classList.remove('hidden');
+
+    container.innerHTML = `
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        ${teams.map((t) => `
+          <div class="card p-5 sm:p-6 flex items-center gap-4">
+            <img src="${t.imageUrl}" alt="${t.name}" class="w-12 h-12 rounded-full object-cover bg-sand-100" />
+            <div>
+              <h3 class="font-display font-bold text-ocean-700">${t.name}</h3>
+              <p class="text-sm text-ocean-600/70">${t.groups}</p>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function filterAndRender() {
+    const filtered = searchQuery
+      ? currentTeams.filter((t) => t.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      : currentTeams;
+    render(filtered);
+  }
+
+  async function loadTeams() {
+    const loading = document.getElementById('teams-loading')!;
+    const container = document.getElementById('teams-container')!;
+    const empty = document.getElementById('teams-empty')!;
+
+    loading.classList.remove('hidden');
+    container.classList.add('hidden');
+    empty.classList.add('hidden');
+
+    try {
+      currentTeams = await fetchTeams(currentDivision);
+      filterAndRender();
+    } catch {
+      loading.classList.add('hidden');
+      empty.classList.remove('hidden');
+    }
+  }
+
+  // Tab clicks
+  document.querySelectorAll<HTMLButtonElement>('#division-tabs .tab-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#division-tabs .tab-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentDivision = btn.dataset.division || '276787';
+      loadTeams();
+    });
+  });
+
+  // Team search
+  const searchInput = document.getElementById('team-search') as HTMLInputElement;
+  searchInput.addEventListener('input', () => {
+    searchQuery = searchInput.value;
+    filterAndRender();
+  });
+
+  // Initial load
+  loadTeams();
+</script>

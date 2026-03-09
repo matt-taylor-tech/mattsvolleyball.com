@@ -2,9 +2,13 @@
 import Layout from '../layouts/Layout.astro';
 import ChampionCard from '../components/ChampionCard.astro';
 import { getChampions } from '../lib/champions';
+import { getRegistrationData, formatDate, formatFullDate } from '../lib/registration';
 import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart } from 'lucide-astro';
 
 const champions = await getChampions();
+const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose } = await getRegistrationData();
+const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
+const heroHeading = seasonLabel || 'Sand Volleyball';
 ---
 
 <Layout title="Matt's Volleyball | Coed Sand Volleyball in Lake Norman">
@@ -19,24 +23,55 @@ const champions = await getChampions();
         Lake Norman's Premier Sand Volleyball League
       </p>
       <h1 class="font-display font-black text-4xl sm:text-5xl md:text-7xl mb-6 leading-tight">
-        Sign Up for<br />
-        <span class="text-coral-400">SPRING 2026!</span>
+        {regStatus === 'open' && seasonLabel && (
+          <Fragment>Sign Up for<br /><span class="text-coral-400">{seasonLabel.toUpperCase()}!</span></Fragment>
+        )}
+        {regStatus === 'coming-soon' && seasonLabel && (
+          <Fragment><span class="text-coral-400">{seasonLabel.toUpperCase()}</span><br />Is Coming!</Fragment>
+        )}
+        {regStatus === 'closed' && seasonLabel && (
+          <Fragment>Matt's<br /><span class="text-coral-400">Volleyball</span></Fragment>
+        )}
+        {!seasonLabel && (
+          <Fragment>Matt's<br /><span class="text-coral-400">Volleyball</span></Fragment>
+        )}
       </h1>
-      <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto mb-10">
+      <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto mb-4">
         Get ready to dig, dive, and dominate with Matt's Volleyball - home to the hottest coed sand volleyball leagues in the Lake Norman area!
       </p>
+
+      {seasonDates && (
+        <p class="text-white/60 text-sm md:text-base mb-6">
+          {seasonDates.start} – {seasonDates.end}
+          {regStatus === 'open' && (<Fragment> · Registration closes {formatDate(latestClose)}</Fragment>)}
+        </p>
+      )}
+      {!seasonDates && <div class="mb-6" />}
+
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <a
-          href="https://app.teamlinkt.com/register/find/mattsvolleyball"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="btn-primary text-xl py-4 px-10"
-        >
-          Register Here
-        </a>
-        <a href="/leagues/" class="btn-secondary text-xl py-4 px-10">
-          View Leagues
-        </a>
+        {regStatus === 'open' ? (
+          <a
+            href={REG_PAGE}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-primary text-xl py-4 px-10"
+          >
+            Register Now
+          </a>
+        ) : regStatus === 'coming-soon' ? (
+          <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-8 py-4 rounded-lg font-bold text-lg">
+            Registration Opens {formatFullDate(earliestOpen)}
+          </div>
+        ) : (
+          <a href="/leagues/" class="btn-primary text-xl py-4 px-10">
+            View Leagues
+          </a>
+        )}
+        {regStatus === 'open' && (
+          <a href="/leagues/" class="btn-secondary text-xl py-4 px-10">
+            View Leagues
+          </a>
+        )}
       </div>
     </div>
     <!-- Wave bottom -->
@@ -95,6 +130,32 @@ const champions = await getChampions();
           </p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- Upcoming Games -->
+  <section class="py-16 md:py-24">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="section-heading text-center mb-4">Upcoming Games</h2>
+      <p class="section-subheading text-center mb-8">Next on the schedule.</p>
+
+      <div id="upcoming-loading" class="text-center py-8">
+        <div class="inline-block w-8 h-8 border-4 border-sand-300 border-t-ocean-600 rounded-full animate-spin"></div>
+      </div>
+
+      <div id="upcoming-container" class="hidden"></div>
+
+      <div class="text-center mt-6">
+        <a href="/leagues/schedule/" class="inline-flex items-center gap-2 text-ocean-600 hover:text-ocean-700 font-semibold transition-colors">
+          View Full Schedule
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+
+      <!-- Tailwind safelist for dynamically rendered classes -->
+      <span class="hidden space-y-2 text-ocean-500 text-ocean-500/70 text-ocean-600 text-ocean-700 font-display font-bold text-sm text-xs truncate sm:grid-cols-2 ml-[76px]"></span>
     </div>
   </section>
 
@@ -238,6 +299,92 @@ const champions = await getChampions();
     next?.addEventListener('click', () => {
       slider?.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     });
+  </script>
+
+  <script>
+    (async () => {
+      const loading = document.getElementById('upcoming-loading');
+      const container = document.getElementById('upcoming-container');
+      if (!loading || !container) return;
+
+      try {
+        const body = new URLSearchParams();
+        body.set('start', '0');
+        body.set('length', '50');
+        body.set('status', 'upcoming');
+
+        const res = await fetch('https://app.mattsvolleyball.com/leagues/getAllEvents/10757', { method: 'POST', body });
+        const json = await res.json();
+        const allGames = (json.data || []) as Array<Record<string, string | number>>;
+
+        if (allGames.length === 0) {
+          loading.classList.add('hidden');
+          return;
+        }
+
+        // Get the first game's date, then include all games within 7 days
+        const firstTimestamp = allGames[0]['6'] as number;
+        const oneWeek = 7 * 24 * 60 * 60;
+        const games = allGames.filter((g) => (g['6'] as number) - firstTimestamp < oneWeek);
+
+        function stripHtml(html: string): string {
+          const tmp = document.createElement('div');
+          tmp.innerHTML = html;
+          const span = tmp.querySelector('.tooltips');
+          if (span) return span.getAttribute('data-original-title') || span.textContent || '';
+          return tmp.textContent || '';
+        }
+
+        function extractLocationName(html: string): string {
+          const tmp = document.createElement('div');
+          tmp.innerHTML = html;
+          return tmp.textContent || '';
+        }
+
+        // Group by date
+        const grouped = new Map<string, typeof games>();
+        for (const g of games) {
+          const date = g['0'] as string;
+          const arr = grouped.get(date) || [];
+          arr.push(g);
+          grouped.set(date, arr);
+        }
+
+        let html = '';
+        for (const [date, dateGames] of grouped) {
+          html += `
+            <div class="mb-6">
+              <h3 class="font-display font-bold text-sm text-ocean-600 mb-2">${date}</h3>
+              <div class="grid sm:grid-cols-2 gap-2">
+                ${dateGames.map((g) => {
+                  const time = (g['1'] as string).split(' - ')[0];
+                  const home = stripHtml(g['3'] as string);
+                  const away = stripHtml(g['4'] as string);
+                  const court = extractLocationName(g['5'] as string);
+                  return `
+                    <div class="bg-white rounded-xl px-4 py-3 shadow-sm border border-sand-200">
+                      <div class="flex items-center gap-3">
+                        <span class="text-xs font-medium text-ocean-500 w-16 shrink-0">${time}</span>
+                        <span class="text-sm text-ocean-700 font-medium truncate">${home}</span>
+                        <span class="text-xs text-ocean-500 shrink-0">vs</span>
+                        <span class="text-sm text-ocean-700 font-medium truncate">${away}</span>
+                      </div>
+                      <div class="text-xs text-ocean-500/70 mt-1 ml-[76px]">${court}</div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        }
+
+        loading.classList.add('hidden');
+        container.innerHTML = html;
+        container.classList.remove('hidden');
+      } catch {
+        loading.classList.add('hidden');
+      }
+    })();
   </script>
 
   <!-- Teamlinkt App -->

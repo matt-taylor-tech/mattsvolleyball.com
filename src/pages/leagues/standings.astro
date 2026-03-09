@@ -1,5 +1,203 @@
 ---
-import ExternalRedirect from '../../components/ExternalRedirect.astro';
+import Layout from '../../layouts/Layout.astro';
+import { Trophy } from 'lucide-astro';
 ---
 
-<ExternalRedirect url="https://app.mattsvolleyball.com/mattsvolleyball/Standings" title="Standings | Matt's Volleyball" />
+<Layout title="Standings | Matt's Volleyball" description="View current standings for all Matt's Volleyball league divisions.">
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white pt-20 md:pt-28">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">Standings</h1>
+      <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
+        Current league standings by division.
+      </p>
+    </div>
+    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full">
+      <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="#F7F6F3" />
+    </svg>
+  </section>
+
+  <section class="py-12 md:py-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Division Tabs -->
+      <div class="flex flex-wrap gap-2 mb-8" id="division-tabs">
+        <button data-division="276787" class="tab-btn active">Tue Competitive</button>
+        <button data-division="276786" class="tab-btn">Tue Recreational</button>
+        <button data-division="276790" class="tab-btn">Wed Shuffle</button>
+        <button data-division="276788" class="tab-btn">Thu Competitive</button>
+        <button data-division="276789" class="tab-btn">Thu Recreational</button>
+      </div>
+
+      <!-- Loading State -->
+      <div id="standings-loading" class="text-center py-12">
+        <div class="inline-block w-8 h-8 border-4 border-sand-300 border-t-ocean-600 rounded-full animate-spin"></div>
+        <p class="text-ocean-600/70 mt-3">Loading standings...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div id="standings-empty" class="text-center py-12 hidden">
+        <Trophy class="w-12 h-12 text-sand-400 mx-auto mb-3" />
+        <p class="text-ocean-600/70">No standings available yet.</p>
+      </div>
+
+      <!-- Standings Container -->
+      <div id="standings-container" class="hidden"></div>
+
+      <!-- Tailwind safelist for dynamically rendered classes -->
+      <span class="hidden overflow-x-auto bg-white rounded-2xl shadow-md text-left text-ocean-600 font-display font-bold text-sm text-ocean-700 text-ocean-500 text-right px-4 py-3 px-3 py-2 border-b border-sand-200 whitespace-nowrap bg-sand-50 tabular-nums"></span>
+
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .tab-btn {
+    @apply px-3 py-2 rounded-full text-xs sm:text-sm font-medium transition-colors;
+    @apply bg-white text-ocean-600 border border-sand-300 hover:bg-sand-50;
+  }
+  .tab-btn.active {
+    @apply bg-ocean-600 text-white border-ocean-600;
+  }
+</style>
+
+<script>
+  const API_URL = 'https://app.mattsvolleyball.com/leagues/getStandings/10757/51955';
+  let currentDivision = '276787';
+
+  interface StandingEntry {
+    team_name: string;
+    team_id: number;
+    Team: { name: string; imageUrl: string };
+    games_played: number;
+    total_wins: number;
+    total_losses: number;
+    total_ties: number;
+    total_points: number;
+    score_for: number;
+    score_against: number;
+    win_percent: string;
+  }
+
+  interface StandingsResponse {
+    columns: Array<{ AssociationStandingColumn: { abbreviation: string; column_name: string; column_type: string } }>;
+    standings: StandingEntry[];
+  }
+
+  async function fetchStandings(divisionId: string): Promise<StandingsResponse> {
+    const body = new URLSearchParams();
+    body.set('group_ids[division]', divisionId);
+    body.set('season_id', '51955');
+
+    const res = await fetch(API_URL, { method: 'POST', body });
+    return await res.json();
+  }
+
+  function render(data: StandingsResponse) {
+    const container = document.getElementById('standings-container')!;
+    const loading = document.getElementById('standings-loading')!;
+    const empty = document.getElementById('standings-empty')!;
+
+    loading.classList.add('hidden');
+
+    if (!data.standings || data.standings.length === 0) {
+      container.classList.add('hidden');
+      empty.classList.remove('hidden');
+      return;
+    }
+
+    empty.classList.add('hidden');
+    container.classList.remove('hidden');
+
+    const standings = data.standings;
+
+    // Mobile cards + desktop table
+    container.innerHTML = `
+      <!-- Mobile View -->
+      <div class="sm:hidden space-y-3">
+        ${standings.map((s, i) => `
+          <div class="card p-4">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-3">
+                <span class="text-sm font-bold text-ocean-500 w-6">${i + 1}</span>
+                <span class="font-display font-bold text-ocean-700">${s.Team.name}</span>
+              </div>
+              <span class="text-sm font-bold text-ocean-600">${s.total_wins}-${s.total_losses}${s.total_ties > 0 ? `-${s.total_ties}` : ''}</span>
+            </div>
+            <div class="flex gap-4 text-xs text-ocean-500 ml-9">
+              <span>GP: ${s.games_played}</span>
+              <span>PF: ${s.score_for}</span>
+              <span>PA: ${s.score_against}</span>
+              <span>Pts: ${s.total_points}</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Desktop View -->
+      <div class="hidden sm:block overflow-x-auto">
+        <table class="w-full bg-white rounded-2xl shadow-md overflow-hidden">
+          <thead>
+            <tr class="border-b border-sand-200">
+              <th class="text-left px-4 py-3 text-sm font-display font-bold text-ocean-600">#</th>
+              <th class="text-left px-4 py-3 text-sm font-display font-bold text-ocean-600">Team</th>
+              <th class="text-right px-3 py-3 text-sm font-display font-bold text-ocean-600">GP</th>
+              <th class="text-right px-3 py-3 text-sm font-display font-bold text-ocean-600">W</th>
+              <th class="text-right px-3 py-3 text-sm font-display font-bold text-ocean-600">L</th>
+              <th class="text-right px-3 py-3 text-sm font-display font-bold text-ocean-600">T</th>
+              <th class="text-right px-3 py-3 text-sm font-display font-bold text-ocean-600">PF</th>
+              <th class="text-right px-3 py-3 text-sm font-display font-bold text-ocean-600">PA</th>
+              <th class="text-right px-4 py-3 text-sm font-display font-bold text-ocean-600">Pts</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${standings.map((s, i) => `
+              <tr class="border-b border-sand-200 ${i % 2 === 1 ? 'bg-sand-50' : ''}">
+                <td class="px-4 py-2 text-sm font-bold text-ocean-500">${i + 1}</td>
+                <td class="px-4 py-2 text-sm font-bold text-ocean-700 whitespace-nowrap">${s.Team.name}</td>
+                <td class="px-3 py-2 text-sm text-ocean-700 text-right tabular-nums">${s.games_played}</td>
+                <td class="px-3 py-2 text-sm text-ocean-700 text-right tabular-nums">${s.total_wins}</td>
+                <td class="px-3 py-2 text-sm text-ocean-700 text-right tabular-nums">${s.total_losses}</td>
+                <td class="px-3 py-2 text-sm text-ocean-700 text-right tabular-nums">${s.total_ties}</td>
+                <td class="px-3 py-2 text-sm text-ocean-700 text-right tabular-nums">${s.score_for}</td>
+                <td class="px-3 py-2 text-sm text-ocean-700 text-right tabular-nums">${s.score_against}</td>
+                <td class="px-4 py-2 text-sm font-bold text-ocean-700 text-right tabular-nums">${s.total_points}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  async function loadStandings() {
+    const loading = document.getElementById('standings-loading')!;
+    const container = document.getElementById('standings-container')!;
+    const empty = document.getElementById('standings-empty')!;
+
+    loading.classList.remove('hidden');
+    container.classList.add('hidden');
+    empty.classList.add('hidden');
+
+    try {
+      const data = await fetchStandings(currentDivision);
+      render(data);
+    } catch {
+      loading.classList.add('hidden');
+      empty.classList.remove('hidden');
+    }
+  }
+
+  // Tab clicks
+  document.querySelectorAll<HTMLButtonElement>('#division-tabs .tab-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#division-tabs .tab-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentDivision = btn.dataset.division || '276787';
+      loadStandings();
+    });
+  });
+
+  // Initial load
+  loadStandings();
+</script>

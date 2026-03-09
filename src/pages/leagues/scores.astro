@@ -1,5 +1,257 @@
 ---
-import ExternalRedirect from '../../components/ExternalRedirect.astro';
+import Layout from '../../layouts/Layout.astro';
+import { ClipboardList } from 'lucide-astro';
 ---
 
-<ExternalRedirect url="https://app.mattsvolleyball.com/mattsvolleyball/Scores" title="Scores | Matt's Volleyball" />
+<Layout title="Scores | Matt's Volleyball" description="View recent scores and results for all Matt's Volleyball league games.">
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white pt-20 md:pt-28">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">Scores</h1>
+      <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
+        Recent results across all leagues.
+      </p>
+    </div>
+    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full">
+      <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="#F7F6F3" />
+    </svg>
+  </section>
+
+  <section class="py-12 md:py-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Division Tabs -->
+      <div class="flex flex-wrap gap-2 mb-8" id="division-tabs">
+        <button data-division="all" class="tab-btn active">All</button>
+        <button data-division="276787" class="tab-btn">Tue Competitive</button>
+        <button data-division="276786" class="tab-btn">Tue Recreational</button>
+        <button data-division="276790" class="tab-btn">Wed Shuffle</button>
+        <button data-division="276788" class="tab-btn">Thu Competitive</button>
+        <button data-division="276789" class="tab-btn">Thu Recreational</button>
+      </div>
+
+      <!-- Team Search -->
+      <div class="mb-8">
+        <input
+          type="text"
+          id="team-search"
+          placeholder="Search by team name..."
+          class="w-full sm:w-72 px-4 py-2 rounded-full border border-sand-300 text-ocean-700 placeholder:text-sand-500 focus:outline-none focus:border-ocean-500 focus:ring-1 focus:ring-ocean-500 text-sm"
+        />
+      </div>
+
+      <!-- Loading State -->
+      <div id="scores-loading" class="text-center py-12">
+        <div class="inline-block w-8 h-8 border-4 border-sand-300 border-t-ocean-600 rounded-full animate-spin"></div>
+        <p class="text-ocean-600/70 mt-3">Loading scores...</p>
+      </div>
+
+      <!-- Empty State -->
+      <div id="scores-empty" class="text-center py-12 hidden">
+        <ClipboardList class="w-12 h-12 text-sand-400 mx-auto mb-3" />
+        <p class="text-ocean-600/70">No recent scores found.</p>
+      </div>
+
+      <!-- Scores Container -->
+      <div id="scores-container" class="space-y-8 hidden"></div>
+
+      <!-- Tailwind safelist for dynamically rendered classes -->
+      <span class="hidden card p-4 sm:p-5 flex-col sm:flex-row sm:items-center sm:w-32 text-ocean-500 text-ocean-500/70 text-ocean-600 text-ocean-700 text-xs font-display font-bold text-lg min-w-0 truncate text-coral-500 hover:text-coral-600"></span>
+
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .tab-btn {
+    @apply px-3 py-2 rounded-full text-xs sm:text-sm font-medium transition-colors;
+    @apply bg-white text-ocean-600 border border-sand-300 hover:bg-sand-50;
+  }
+  .tab-btn.active {
+    @apply bg-ocean-600 text-white border-ocean-600;
+  }
+</style>
+
+<script>
+  const API_URL = 'https://app.mattsvolleyball.com/leagues/getAllEvents/10757';
+  let currentDivision = 'all';
+  let currentGames: GameEvent[] = [];
+  let searchQuery = '';
+
+  function stripHtml(html: string): string {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    const span = tmp.querySelector('.tooltips');
+    if (span) return span.getAttribute('data-original-title') || span.textContent || '';
+    return tmp.textContent || '';
+  }
+
+  function extractLink(html: string): string {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    const a = tmp.querySelector('a');
+    return a?.href || '';
+  }
+
+  function extractLocation(html: string): { name: string; url: string } {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    const a = tmp.querySelector('a');
+    return {
+      name: a?.textContent || '',
+      url: a?.href || '',
+    };
+  }
+
+  interface GameEvent {
+    date: string;
+    time: string;
+    home: string;
+    away: string;
+    summaryUrl: string;
+    location: { name: string; url: string };
+    timestamp: number;
+  }
+
+  async function fetchScores(divisionId: string): Promise<GameEvent[]> {
+    const body = new URLSearchParams();
+    body.set('start', '0');
+    body.set('length', '100');
+    body.set('status', 'past');
+    body.set('type', 'scores');
+    body.set('show_games_only', '1');
+
+    if (divisionId !== 'all') {
+      body.set(`filters[${divisionId}]`, divisionId);
+    }
+
+    const res = await fetch(API_URL, { method: 'POST', body });
+    const json = await res.json();
+
+    return (json.data || []).map((row: Record<string, string | number>) => ({
+      date: row['0'] as string,
+      time: row['1'] as string,
+      home: stripHtml(row['3'] as string),
+      away: stripHtml(row['4'] as string),
+      summaryUrl: extractLink(row['2'] as string),
+      location: extractLocation(row['5'] as string),
+      timestamp: row['6'] as number,
+    })).reverse();
+  }
+
+  function groupByDate(games: GameEvent[]): Map<string, GameEvent[]> {
+    const map = new Map<string, GameEvent[]>();
+    for (const game of games) {
+      const existing = map.get(game.date) || [];
+      existing.push(game);
+      map.set(game.date, existing);
+    }
+    return map;
+  }
+
+  function render(games: GameEvent[]) {
+    const container = document.getElementById('scores-container')!;
+    const loading = document.getElementById('scores-loading')!;
+    const empty = document.getElementById('scores-empty')!;
+
+    loading.classList.add('hidden');
+
+    if (games.length === 0) {
+      container.classList.add('hidden');
+      empty.classList.remove('hidden');
+      return;
+    }
+
+    empty.classList.add('hidden');
+    container.classList.remove('hidden');
+
+    const grouped = groupByDate(games);
+    let html = '';
+
+    for (const [date, dateGames] of grouped) {
+      html += `
+        <div>
+          <h3 class="font-display font-bold text-lg text-ocean-600 mb-3 flex items-center gap-2">
+            <svg class="w-5 h-5 text-ocean-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
+              <line x1="16" y1="2" x2="16" y2="6" stroke-width="2"/>
+              <line x1="8" y1="2" x2="8" y2="6" stroke-width="2"/>
+              <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
+            </svg>
+            ${date}
+          </h3>
+          <div class="space-y-3">
+            ${dateGames.map((g) => `
+              <div class="card p-4 sm:p-5">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <span class="text-sm font-medium text-ocean-500 sm:w-32 shrink-0">${g.time.replace(' - ', ' – ')}</span>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 text-ocean-700 font-medium">
+                      <span class="truncate">${g.home}</span>
+                      <span class="text-ocean-500 text-xs shrink-0">vs</span>
+                      <span class="truncate">${g.away}</span>
+                    </div>
+                    <div class="flex items-center gap-3 mt-1">
+                      <span class="text-sm text-ocean-500/70">${g.location.name}</span>
+                      ${g.summaryUrl ? `<a href="${g.summaryUrl}" target="_blank" rel="noopener noreferrer" class="text-sm text-coral-500 hover:text-coral-600 font-medium transition-colors">Summary</a>` : ''}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    container.innerHTML = html;
+  }
+
+  function filterAndRender() {
+    const filtered = searchQuery
+      ? currentGames.filter((g) => {
+          const q = searchQuery.toLowerCase();
+          return g.home.toLowerCase().includes(q) || g.away.toLowerCase().includes(q);
+        })
+      : currentGames;
+    render(filtered);
+  }
+
+  async function loadScores() {
+    const loading = document.getElementById('scores-loading')!;
+    const container = document.getElementById('scores-container')!;
+    const empty = document.getElementById('scores-empty')!;
+
+    loading.classList.remove('hidden');
+    container.classList.add('hidden');
+    empty.classList.add('hidden');
+
+    try {
+      currentGames = await fetchScores(currentDivision);
+      filterAndRender();
+    } catch {
+      loading.classList.add('hidden');
+      empty.classList.remove('hidden');
+    }
+  }
+
+  // Tab clicks
+  document.querySelectorAll<HTMLButtonElement>('#division-tabs .tab-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#division-tabs .tab-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentDivision = btn.dataset.division || 'all';
+      loadScores();
+    });
+  });
+
+  // Team search
+  const searchInput = document.getElementById('team-search') as HTMLInputElement;
+  searchInput.addEventListener('input', () => {
+    searchQuery = searchInput.value;
+    filterAndRender();
+  });
+
+  // Initial load
+  loadScores();
+</script>
