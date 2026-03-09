@@ -1,6 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { Shuffle, Layers, BookOpen, Sparkles, Dices, Users, Scale, TrendingUp, Check, ArrowRight } from 'lucide-astro';
+import { Shuffle, Layers, BookOpen, Sparkles, Dices, Users, Scale, TrendingUp, Check, ArrowRight, MapPin } from 'lucide-astro';
 ---
 
 <Layout title="Shuffle League | Matt's Volleyball" description="Learn about the Wednesday shuffle league format at Matt's Volleyball. Teams are re-drafted weekly with the Level Up handicap system.">
@@ -23,19 +23,57 @@ import { Shuffle, Layers, BookOpen, Sparkles, Dices, Users, Scale, TrendingUp, C
   <section class="py-12 md:py-20">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
-      <!-- How It Works -->
+      <!-- The Format -->
       <div class="mb-16">
-        <h2 class="section-heading mb-6"><Shuffle class="w-6 h-6 inline-block mr-2 -mt-1 text-ocean-500" />How It Works</h2>
+        <h2 class="section-heading mb-6"><Shuffle class="w-6 h-6 inline-block mr-2 -mt-1 text-ocean-500" />The Format</h2>
         <div class="text-ocean-700 leading-relaxed space-y-4">
           <p>
-            Teams are re-drafted weekly, allowing players to meet everyone in the league by season's end through constant new pairings. Players can stay as little or as long as they want - we redraft teams as people come and go.
+            Everyone signs up as an individual. Teams are re-drafted every week, so you'll play with and against everyone by the end of the season. All skill levels are welcome.
           </p>
           <p>
-            Players arrive by 6:30 PM for balanced team drafting and play "Level Up." Teams begin at Level 1, advancing one level per win. Starting at Level 2, handicaps apply based on the current level.
+            The format is called "Level Up." Every team starts at Level 1. Win a game and your team levels up, picking up a handicap. The better you do, the harder it gets. It keeps every match competitive no matter who's on the court.
           </p>
           <p>
-            At the end of the season, the top teams advance to a single-elimination championship bracket with handicaps removed.
+            Each season runs 7 regular season games over 7 weeks, plus 1 week of playoffs. The top teams advance to a single-elimination championship bracket with handicaps removed.
           </p>
+          <p>
+            Play runs for about 2 hours each night. Come late or leave early, no problem -- we redraft teams as people come and go.
+          </p>
+        </div>
+      </div>
+
+      <!-- What to Expect -->
+      <div class="mb-16">
+        <h2 class="section-heading mb-6"><MapPin class="w-6 h-6 inline-block mr-2 -mt-1 text-ocean-500" />What to Expect When You Show Up</h2>
+        <div class="space-y-4">
+          <div class="card p-6 flex gap-4 items-start">
+            <span class="w-10 h-10 bg-ocean-100 rounded-full flex items-center justify-center text-ocean-600 font-display font-bold shrink-0">1</span>
+            <div>
+              <h3 class="font-display font-bold text-lg text-ocean-600 mb-1">Check in by 6:30 PM</h3>
+              <p class="text-ocean-700 text-sm leading-relaxed">Show up and get marked present in the system. This is how we know who's playing and can build balanced teams.</p>
+            </div>
+          </div>
+          <div class="card p-6 flex gap-4 items-start">
+            <span class="w-10 h-10 bg-ocean-100 rounded-full flex items-center justify-center text-ocean-600 font-display font-bold shrink-0">2</span>
+            <div>
+              <h3 class="font-display font-bold text-lg text-ocean-600 mb-1">Teams and schedules are generated around 6:40</h3>
+              <p class="text-ocean-700 text-sm leading-relaxed">Balanced teams are built fresh each week based on who showed up. You'll get your team assignment and a full schedule of pool play games -- usually around 4, sometimes more depending on turnout.</p>
+            </div>
+          </div>
+          <div class="card p-6 flex gap-4 items-start">
+            <span class="w-10 h-10 bg-ocean-100 rounded-full flex items-center justify-center text-ocean-600 font-display font-bold shrink-0">3</span>
+            <div>
+              <h3 class="font-display font-bold text-lg text-ocean-600 mb-1">Play your games</h3>
+              <p class="text-ocean-700 text-sm leading-relaxed">Your team starts at Level 1. Win and you level up, gaining a handicap for your next game. Lose and you stay at your current level. Games are played to 25, rally scoring.</p>
+            </div>
+          </div>
+          <div class="card p-6 flex gap-4 items-start">
+            <span class="w-10 h-10 bg-ocean-100 rounded-full flex items-center justify-center text-ocean-600 font-display font-bold shrink-0">4</span>
+            <div>
+              <h3 class="font-display font-bold text-lg text-ocean-600 mb-1">Hang out</h3>
+              <p class="text-ocean-700 text-sm leading-relaxed">Grab a drink, meet new people, stick around after games. It's a social league -- the volleyball is just the excuse to get together.</p>
+            </div>
+          </div>
         </div>
       </div>
 
