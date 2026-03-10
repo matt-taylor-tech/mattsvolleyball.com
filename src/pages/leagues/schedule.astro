@@ -20,6 +20,14 @@ import { CalendarDays } from 'lucide-astro';
   <section class="py-12 md:py-20">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
+      <!-- Day Filter -->
+      <div class="flex flex-wrap gap-2 mb-4" id="day-tabs">
+        <button data-day="all" class="tab-btn active">All Days</button>
+        <button data-day="Tuesday" class="tab-btn">Tuesday</button>
+        <button data-day="Wednesday" class="tab-btn">Wednesday</button>
+        <button data-day="Thursday" class="tab-btn">Thursday</button>
+      </div>
+
       <!-- Division Tabs -->
       <div class="flex flex-wrap gap-2 mb-8" id="division-tabs">
         <button data-division="all" class="tab-btn active">All</button>
@@ -75,6 +83,7 @@ import { CalendarDays } from 'lucide-astro';
 <script>
   const API_URL = 'https://app.mattsvolleyball.com/leagues/getAllEvents/10757';
   let currentDivision = 'all';
+  let currentDay = 'all';
   let currentGames: GameEvent[] = [];
   let searchQuery = '';
 
@@ -198,12 +207,19 @@ import { CalendarDays } from 'lucide-astro';
   }
 
   function filterAndRender() {
-    const filtered = searchQuery
-      ? currentGames.filter((g) => {
-          const q = searchQuery.toLowerCase();
-          return g.home.toLowerCase().includes(q) || g.away.toLowerCase().includes(q);
-        })
-      : currentGames;
+    let filtered = currentGames;
+
+    if (currentDay !== 'all') {
+      filtered = filtered.filter((g) => g.date.startsWith(currentDay));
+    }
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter((g) =>
+        g.home.toLowerCase().includes(q) || g.away.toLowerCase().includes(q)
+      );
+    }
+
     render(filtered);
   }
 
@@ -225,7 +241,17 @@ import { CalendarDays } from 'lucide-astro';
     }
   }
 
-  // Tab clicks
+  // Day filter clicks
+  document.querySelectorAll<HTMLButtonElement>('#day-tabs .tab-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#day-tabs .tab-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentDay = btn.dataset.day || 'all';
+      filterAndRender();
+    });
+  });
+
+  // Division tab clicks
   document.querySelectorAll<HTMLButtonElement>('#division-tabs .tab-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('#division-tabs .tab-btn').forEach((b) => b.classList.remove('active'));

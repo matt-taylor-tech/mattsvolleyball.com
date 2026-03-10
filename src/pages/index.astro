@@ -95,8 +95,34 @@ const heroHeading = seasonLabel || 'Sand Volleyball';
     </div>
   </section>
 
-  <!-- Schedule -->
+  <!-- Upcoming Games -->
   <section class="py-16 md:py-24 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="section-heading text-center mb-4">Upcoming Games</h2>
+      <p class="section-subheading text-center mb-8">Next on the schedule.</p>
+
+      <div id="upcoming-loading" class="text-center py-8">
+        <div class="inline-block w-8 h-8 border-4 border-sand-300 border-t-ocean-600 rounded-full animate-spin"></div>
+      </div>
+
+      <div id="upcoming-container" class="hidden"></div>
+
+      <div class="text-center mt-6">
+        <a href="/leagues/schedule/" class="inline-flex items-center gap-2 text-ocean-600 hover:text-ocean-700 font-semibold transition-colors">
+          View Full Schedule
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+
+      <!-- Tailwind safelist for dynamically rendered classes -->
+      <span class="hidden space-y-2 text-ocean-500 text-ocean-500/70 text-ocean-600 text-ocean-700 font-display font-bold text-sm text-xs truncate sm:grid-cols-2 ml-[76px]"></span>
+    </div>
+  </section>
+
+  <!-- Schedule -->
+  <section class="py-16 md:py-24">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <h2 class="section-heading text-center mb-12">Weekly Schedule</h2>
       <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -130,32 +156,6 @@ const heroHeading = seasonLabel || 'Sand Volleyball';
           </p>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- Upcoming Games -->
-  <section class="py-16 md:py-24">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="section-heading text-center mb-4">Upcoming Games</h2>
-      <p class="section-subheading text-center mb-8">Next on the schedule.</p>
-
-      <div id="upcoming-loading" class="text-center py-8">
-        <div class="inline-block w-8 h-8 border-4 border-sand-300 border-t-ocean-600 rounded-full animate-spin"></div>
-      </div>
-
-      <div id="upcoming-container" class="hidden"></div>
-
-      <div class="text-center mt-6">
-        <a href="/leagues/schedule/" class="inline-flex items-center gap-2 text-ocean-600 hover:text-ocean-700 font-semibold transition-colors">
-          View Full Schedule
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </a>
-      </div>
-
-      <!-- Tailwind safelist for dynamically rendered classes -->
-      <span class="hidden space-y-2 text-ocean-500 text-ocean-500/70 text-ocean-600 text-ocean-700 font-display font-bold text-sm text-xs truncate sm:grid-cols-2 ml-[76px]"></span>
     </div>
   </section>
 

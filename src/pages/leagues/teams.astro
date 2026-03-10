@@ -112,13 +112,13 @@ import { Users } from 'lucide-astro';
     container.innerHTML = `
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         ${teams.map((t) => `
-          <div class="card p-5 sm:p-6 flex items-center gap-4">
+          <a href="/leagues/team/?id=${t.id}&name=${encodeURIComponent(t.name)}" class="card p-5 sm:p-6 flex items-center gap-4 hover:shadow-md transition-shadow">
             <img src="${t.imageUrl}" alt="${t.name}" class="w-12 h-12 rounded-full object-cover bg-sand-100" />
             <div>
               <h3 class="font-display font-bold text-ocean-700">${t.name}</h3>
               <p class="text-sm text-ocean-600/70">${t.groups}</p>
             </div>
-          </div>
+          </a>
         `).join('')}
       </div>
     `;
