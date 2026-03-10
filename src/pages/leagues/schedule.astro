@@ -23,9 +23,9 @@ import { CalendarDays } from 'lucide-astro';
       <!-- Day Filter -->
       <div class="flex flex-wrap gap-2 mb-4" id="day-tabs">
         <button data-day="all" class="tab-btn active">All Days</button>
-        <button data-day="Tuesday" class="tab-btn">Tuesday</button>
-        <button data-day="Wednesday" class="tab-btn">Wednesday</button>
-        <button data-day="Thursday" class="tab-btn">Thursday</button>
+        <button data-day="Tue" class="tab-btn">Tuesday</button>
+        <button data-day="Wed" class="tab-btn">Wednesday</button>
+        <button data-day="Thu" class="tab-btn">Thursday</button>
       </div>
 
       <!-- Division Tabs -->
@@ -85,9 +85,9 @@ import { CalendarDays } from 'lucide-astro';
   const TEAMS_API_URL = 'https://app.mattsvolleyball.com/leagues/getTeams/10757/51955';
 
   const DIVISIONS_BY_DAY: Record<string, string[]> = {
-    Tuesday: ['276787', '276786'],
-    Wednesday: ['276790'],
-    Thursday: ['276788', '276789'],
+    Tue: ['276787', '276786'],
+    Wed: ['276790'],
+    Thu: ['276788', '276789'],
   };
 
   let currentDivision = 'all';
@@ -144,7 +144,7 @@ import { CalendarDays } from 'lucide-astro';
 
   function getByeTeams(date: string, games: GameEvent[]): string[] {
     // Determine which day of the week this date falls on
-    const day = date.split(',')[0]; // e.g. "Tuesday"
+    const day = date.split(' ')[0]; // e.g. "Tue"
     const divisionIds = DIVISIONS_BY_DAY[day];
     if (!divisionIds) return [];
 
