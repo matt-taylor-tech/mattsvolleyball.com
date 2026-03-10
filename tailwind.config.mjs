@@ -27,6 +27,17 @@ export default {
           700: '#87301F',
         },
       },
+      borderRadius: {
+        none: '0',
+        sm: '1px',
+        DEFAULT: '2px',
+        md: '3px',
+        lg: '4px',
+        xl: '5px',
+        '2xl': '6px',
+        '3xl': '8px',
+        full: '9999px',
+      },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
         display: ['Montserrat', 'system-ui', 'sans-serif'],
