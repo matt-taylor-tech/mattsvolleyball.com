@@ -83,6 +83,7 @@ import { CalendarDays } from 'lucide-astro';
 <script>
   const API_URL = 'https://app.mattsvolleyball.com/leagues/getAllEvents/10757';
   const TEAMS_API_URL = 'https://app.mattsvolleyball.com/leagues/getTeams/10757/51955';
+  const DIVISION_IDS = ['276787', '276786', '276790', '276788', '276789'];
 
   const DIVISIONS_BY_DAY: Record<string, string[]> = {
     Tue: ['276787', '276786'],
@@ -100,7 +101,7 @@ import { CalendarDays } from 'lucide-astro';
 
   let currentDivision = 'all';
   let currentDay = 'all';
-  let currentGames: GameEvent[] = [];
+  let allGames: GameEvent[] = [];
   let searchQuery = '';
   // Map of division ID → team names
   const teamsByDivision = new Map<string, string[]>();
@@ -108,7 +109,6 @@ import { CalendarDays } from 'lucide-astro';
   function stripHtml(html: string): string {
     const tmp = document.createElement('div');
     tmp.innerHTML = html;
-    // Get text from the first span or anchor with meaningful text
     const span = tmp.querySelector('.tooltips');
     if (span) return span.getAttribute('data-original-title') || span.textContent || '';
     return tmp.textContent || '';
@@ -131,12 +131,12 @@ import { CalendarDays } from 'lucide-astro';
     away: string;
     location: { name: string; url: string };
     timestamp: number;
+    divisionId: string;
   }
 
   async function fetchAllTeams(): Promise<void> {
-    const divisionIds = ['276787', '276786', '276790', '276788', '276789'];
     const results = await Promise.all(
-      divisionIds.map(async (id) => {
+      DIVISION_IDS.map(async (id) => {
         const body = new URLSearchParams();
         body.set('group_ids[division]', id);
         body.set('season_id', '51955');
@@ -151,43 +151,35 @@ import { CalendarDays } from 'lucide-astro';
   }
 
   function getByeTeams(date: string, games: GameEvent[]): string[] {
-    // Determine which day of the week this date falls on
-    const day = date.split(' ')[0]; // e.g. "Tue"
+    const day = date.split(' ')[0];
     const divisionIds = DIVISIONS_BY_DAY[day];
     if (!divisionIds) return [];
 
-    // If filtering by a specific division, only check that division
     const divisionsToCheck = currentDivision !== 'all'
       ? divisionIds.filter((id) => id === currentDivision)
       : divisionIds;
 
-    // Collect all teams for the relevant divisions
     const allTeams = new Set<string>();
     for (const id of divisionsToCheck) {
       const teams = teamsByDivision.get(id);
       if (teams) teams.forEach((t) => allTeams.add(t));
     }
 
-    // Find teams that are playing
     const playingTeams = new Set<string>();
     for (const g of games) {
       playingTeams.add(g.home);
       playingTeams.add(g.away);
     }
 
-    // Bye teams = all teams minus playing teams
     return [...allTeams].filter((t) => !playingTeams.has(t)).sort();
   }
 
-  async function fetchSchedule(divisionId: string): Promise<GameEvent[]> {
+  async function fetchDivision(divisionId: string): Promise<GameEvent[]> {
     const body = new URLSearchParams();
     body.set('start', '0');
     body.set('length', '100');
     body.set('status', 'upcoming');
-
-    if (divisionId !== 'all') {
-      body.set(`filters[${divisionId}]`, divisionId);
-    }
+    body.set(`filters[${divisionId}]`, divisionId);
 
     const res = await fetch(API_URL, { method: 'POST', body });
     const json = await res.json();
@@ -199,7 +191,13 @@ import { CalendarDays } from 'lucide-astro';
       away: stripHtml(row['4'] as string),
       location: extractLocation(row['5'] as string),
       timestamp: row['6'] as number,
+      divisionId,
     }));
+  }
+
+  async function fetchAllSchedule(): Promise<GameEvent[]> {
+    const results = await Promise.all(DIVISION_IDS.map(fetchDivision));
+    return results.flat().sort((a, b) => a.timestamp - b.timestamp);
   }
 
   function groupByDate(games: GameEvent[]): Map<string, GameEvent[]> {
@@ -285,15 +283,17 @@ import { CalendarDays } from 'lucide-astro';
   }
 
   function filterAndRender() {
-    let filtered = currentGames;
+    let filtered = allGames;
 
     if (currentDay !== 'all') {
-      filtered = filtered.filter((g) => g.date.startsWith(currentDay));
+      filtered = filtered.filter((g: GameEvent) => g.date.startsWith(currentDay));
     }
-
+    if (currentDivision !== 'all') {
+      filtered = filtered.filter((g: GameEvent) => g.divisionId === currentDivision);
+    }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      filtered = filtered.filter((g) =>
+      filtered = filtered.filter((g: GameEvent) =>
         g.home.toLowerCase().includes(q) || g.away.toLowerCase().includes(q)
       );
     }
@@ -311,7 +311,7 @@ import { CalendarDays } from 'lucide-astro';
     empty.classList.add('hidden');
 
     try {
-      currentGames = await fetchSchedule(currentDivision);
+      allGames = await fetchAllSchedule();
       filterAndRender();
     } catch {
       loading.classList.add('hidden');
@@ -345,31 +345,28 @@ import { CalendarDays } from 'lucide-astro';
     });
   }
 
-  // Day filter clicks
+  // Day filter clicks — instant, no API call
   document.querySelectorAll<HTMLButtonElement>('#day-tabs .tab-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       setActiveDay(btn.dataset.day || 'all');
-      // Reset division to "All" when switching days
       setActiveDivision('all');
       updateDivisionVisibility();
-      loadSchedule();
+      filterAndRender();
     });
   });
 
-  // Division tab clicks
+  // Division tab clicks — instant, no API call
   document.querySelectorAll<HTMLButtonElement>('#division-tabs .tab-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const div = btn.dataset.division || 'all';
       setActiveDivision(div);
-      // Auto-set day filter to match the division's day
       if (div === 'all') {
         setActiveDay('all');
-        updateDivisionVisibility();
       } else {
         setActiveDay(DAY_FOR_DIVISION[div]);
-        updateDivisionVisibility();
       }
-      loadSchedule();
+      updateDivisionVisibility();
+      filterAndRender();
     });
   });
 
@@ -380,7 +377,7 @@ import { CalendarDays } from 'lucide-astro';
     filterAndRender();
   });
 
-  // Initial load — fetch teams in parallel with schedule, re-render once both are done
+  // Fetch teams + schedule in parallel on init, then all filtering is local
   const teamsReady = fetchAllTeams();
   loadSchedule();
   teamsReady.then(() => filterAndRender());

@@ -74,8 +74,9 @@ import { ClipboardList } from 'lucide-astro';
 
 <script>
   const API_URL = 'https://app.mattsvolleyball.com/leagues/getAllEvents/10757';
+  const DIVISION_IDS = ['276787', '276786', '276790', '276788', '276789'];
   let currentDivision = 'all';
-  let currentGames: GameEvent[] = [];
+  let allGames: GameEvent[] = [];
   let searchQuery = '';
 
   function stripHtml(html: string): string {
@@ -111,19 +112,17 @@ import { ClipboardList } from 'lucide-astro';
     summaryUrl: string;
     location: { name: string; url: string };
     timestamp: number;
+    divisionId: string;
   }
 
-  async function fetchScores(divisionId: string): Promise<GameEvent[]> {
+  async function fetchDivision(divisionId: string): Promise<GameEvent[]> {
     const body = new URLSearchParams();
     body.set('start', '0');
     body.set('length', '100');
     body.set('status', 'past');
     body.set('type', 'scores');
     body.set('show_games_only', '1');
-
-    if (divisionId !== 'all') {
-      body.set(`filters[${divisionId}]`, divisionId);
-    }
+    body.set(`filters[${divisionId}]`, divisionId);
 
     const res = await fetch(API_URL, { method: 'POST', body });
     const json = await res.json();
@@ -136,7 +135,13 @@ import { ClipboardList } from 'lucide-astro';
       summaryUrl: extractLink(row['2'] as string),
       location: extractLocation(row['5'] as string),
       timestamp: row['6'] as number,
-    })).reverse();
+      divisionId,
+    }));
+  }
+
+  async function fetchAllScores(): Promise<GameEvent[]> {
+    const results = await Promise.all(DIVISION_IDS.map(fetchDivision));
+    return results.flat().sort((a, b) => b.timestamp - a.timestamp);
   }
 
   function groupByDate(games: GameEvent[]): Map<string, GameEvent[]> {
@@ -208,12 +213,16 @@ import { ClipboardList } from 'lucide-astro';
   }
 
   function filterAndRender() {
-    const filtered = searchQuery
-      ? currentGames.filter((g) => {
-          const q = searchQuery.toLowerCase();
-          return g.home.toLowerCase().includes(q) || g.away.toLowerCase().includes(q);
-        })
-      : currentGames;
+    let filtered = allGames;
+    if (currentDivision !== 'all') {
+      filtered = filtered.filter((g) => g.divisionId === currentDivision);
+    }
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      filtered = filtered.filter((g) =>
+        g.home.toLowerCase().includes(q) || g.away.toLowerCase().includes(q)
+      );
+    }
     render(filtered);
   }
 
@@ -227,7 +236,7 @@ import { ClipboardList } from 'lucide-astro';
     empty.classList.add('hidden');
 
     try {
-      currentGames = await fetchScores(currentDivision);
+      allGames = await fetchAllScores();
       filterAndRender();
     } catch {
       loading.classList.add('hidden');
@@ -235,13 +244,13 @@ import { ClipboardList } from 'lucide-astro';
     }
   }
 
-  // Tab clicks
+  // Tab clicks — now instant, no API call
   document.querySelectorAll<HTMLButtonElement>('#division-tabs .tab-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('#division-tabs .tab-btn').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       currentDivision = btn.dataset.division || 'all';
-      loadScores();
+      filterAndRender();
     });
   });
 
@@ -252,6 +261,6 @@ import { ClipboardList } from 'lucide-astro';
     filterAndRender();
   });
 
-  // Initial load
+  // Single load on page init — all filtering is local after this
   loadScores();
 </script>
