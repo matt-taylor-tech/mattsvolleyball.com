@@ -84,7 +84,7 @@ import { ArrowLeft, CalendarDays, ClipboardList } from 'lucide-astro';
 
   // Look up team info (image, division) from teams API
   async function loadTeamInfo() {
-    if (!teamId) return;
+    if (!teamId && !teamName) return;
 
     for (const divId of DIVISION_IDS) {
       try {
@@ -94,7 +94,9 @@ import { ArrowLeft, CalendarDays, ClipboardList } from 'lucide-astro';
 
         const res = await fetch(TEAMS_API, { method: 'POST', body });
         const teams: { id: number; name: string; imageUrl: string; groups: string }[] = await res.json();
-        const team = teams.find((t) => t.id === Number(teamId));
+        const team = teamId
+          ? teams.find((t) => t.id === Number(teamId))
+          : teams.find((t) => t.name === teamName);
 
         if (team) {
           const logo = document.getElementById('team-logo') as HTMLImageElement;

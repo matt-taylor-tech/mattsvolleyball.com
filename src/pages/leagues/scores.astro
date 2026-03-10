@@ -56,7 +56,7 @@ import { ClipboardList } from 'lucide-astro';
       <div id="scores-container" class="space-y-8 hidden"></div>
 
       <!-- Tailwind safelist for dynamically rendered classes -->
-      <span class="hidden card p-4 sm:p-5 flex-col sm:flex-row sm:items-center sm:w-32 text-ocean-500 text-ocean-500/70 text-ocean-600 text-ocean-700 text-xs font-display font-bold text-lg min-w-0 truncate text-coral-500 hover:text-coral-600"></span>
+      <span class="hidden card p-4 sm:p-5 flex-col sm:flex-row sm:items-center sm:w-32 text-ocean-500 text-ocean-500/70 text-ocean-600 text-ocean-700 text-xs font-display font-bold text-lg min-w-0 truncate text-coral-500 hover:text-coral-600 hover:text-ocean-500"></span>
 
     </div>
   </section>
@@ -187,9 +187,9 @@ import { ClipboardList } from 'lucide-astro';
                   <span class="text-sm font-medium text-ocean-500 sm:w-32 shrink-0">${g.time.replace(' - ', ' – ')}</span>
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 text-ocean-700 font-medium">
-                      <span class="truncate">${g.home}</span>
+                      <a href="/leagues/team/?name=${encodeURIComponent(g.home)}" class="truncate hover:text-ocean-500 transition-colors">${g.home}</a>
                       <span class="text-ocean-500 text-xs shrink-0">vs</span>
-                      <span class="truncate">${g.away}</span>
+                      <a href="/leagues/team/?name=${encodeURIComponent(g.away)}" class="truncate hover:text-ocean-500 transition-colors">${g.away}</a>
                     </div>
                     <div class="flex items-center gap-3 mt-1">
                       <span class="text-sm text-ocean-500/70">${g.location.name}</span>

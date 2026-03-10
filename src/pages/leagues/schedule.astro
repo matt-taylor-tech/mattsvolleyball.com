@@ -64,7 +64,7 @@ import { CalendarDays } from 'lucide-astro';
       <div id="schedule-container" class="space-y-8 hidden"></div>
 
       <!-- Tailwind safelist for dynamically rendered classes -->
-      <span class="hidden card p-4 sm:p-5 flex-col sm:flex-row sm:items-center sm:w-32 text-ocean-500 text-ocean-500/70 text-ocean-600 text-ocean-700 text-xs font-display font-bold text-lg min-w-0 truncate bg-sand-50 text-sand-500 italic gap-1"></span>
+      <span class="hidden card p-4 sm:p-5 flex-col sm:flex-row sm:items-center sm:w-32 text-ocean-500 text-ocean-500/70 text-ocean-600 text-ocean-700 text-xs font-display font-bold text-lg min-w-0 truncate bg-sand-50 text-sand-500 italic gap-1 hover:text-ocean-500"></span>
 
     </div>
   </section>
@@ -88,6 +88,14 @@ import { CalendarDays } from 'lucide-astro';
     Tue: ['276787', '276786'],
     Wed: ['276790'],
     Thu: ['276788', '276789'],
+  };
+
+  const DAY_FOR_DIVISION: Record<string, string> = {
+    '276787': 'Tue',
+    '276786': 'Tue',
+    '276790': 'Wed',
+    '276788': 'Thu',
+    '276789': 'Thu',
   };
 
   let currentDivision = 'all';
@@ -242,9 +250,9 @@ import { CalendarDays } from 'lucide-astro';
                   <span class="text-sm font-medium text-ocean-500 sm:w-32 shrink-0">${g.time.replace(' - ', ' – ')}</span>
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 text-ocean-700 font-medium">
-                      <span class="truncate">${g.home}</span>
+                      <a href="/leagues/team/?name=${encodeURIComponent(g.home)}" class="truncate hover:text-ocean-500 transition-colors">${g.home}</a>
                       <span class="text-ocean-500 text-xs shrink-0">vs</span>
-                      <span class="truncate">${g.away}</span>
+                      <a href="/leagues/team/?name=${encodeURIComponent(g.away)}" class="truncate hover:text-ocean-500 transition-colors">${g.away}</a>
                     </div>
                     <a href="${g.location.url}" target="_blank" rel="noopener noreferrer"
                        class="text-sm text-ocean-500/70 hover:text-ocean-600 transition-colors mt-1 inline-block">
@@ -311,22 +319,56 @@ import { CalendarDays } from 'lucide-astro';
     }
   }
 
+  function updateDivisionVisibility() {
+    document.querySelectorAll<HTMLButtonElement>('#division-tabs .tab-btn').forEach((btn) => {
+      const div = btn.dataset.division || 'all';
+      if (currentDay === 'all' || div === 'all') {
+        btn.classList.remove('hidden');
+      } else {
+        const dayDivisions = DIVISIONS_BY_DAY[currentDay] || [];
+        btn.classList.toggle('hidden', !dayDivisions.includes(div));
+      }
+    });
+  }
+
+  function setActiveDay(day: string) {
+    currentDay = day;
+    document.querySelectorAll<HTMLButtonElement>('#day-tabs .tab-btn').forEach((b) => {
+      b.classList.toggle('active', b.dataset.day === day);
+    });
+  }
+
+  function setActiveDivision(division: string) {
+    currentDivision = division;
+    document.querySelectorAll<HTMLButtonElement>('#division-tabs .tab-btn').forEach((b) => {
+      b.classList.toggle('active', b.dataset.division === division);
+    });
+  }
+
   // Day filter clicks
   document.querySelectorAll<HTMLButtonElement>('#day-tabs .tab-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('#day-tabs .tab-btn').forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentDay = btn.dataset.day || 'all';
-      filterAndRender();
+      setActiveDay(btn.dataset.day || 'all');
+      // Reset division to "All" when switching days
+      setActiveDivision('all');
+      updateDivisionVisibility();
+      loadSchedule();
     });
   });
 
   // Division tab clicks
   document.querySelectorAll<HTMLButtonElement>('#division-tabs .tab-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('#division-tabs .tab-btn').forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentDivision = btn.dataset.division || 'all';
+      const div = btn.dataset.division || 'all';
+      setActiveDivision(div);
+      // Auto-set day filter to match the division's day
+      if (div === 'all') {
+        setActiveDay('all');
+        updateDivisionVisibility();
+      } else {
+        setActiveDay(DAY_FOR_DIVISION[div]);
+        updateDivisionVisibility();
+      }
       loadSchedule();
     });
   });

@@ -45,7 +45,7 @@ import { Trophy } from 'lucide-astro';
       <div id="standings-container" class="hidden"></div>
 
       <!-- Tailwind safelist for dynamically rendered classes -->
-      <span class="hidden overflow-x-auto bg-white rounded-2xl shadow-md text-left text-ocean-600 font-display font-bold text-sm text-ocean-700 text-ocean-500 text-right px-4 py-3 px-3 py-2 border-b border-sand-200 whitespace-nowrap bg-sand-50 tabular-nums"></span>
+      <span class="hidden overflow-x-auto bg-white rounded-2xl shadow-md text-left text-ocean-600 font-display font-bold text-sm text-ocean-700 text-ocean-500 text-right px-4 py-3 px-3 py-2 border-b border-sand-200 whitespace-nowrap bg-sand-50 tabular-nums hover:text-ocean-500"></span>
 
     </div>
   </section>
@@ -120,7 +120,7 @@ import { Trophy } from 'lucide-astro';
             <div class="flex items-center justify-between mb-2">
               <div class="flex items-center gap-3">
                 <span class="text-sm font-bold text-ocean-500 w-6">${i + 1}</span>
-                <span class="font-display font-bold text-ocean-700">${s.Team.name}</span>
+                <a href="/leagues/team/?name=${encodeURIComponent(s.Team.name)}" class="font-display font-bold text-ocean-700 hover:text-ocean-500 transition-colors">${s.Team.name}</a>
               </div>
               <span class="text-sm font-bold text-ocean-600">${s.total_wins}-${s.total_losses}${s.total_ties > 0 ? `-${s.total_ties}` : ''}</span>
             </div>
@@ -154,7 +154,7 @@ import { Trophy } from 'lucide-astro';
             ${standings.map((s, i) => `
               <tr class="border-b border-sand-200 ${i % 2 === 1 ? 'bg-sand-50' : ''}">
                 <td class="px-4 py-2 text-sm font-bold text-ocean-500">${i + 1}</td>
-                <td class="px-4 py-2 text-sm font-bold text-ocean-700 whitespace-nowrap">${s.Team.name}</td>
+                <td class="px-4 py-2 text-sm font-bold whitespace-nowrap"><a href="/leagues/team/?name=${encodeURIComponent(s.Team.name)}" class="text-ocean-700 hover:text-ocean-500 transition-colors">${s.Team.name}</a></td>
                 <td class="px-3 py-2 text-sm text-ocean-700 text-right tabular-nums">${s.games_played}</td>
                 <td class="px-3 py-2 text-sm text-ocean-700 text-right tabular-nums">${s.total_wins}</td>
                 <td class="px-3 py-2 text-sm text-ocean-700 text-right tabular-nums">${s.total_losses}</td>
