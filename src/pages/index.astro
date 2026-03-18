@@ -29,6 +29,9 @@ const heroHeading = seasonLabel || 'Sand Volleyball';
         {regStatus === 'coming-soon' && seasonLabel && (
           <Fragment><span class="text-coral-400">{seasonLabel.toUpperCase()}</span><br />Is Coming!</Fragment>
         )}
+        {regStatus === 'in-progress' && seasonLabel && (
+          <Fragment><span class="text-coral-400">{seasonLabel.toUpperCase()}</span><br />Is Underway!</Fragment>
+        )}
         {regStatus === 'closed' && seasonLabel && (
           <Fragment>Matt's<br /><span class="text-coral-400">Volleyball</span></Fragment>
         )}

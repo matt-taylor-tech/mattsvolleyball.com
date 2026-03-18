@@ -27,7 +27,7 @@ export interface RegCard {
 
 export interface RegistrationData {
   seasonLabel: string;
-  regStatus: 'open' | 'coming-soon' | 'closed';
+  regStatus: 'open' | 'coming-soon' | 'in-progress' | 'closed';
   seasonDates: { start: string; end: string } | null;
   earliestOpen: string;
   latestClose: string;
@@ -107,7 +107,7 @@ export async function getRegistrationData(): Promise<RegistrationData> {
       return now < open;
     });
 
-    const regStatus = anyOpen ? 'open' : allFuture ? 'coming-soon' : 'closed';
+    let regStatus: RegistrationData['regStatus'] = anyOpen ? 'open' : allFuture ? 'coming-soon' : 'closed';
 
     const earliestOpen = entries.reduce((min, e) => {
       const d = e.AssociationRegistration.open_datetime;
@@ -144,6 +144,17 @@ export async function getRegistrationData(): Promise<RegistrationData> {
           seasonDates = { start: seasonDatesMatch[1].trim(), end: seasonDatesMatch[2].trim() };
         }
       } catch { /* non-critical */ }
+    }
+
+    // If the season has started, override status to in-progress
+    if (seasonDates) {
+      const startDate = new Date(seasonDates.start);
+      const endDate = new Date(seasonDates.end);
+      if (now >= startDate && now <= endDate) {
+        regStatus = 'in-progress';
+      } else if (now > endDate) {
+        regStatus = 'closed';
+      }
     }
 
     // Precompute card data
