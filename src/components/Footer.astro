@@ -1,4 +1,9 @@
 ---
+interface Props {
+  regStatus: 'open' | 'coming-soon' | 'in-progress' | 'closed';
+}
+
+const { regStatus } = Astro.props;
 const r2Base = import.meta.env.PUBLIC_R2_BASE_URL || '';
 const socialLinks = [
   {
@@ -47,11 +52,19 @@ const socialLinks = [
               TeamLinkt Account
             </a>
           </li>
-          <li>
-            <a href="https://app.teamlinkt.com/register/find/mattsvolleyball" target="_blank" rel="noopener noreferrer" class="text-sand-300 hover:text-white transition-colors text-sm font-semibold">
-              Register Now →
-            </a>
-          </li>
+          {regStatus === 'open' ? (
+            <li>
+              <a href="https://app.teamlinkt.com/register/find/mattsvolleyball" target="_blank" rel="noopener noreferrer" class="text-sand-300 hover:text-white transition-colors text-sm font-semibold">
+                Register Now →
+              </a>
+            </li>
+          ) : (
+            <li>
+              <a href="/leagues/" class="text-sand-300 hover:text-white transition-colors text-sm font-semibold">
+                View Leagues →
+              </a>
+            </li>
+          )}
         </ul>
       </div>
 

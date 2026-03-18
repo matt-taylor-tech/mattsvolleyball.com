@@ -1,6 +1,7 @@
 ---
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { getRegistrationData } from '../lib/registration';
 import '../styles/global.css';
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 
 const r2Base = import.meta.env.PUBLIC_R2_BASE_URL || '';
 const { title, description = "Matt's Volleyball - the hottest coed sand volleyball leagues in the Lake Norman area! Play year-round at Saeed's Bar & Grill in Cornelius and Blythe Landing in Huntersville." } = Astro.props;
+const { regStatus } = await getRegistrationData();
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
 ---
 
@@ -31,10 +33,10 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
     <title>{title}</title>
   </head>
   <body class="min-h-screen flex flex-col">
-    <Header />
+    <Header regStatus={regStatus} />
     <main class="flex-1">
       <slot />
     </main>
-    <Footer />
+    <Footer regStatus={regStatus} />
   </body>
 </html>

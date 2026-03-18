@@ -1,6 +1,9 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { Shuffle, Layers, BookOpen, Sparkles, Dices, Users, Scale, TrendingUp, Check, ArrowRight, MapPin } from 'lucide-astro';
+import { getRegistrationData } from '../../lib/registration';
+
+const { regStatus } = await getRegistrationData();
 ---
 
 <Layout title="Shuffle League | Matt's Volleyball" description="Learn about the Wednesday shuffle league format at Matt's Volleyball. Teams are re-drafted weekly with the Level Up handicap system.">
@@ -191,17 +194,26 @@ import { Shuffle, Layers, BookOpen, Sparkles, Dices, Users, Scale, TrendingUp, C
         Ready to shuffle?
       </h2>
       <p class="text-ocean-600/80 text-lg mb-8">
-        Sign up for Wednesday nights and meet the whole league.
+        {regStatus === 'open'
+          ? 'Sign up for Wednesday nights and meet the whole league.'
+          : 'Check out the Wednesday night league and meet the whole crew.'}
       </p>
-      <a
-        href="https://app.teamlinkt.com/register/find/mattsvolleyball"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="btn-primary inline-flex items-center gap-2"
-      >
-        Register Now
-        <ArrowRight class="w-4 h-4" />
-      </a>
+      {regStatus === 'open' ? (
+        <a
+          href="https://app.teamlinkt.com/register/find/mattsvolleyball"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-primary inline-flex items-center gap-2"
+        >
+          Register Now
+          <ArrowRight class="w-4 h-4" />
+        </a>
+      ) : (
+        <a href="/leagues/" class="btn-primary inline-flex items-center gap-2">
+          View Leagues
+          <ArrowRight class="w-4 h-4" />
+        </a>
+      )}
     </div>
   </section>
 </Layout>
