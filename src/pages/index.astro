@@ -311,14 +311,29 @@ const heroHeading = seasonLabel || 'Sand Volleyball';
       if (!loading || !container) return;
 
       try {
-        const body = new URLSearchParams();
-        body.set('start', '0');
-        body.set('length', '50');
-        body.set('status', 'upcoming');
+        const DIVISION_IDS = ['276787', '276786', '276790', '276788', '276789'];
+        const DIVISION_NAME: Record<string, string> = {
+          '276787': 'Competitive',
+          '276786': 'Recreational',
+          '276790': 'Shuffle',
+          '276788': 'Competitive',
+          '276789': 'Recreational',
+        };
 
-        const res = await fetch('https://app.mattsvolleyball.com/leagues/getAllEvents/10757', { method: 'POST', body });
-        const json = await res.json();
-        const allGames = (json.data || []) as Array<Record<string, string | number>>;
+        const allGames: Array<Record<string, string | number> & { divisionId: string }> = [];
+        await Promise.all(DIVISION_IDS.map(async (divId) => {
+          const body = new URLSearchParams();
+          body.set('start', '0');
+          body.set('length', '50');
+          body.set('status', 'upcoming');
+          body.set(`filters[${divId}]`, divId);
+          const res = await fetch('https://app.mattsvolleyball.com/leagues/getAllEvents/10757', { method: 'POST', body });
+          const json = await res.json();
+          for (const row of (json.data || [])) {
+            allGames.push({ ...row, divisionId: divId });
+          }
+        }));
+        allGames.sort((a, b) => (a['6'] as number) - (b['6'] as number));
 
         if (allGames.length === 0) {
           loading.classList.add('hidden');
@@ -372,7 +387,7 @@ const heroHeading = seasonLabel || 'Sand Volleyball';
                         <span class="text-xs text-ocean-500 shrink-0">vs</span>
                         <span class="text-sm text-ocean-700 font-medium truncate">${away}</span>
                       </div>
-                      <div class="text-xs text-ocean-500/70 mt-1 ml-[76px]">${court}</div>
+                      <div class="text-xs text-ocean-500/70 mt-1 ml-[76px]">${court} <span class="text-ocean-500/50">·</span> <span class="text-ocean-500/60">${DIVISION_NAME[g.divisionId] || ''}</span></div>
                     </div>
                   `;
                 }).join('')}
