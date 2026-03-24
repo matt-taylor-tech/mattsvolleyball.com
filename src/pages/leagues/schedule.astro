@@ -261,12 +261,12 @@ import { CalendarDays } from 'lucide-astro';
                       <a href="/leagues/team/?name=${encodeURIComponent(g.away)}" class="truncate hover:text-ocean-500 transition-colors">${g.away}</a>
                     </div>
                     <div class="flex items-center gap-2 mt-1">
+                      <span class="text-sm text-ocean-600">${DIVISION_NAME[g.divisionId] || ''}</span>
+                      <span class="text-ocean-400">·</span>
                       <a href="${g.location.url}" target="_blank" rel="noopener noreferrer"
-                         class="text-sm text-ocean-500/70 hover:text-ocean-600 transition-colors">
+                         class="text-sm text-ocean-600 hover:text-ocean-700 transition-colors">
                         ${g.location.name}
                       </a>
-                      <span class="text-xs text-ocean-500/50">·</span>
-                      <span class="text-xs text-ocean-500/60">${DIVISION_NAME[g.divisionId] || ''}</span>
                     </div>
                   </div>
                 </div>
