@@ -75,12 +75,12 @@ import { ClipboardList } from 'lucide-astro';
 <script>
   const API_URL = 'https://app.mattsvolleyball.com/leagues/getAllEvents/10757';
   const DIVISION_IDS = ['276787', '276786', '276790', '276788', '276789'];
-  const DIVISION_NAMES: Record<string, string> = {
-    '276787': 'Tue Competitive',
-    '276786': 'Tue Recreational',
-    '276790': 'Wed Shuffle',
-    '276788': 'Thu Competitive',
-    '276789': 'Thu Recreational',
+  const DIVISION_NAME: Record<string, string> = {
+    '276787': 'Competitive',
+    '276786': 'Recreational',
+    '276790': 'Shuffle',
+    '276788': 'Competitive',
+    '276789': 'Recreational',
   };
 
   let currentDivision = 'all';
@@ -204,8 +204,9 @@ import { ClipboardList } from 'lucide-astro';
                       <span class="text-ocean-500 text-xs shrink-0">vs</span>
                       <a href="/leagues/team/?name=${encodeURIComponent(g.away)}" class="truncate hover:text-ocean-500 transition-colors">${g.away}</a>
                     </div>
-                    <div class="flex items-center gap-3 mt-1">
-                      <span class="text-sm text-ocean-600">${DIVISION_NAMES[g.divisionId] || ''}</span>
+                    <div class="flex items-center gap-2 mt-1">
+                      <span class="text-sm text-ocean-600">${DIVISION_NAME[g.divisionId] || ''}</span>
+                      <span class="text-ocean-400">·</span>
                       <span class="text-sm text-ocean-600">${g.location.name}</span>
                       ${g.summaryUrl ? `<a href="${g.summaryUrl}" target="_blank" rel="noopener noreferrer" class="text-sm text-coral-500 hover:text-coral-600 font-medium transition-colors">Summary</a>` : ''}
                     </div>

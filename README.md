@@ -47,6 +47,37 @@ src/
     └── global.css           # Tailwind config + custom classes
 ```
 
+## Dynamic Registration & Season Status
+
+The site automatically determines what to show based on live data from TeamLinkt. The logic lives in `src/lib/registration.ts` (`getRegistrationData()`), which scrapes TeamLinkt's registration page at build time.
+
+### How `regStatus` works
+
+The system resolves to one of four states:
+
+| Status | Condition | Hero (home) | Nav button | Footer link |
+| --- | --- | --- | --- | --- |
+| `open` | Any registration window is currently open | "Sign Up for SPRING 2026!" + Register Now | Sign Up | Register Now → |
+| `coming-soon` | All registration windows are in the future | "SPRING 2026 Is Coming!" + opens date | View Leagues | View Leagues → |
+| `in-progress` | Current date is between season start and end dates | "SPRING 2026 Is Underway!" | View Leagues | View Leagues → |
+| `closed` | All registration windows have passed and season has ended | "Matt's Volleyball" (generic) | View Leagues | View Leagues → |
+
+Season start/end dates are scraped from the TeamLinkt registration detail page ("Season Dates" field).
+
+### Season transitions
+
+- When you open registration for the **next** season on TeamLinkt (e.g., Summer while Spring is still playing), the site automatically switches to promoting the new season because it always picks the newest season.
+- No manual content changes are needed — just manage registration windows in TeamLinkt and the site updates on the next build.
+
+### Where `regStatus` is used
+
+- `src/pages/index.astro` — Hero heading, subtitle, and CTA buttons
+- `src/pages/leagues/index.astro` — Hero badge, subtitle, and register button
+- `src/pages/leagues/shuffle.astro` — Bottom CTA section
+- `src/components/Header.astro` — Nav button (Sign Up vs View Leagues)
+- `src/components/Footer.astro` — Quick links (Register Now vs View Leagues)
+- `src/layouts/Layout.astro` — Fetches data once and passes to Header/Footer
+
 ## Content Collections
 
 ### Adding a Champion
@@ -71,29 +102,6 @@ Optional description of the team's season.
 ```
 
 The `photo` path is relative to the R2 base URL.
-
-### Adding a Season
-
-Create a markdown file in `src/content/seasons/`:
-
-```markdown
----
-name: "Summer 2026"
-year: 2026
-startDate: "2026-06-01"
-endDate: "2026-07-24"
-status: "upcoming"
-registrationOpen: true
-registrationUrl: "https://app.teamlinkt.com/register/find/mattsvolleyball"
-leagues:
-  - day: "Tuesday"
-    format: "4v4"
-    maxTeams: 14
-    fee: "$50/team"
----
-
-Season description here.
-```
 
 ## Deployment (Cloudflare Pages)
 

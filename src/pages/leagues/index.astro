@@ -44,6 +44,12 @@ const faqItems = [
           Coming Soon
         </div>
       )}
+      {regStatus === 'in-progress' && (
+        <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-4 py-2 rounded-full font-bold text-sm mb-6">
+          <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+          Season In Progress
+        </div>
+      )}
 
       <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">
         {seasonLabel ? `${seasonLabel} Leagues` : 'Leagues'}
@@ -63,6 +69,11 @@ const faqItems = [
       {regStatus === 'coming-soon' && (
         <p class="text-white/70 text-lg mb-8">
           Registration opens {formatFullDate(earliestOpen)}
+        </p>
+      )}
+      {regStatus === 'in-progress' && (
+        <p class="text-white/70 text-lg mb-8">
+          Games are underway!
         </p>
       )}
       {regStatus === 'closed' && seasonLabel && (
