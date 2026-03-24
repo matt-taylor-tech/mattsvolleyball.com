@@ -91,6 +91,14 @@ import { CalendarDays } from 'lucide-astro';
     Thu: ['276788', '276789'],
   };
 
+  const DIVISION_NAMES: Record<string, string> = {
+    '276787': 'Tue Competitive',
+    '276786': 'Tue Recreational',
+    '276790': 'Wed Shuffle',
+    '276788': 'Thu Competitive',
+    '276789': 'Thu Recreational',
+  };
+
   const DAY_FOR_DIVISION: Record<string, string> = {
     '276787': 'Tue',
     '276786': 'Tue',
@@ -252,10 +260,13 @@ import { CalendarDays } from 'lucide-astro';
                       <span class="text-ocean-500 text-xs shrink-0">vs</span>
                       <a href="/leagues/team/?name=${encodeURIComponent(g.away)}" class="truncate hover:text-ocean-500 transition-colors">${g.away}</a>
                     </div>
-                    <a href="${g.location.url}" target="_blank" rel="noopener noreferrer"
-                       class="text-sm text-ocean-500/70 hover:text-ocean-600 transition-colors mt-1 inline-block">
-                      ${g.location.name}
-                    </a>
+                    <div class="flex items-center gap-3 mt-1">
+                      <span class="text-sm text-ocean-600">${DIVISION_NAMES[g.divisionId] || ''}</span>
+                      <a href="${g.location.url}" target="_blank" rel="noopener noreferrer"
+                         class="text-sm text-ocean-600 hover:text-ocean-700 transition-colors">
+                        ${g.location.name}
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
