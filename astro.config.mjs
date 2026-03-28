@@ -15,6 +15,10 @@ export default defineConfig({
         const excludes = ['/leagues/schedule', '/leagues/teams', '/leagues/standings', '/leagues/scores', '/home'];
         return !page.includes('_') && !excludes.some((p) => page.includes(p));
       },
+      serialize: (item) => {
+        item.lastmod = new Date();
+        return item;
+      },
     }),
   ],
   build: {

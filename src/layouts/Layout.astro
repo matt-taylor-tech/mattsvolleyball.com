@@ -29,8 +29,42 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:image" content={`${r2Base}/logos/vbenginelite.png`} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content={`${r2Base}/logos/vbenginelite.png`} />
+    <meta name="robots" content="index, follow" />
     <link rel="icon" type="image/x-icon" href={`${r2Base}/favicon.ico`} />
     <title>{title}</title>
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "SportsOrganization",
+      "name": "Matt's Volleyball",
+      "url": "https://mattsvolleyball.com",
+      "logo": `${r2Base}/logos/vbenginelite.png`,
+      "description": "Coed sand volleyball leagues in the Lake Norman area. Play year-round at Saeed's Bar & Grill in Cornelius and Blythe Landing in Huntersville.",
+      "sport": "Volleyball",
+      "location": [
+        {
+          "@type": "Place",
+          "name": "Saeed's Bar & Grill",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Cornelius",
+            "addressRegion": "NC"
+          }
+        },
+        {
+          "@type": "Place",
+          "name": "Blythe Landing",
+          "address": {
+            "@type": "PostalAddress",
+            "addressLocality": "Huntersville",
+            "addressRegion": "NC"
+          }
+        }
+      ],
+      "sameAs": [
+        "https://www.facebook.com/groups/mattsvolleyball/",
+        "https://instagram.com/mattsvolleyball/"
+      ]
+    })} />
   </head>
   <body class="min-h-screen flex flex-col">
     <Header regStatus={regStatus} />
