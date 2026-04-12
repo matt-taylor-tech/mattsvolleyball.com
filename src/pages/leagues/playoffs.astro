@@ -1,0 +1,699 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { Trophy } from 'lucide-astro';
+---
+
+<Layout title="Playoffs | Matt's Volleyball" description="Playoff brackets for Matt's Volleyball leagues - single elimination tournaments for Tuesday and Thursday divisions.">
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white pt-20 md:pt-28 print:hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">Playoffs</h1>
+      <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
+        Single elimination brackets by division.
+      </p>
+    </div>
+    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full print:hidden">
+      <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="#F7F6F3" />
+    </svg>
+  </section>
+
+  <section class="py-12 md:py-20 print:py-4">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Day Tabs -->
+      <div class="flex flex-wrap gap-2 mb-8 print:hidden" id="day-tabs">
+        <button data-day="Tue" class="tab-btn active">Tuesday</button>
+        <button data-day="Thu" class="tab-btn">Thursday</button>
+      </div>
+
+      <!-- Print Button -->
+      <div class="flex justify-end mb-4 print:hidden">
+        <button id="print-btn" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-ocean-600 bg-white border border-sand-300 rounded-full hover:bg-sand-50 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+          </svg>
+          Print Brackets
+        </button>
+      </div>
+
+      <!-- Loading State -->
+      <div id="playoffs-loading" class="text-center py-12">
+        <div class="inline-block w-8 h-8 border-4 border-sand-300 border-t-ocean-600 rounded-full animate-spin"></div>
+        <p class="text-ocean-600/70 mt-3">Loading brackets...</p>
+      </div>
+
+      <!-- Not Ready State -->
+      <div id="playoffs-not-ready" class="text-center py-12 hidden">
+        <Trophy class="w-12 h-12 text-sand-400 mx-auto mb-3" />
+        <p class="text-ocean-700 font-display font-bold text-xl mb-2">Regular Season Still in Progress</p>
+        <p class="text-ocean-600/70">Playoff brackets will be generated once all regular season games are complete.</p>
+        <a href="/leagues/standings/" class="inline-block mt-4 text-sm font-medium text-ocean-600 hover:text-ocean-800 underline underline-offset-2">View Current Standings →</a>
+      </div>
+
+      <!-- Brackets Container -->
+      <div id="brackets-container" class="hidden"></div>
+
+    </div>
+  </section>
+</Layout>
+
+<style is:global>
+  .tab-btn {
+    @apply px-3 py-2 rounded-full text-xs sm:text-sm font-medium transition-colors;
+    @apply bg-white text-ocean-600 border border-sand-300 hover:bg-sand-50;
+  }
+  .tab-btn.active {
+    @apply bg-ocean-600 text-white border-ocean-600;
+  }
+
+  /* ── Bracketry match card styling ── */
+  .match-body {
+    background: linear-gradient(180deg, #FFFFFF 0%, #FCFCFA 100%);
+    border: 1px solid #D8D4CC;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(35, 31, 32, 0.08);
+    padding: 7px;
+  }
+
+  .sides {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+  }
+
+  .sides::before {
+    content: '';
+    position: absolute;
+    left: 5%;
+    right: 5%;
+    top: 50%;
+    height: 1px;
+    background: #E3DED6;
+    pointer-events: none;
+  }
+
+  .sides::after {
+    content: 'vs';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.52rem;
+    font-weight: 800;
+    font-family: 'Montserrat', sans-serif;
+    color: #B0A89E;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: #FCFCFA;
+    padding: 1px 7px;
+    line-height: 1.5;
+    border-radius: 999px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .side-wrapper {
+    padding: 9px 10px 9px 0;
+    border: 1px solid #E3DED6;
+    border-radius: 8px;
+    background: #FFFFFF;
+    display: flex;
+    align-items: center;
+    transition: background 0.15s;
+  }
+
+  .side-wrapper .entry-status {
+    width: 26px;
+    min-width: 26px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.66rem;
+    color: #7A746D;
+    background: #F2F0EC;
+    border-radius: 999px;
+    padding: 0;
+    margin: 0 4px;
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  .side-wrapper .player-title {
+    font-weight: 600;
+    font-size: 0.82rem;
+    color: #363133;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    line-height: 1.2;
+    word-break: break-word;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .team-title-wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .team-name-full {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    word-break: break-word;
+    line-height: 1.2;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .team-record-inline {
+    font-size: 0.68rem;
+    color: #A5A29B;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Winning side gets coral left bar + slightly warm bg */
+  .side-wrapper.winner {
+    background: #FFF8F7;
+    border-color: #E6B0A7;
+    box-shadow: inset 3px 0 0 #BB4430;
+  }
+
+  .side-wrapper.winner .entry-status {
+    color: #BB4430;
+  }
+
+  .side-wrapper.winner .player-title {
+    color: #231F20;
+    font-weight: 700;
+  }
+
+  /* TBD / empty sides */
+  .side-wrapper:not(.winner):not(:has(.player-title:not(:empty))) {
+    background: #F7F6F3;
+  }
+
+  /* Round title bar */
+  .round-title {
+    font-family: 'Montserrat', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 0.65rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    color: #87847D !important;
+  }
+
+  /* Connection lines */
+  .match-lines-area svg line,
+  .match-lines-area svg path {
+    stroke: #DAD8D2 !important;
+  }
+
+  .match-status {
+    display: inline-block;
+    margin: 0 0 6px 2px;
+    padding: 2px 8px;
+    border: 1px solid #E8E6E1;
+    border-radius: 999px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #87847D;
+    background: #F7F6F3;
+  }
+
+  .print-division-meta {
+    display: none;
+  }
+
+  /* ── Screen-only polish ── */
+  @media screen {
+    #brackets-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .bracket-division {
+      border: 1px solid #DFD9D0;
+      border-radius: 8px;
+      background:
+        radial-gradient(1000px 300px at 5% -20%, rgba(187, 68, 48, 0.08) 0%, rgba(187, 68, 48, 0) 45%),
+        radial-gradient(900px 260px at 95% -25%, rgba(54, 49, 51, 0.08) 0%, rgba(54, 49, 51, 0) 42%),
+        #FFFEFC;
+      box-shadow: 0 10px 26px rgba(35, 31, 32, 0.08);
+      padding: 1rem 1rem 1.15rem;
+    }
+
+    .bracket-division > .flex {
+      border-bottom: 1px solid #ECE6DD;
+      margin-bottom: 0.85rem;
+      padding-bottom: 0.6rem;
+    }
+
+    .round-title {
+      color: #6B7D93 !important;
+      font-size: 0.72rem !important;
+      letter-spacing: 0.11em !important;
+    }
+
+    .match-body {
+      border-color: #D7D0C6;
+      box-shadow: 0 4px 14px rgba(35, 31, 32, 0.1);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .match-body:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 7px 18px rgba(35, 31, 32, 0.14);
+    }
+
+    .sides::after {
+      background: #FDFCFA;
+    }
+
+    .side-wrapper {
+      border-color: #DED8CF;
+      background: linear-gradient(180deg, #FFFFFF 0%, #FBFAF8 100%);
+    }
+
+    .side-wrapper .player-title {
+      font-size: 0.84rem;
+      color: #3A3536;
+    }
+
+    .team-record-inline {
+      color: #8B857E;
+      font-weight: 600;
+    }
+
+    .match-status {
+      border-color: #D8CFC5;
+      background: #FFF8F2;
+      color: #8A6A4F;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .match-lines-area svg line,
+    .match-lines-area svg path {
+      stroke: #D4CDC4 !important;
+      stroke-width: 2.4px !important;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .bracket-division {
+        animation: bracket-enter 360ms ease both;
+      }
+    }
+
+    @keyframes bracket-enter {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  }
+
+  /* ── Print styles ── */
+  @media print {
+    @page {
+      size: landscape;
+      margin: 0.5in;
+    }
+
+    header, footer, nav { display: none !important; }
+    body { background: white !important; }
+    section { padding-top: 0 !important; }
+    .bracket-division {
+      break-inside: avoid;
+      page-break-inside: avoid;
+      margin-bottom: 1rem;
+      break-before: page;
+      page-break-before: always;
+    }
+
+    .bracket-division:first-of-type {
+      break-before: auto;
+      page-break-before: auto;
+    }
+
+    #day-tabs,
+    #print-btn {
+      display: none !important;
+    }
+
+    #playoff-format-note {
+      display: none !important;
+    }
+
+    .print-division-meta {
+      display: block;
+      margin: 0 0 0.35in;
+      border-bottom: 1.5px solid #444;
+      padding-bottom: 0.12in;
+    }
+
+    .print-division-day {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 14pt;
+      font-weight: 700;
+      line-height: 1.1;
+      color: #111;
+      margin: 0 0 2px;
+    }
+
+    .print-division-subline {
+      font-family: 'Inter', sans-serif;
+      font-size: 9pt;
+      color: #222;
+      margin: 0;
+    }
+
+    .overflow-x-auto {
+      overflow: visible !important;
+    }
+
+    .match-body {
+      background: #fff !important;
+      border: 1.25px solid #5B5B5B !important;
+      border-radius: 3px !important;
+      box-shadow: none !important;
+      overflow: visible !important;
+    }
+
+    .sides {
+      overflow: visible !important;
+    }
+
+    .sides::before,
+    .sides::after {
+      display: none !important;
+    }
+
+    .side-wrapper {
+      padding: 6px 7px 6px 0 !important;
+      border: 1px solid #7A7A7A !important;
+      border-radius: 2px !important;
+      align-items: flex-start;
+    }
+
+    .side-wrapper .entry-status {
+      background: transparent !important;
+      color: #111 !important;
+      border-radius: 0 !important;
+      width: 18px;
+      min-width: 18px;
+      margin: 0 6px 0 2px;
+      height: auto;
+      line-height: 1.1;
+      font-size: 8.5pt;
+    }
+
+    .side-wrapper .player-title,
+    .team-name-full {
+      white-space: normal !important;
+      overflow: visible !important;
+      text-overflow: clip !important;
+      word-break: break-word !important;
+    }
+
+    .team-title-wrap {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr) !important;
+      gap: 2px !important;
+    }
+
+    .team-record-inline {
+      display: block;
+      margin-top: 0;
+      white-space: normal;
+      font-size: 7.5pt;
+      color: #444;
+      padding-left: 0;
+    }
+
+    .team-name-full {
+      font-size: 9.2pt;
+      line-height: 1.15;
+    }
+
+    .match-status {
+      border: 1px solid #777 !important;
+      color: #222 !important;
+      background: #fff !important;
+      font-size: 7.5pt;
+      padding: 1px 6px;
+      margin-bottom: 4px;
+    }
+  }
+</style>
+
+<script>
+  import { createBracket } from 'bracketry';
+
+  const STANDINGS_API = 'https://app.mattsvolleyball.com/leagues/getStandings/10757/51955';
+  const SCHEDULE_API = 'https://app.mattsvolleyball.com/leagues/getAllEvents/10757';
+  const PLAYOFF_TEAM_COUNT = 6;
+  const PLAYOFF_TIME_SLOTS = ['6:30 PM', '7:15 PM', '8:00 PM', '8:45 PM', '9:30 PM'];
+
+  interface DivisionConfig {
+    id: string;
+    name: string;
+    day: string;
+    court: string;
+  }
+
+  // Extensible: add Sunday/Monday divisions here in the future
+  const DIVISIONS: DivisionConfig[] = [
+    { id: '276787', name: 'Competitive', day: 'Tue', court: 'Court 1' },
+    { id: '276786', name: 'Recreational', day: 'Tue', court: 'Court 2' },
+    { id: '276788', name: 'Competitive', day: 'Thu', court: 'Court 1' },
+    { id: '276789', name: 'Recreational', day: 'Thu', court: 'Court 2' },
+  ];
+
+  const DAY_LABELS: Record<string, string> = {
+    Tue: 'Tuesday',
+    Thu: 'Thursday',
+  };
+
+  interface StandingEntry {
+    Team: { name: string };
+    total_wins: number;
+    total_losses: number;
+    total_ties: number;
+    total_points: number;
+    games_played: number;
+    score_for: number;
+    score_against: number;
+  }
+
+  interface BracketTeam {
+    seed: number;
+    name: string;
+    record: string;
+  }
+
+  let currentDay = 'Tue';
+  let allBrackets: Map<string, { config: DivisionConfig; teams: BracketTeam[] }> = new Map();
+  let seasonComplete = false;
+
+  async function fetchStandings(divisionId: string): Promise<StandingEntry[]> {
+    const body = new URLSearchParams();
+    body.set('group_ids[division]', divisionId);
+    body.set('season_id', '51955');
+    const res = await fetch(STANDINGS_API, { method: 'POST', body });
+    const json = await res.json();
+    return json.standings || [];
+  }
+
+  async function hasUpcomingGames(divisionId: string): Promise<boolean> {
+    const body = new URLSearchParams();
+    body.set('start', '0');
+    body.set('length', '1');
+    body.set('status', 'upcoming');
+    body.set(`filters[${divisionId}]`, divisionId);
+    const res = await fetch(SCHEDULE_API, { method: 'POST', body });
+    const json = await res.json();
+    return (json.data || []).length > 0;
+  }
+
+  function buildBracketData(teams: BracketTeam[]) {
+    const [t1, t2, t3, t4, t5, t6] = teams;
+    const contestants: Record<string, { entryStatus: string; players: { title: string; nationality: string }[] }> = {};
+    teams.forEach((team) => {
+      contestants[`t${team.seed}`] = {
+        entryStatus: String(team.seed),
+        players: [{ title: team.name, nationality: team.record }],
+      };
+    });
+
+    return {
+      // 4 positions in round 0 so bracketry draws proper fan connectors (4→2→1)
+      rounds: [{ name: 'First Round' }, { name: 'Semifinals' }, { name: 'Finals' }],
+      matches: [
+        // Round 0: #1 bye top, QF pair (#4/#5), QF pair (#3/#6), #2 bye bottom
+        { roundIndex: 0, order: 0, sides: [{ contestantId: `t${t1.seed}` }, { title: 'BYE' }] },
+        { roundIndex: 0, order: 1, matchStatus: PLAYOFF_TIME_SLOTS[0], sides: [{ contestantId: `t${t4.seed}` }, { contestantId: `t${t5.seed}` }] },
+        { roundIndex: 0, order: 2, matchStatus: PLAYOFF_TIME_SLOTS[1], sides: [{ contestantId: `t${t3.seed}` }, { contestantId: `t${t6.seed}` }] },
+        { roundIndex: 0, order: 3, sides: [{ contestantId: `t${t2.seed}` }, { title: 'BYE' }] },
+        // Semifinals: bracketry pairs (order0+order1)→SF0, (order2+order3)→SF1
+        { roundIndex: 1, order: 0, matchStatus: PLAYOFF_TIME_SLOTS[2], sides: [{ contestantId: `t${t1.seed}` }, {}] },
+        { roundIndex: 1, order: 1, matchStatus: PLAYOFF_TIME_SLOTS[3], sides: [{}, { contestantId: `t${t2.seed}` }] },
+        // Finals
+        { roundIndex: 2, order: 0, matchStatus: PLAYOFF_TIME_SLOTS[4] },
+      ],
+      contestants,
+    };
+  }
+
+  function renderPage() {
+    const container = document.getElementById('brackets-container')!;
+    container.innerHTML = '';
+
+    const heading = document.createElement('h2');
+    heading.className = 'hidden print:block font-display font-black text-2xl text-ocean-700 mb-4';
+    heading.textContent = `${DAY_LABELS[currentDay]} Playoffs`;
+    container.appendChild(heading);
+
+    const formatEl = document.createElement('div');
+    formatEl.id = 'playoff-format-note';
+    formatEl.className = 'mb-6 rounded-2xl border border-sand-200 bg-white px-4 py-3 text-sm text-ocean-700';
+    formatEl.innerHTML = `
+      <p class="font-semibold text-ocean-700">Playoff Match Format</p>
+      <p class="mt-1 text-ocean-600">One court per division. 45-minute slots: <strong>6:30</strong>, <strong>7:15</strong>, <strong>8:00</strong>, <strong>8:45</strong>, <strong>9:30</strong>.</p>
+      <p class="mt-1 text-ocean-600">Best 2 of 3 sets, played to <strong>21-21-15</strong>, win by 2.</p>
+    `;
+    container.appendChild(formatEl);
+
+    const dayDivisions = DIVISIONS.filter((d) => d.day === currentDay);
+
+    for (const config of dayDivisions) {
+      const data = allBrackets.get(config.id);
+      if (!data) continue;
+
+      const divisionEl = document.createElement('div');
+      divisionEl.className = 'bracket-division mb-12';
+      divisionEl.innerHTML = `
+        <div class="print-division-meta">
+          <p class="print-division-day">${DAY_LABELS[currentDay]} Playoffs - ${config.name} (${config.court})</p>
+          <p class="print-division-subline">Best 2 of 3 sets, played to 21-21-15, win by 2.</p>
+        </div>
+        <div class="flex items-center gap-3 mb-5">
+          <h3 class="font-display font-bold text-xl text-ocean-700">${config.name}</h3>
+          <span class="text-sm text-ocean-500 bg-sand-50 px-3 py-1 rounded-full border border-sand-200">${config.court}</span>
+        </div>
+      `;
+
+      const scrollWrapper = document.createElement('div');
+      scrollWrapper.className = 'overflow-x-auto pb-2';
+
+      const bracketEl = document.createElement('div');
+
+      scrollWrapper.appendChild(bracketEl);
+      divisionEl.appendChild(scrollWrapper);
+      container.appendChild(divisionEl);
+
+      createBracket(buildBracketData(data.teams) as any, bracketEl, {
+        useClassicalLayout: true,
+        navButtonsPosition: 'hidden' as any,
+        disableHighlight: true,
+        rootBgColor: 'transparent',
+        connectionLinesColor: '#DAD8D2',
+        connectionLinesWidth: 2,
+        roundTitleColor: '#87847D',
+        roundTitlesFontSize: 11,
+        matchFontSize: 13,
+        matchMaxWidth: 300,
+        mainVerticalPadding: 16,
+        rootBorderColor: 'transparent',
+        wrapperBorderColor: 'transparent',
+        matchHorMargin: 24,
+        getNationalityHTML: () => '',
+        getPlayerTitleHTML: (player: any) => {
+          if (player.title === 'BYE') {
+            return `<span style="color:#C2BFB8;font-style:italic;font-size:0.75rem;">BYE</span>`;
+          }
+          return `<span class="team-title-wrap"><span class="team-name-full">${player.title}</span>`
+            + (player.nationality
+              ? `<span class="team-record-inline">${player.nationality}</span>`
+              : '')
+            + '</span>';
+        },
+      });
+    }
+  }
+
+  function showState(state: 'loading' | 'not-ready' | 'brackets') {
+    document.getElementById('playoffs-loading')!.classList.toggle('hidden', state !== 'loading');
+    document.getElementById('playoffs-not-ready')!.classList.toggle('hidden', state !== 'not-ready');
+    document.getElementById('brackets-container')!.classList.toggle('hidden', state !== 'brackets');
+  }
+
+  async function init() {
+    showState('loading');
+
+    try {
+      const divisionIds = DIVISIONS.map((d) => d.id);
+      const upcomingChecks = await Promise.all(divisionIds.map(hasUpcomingGames));
+      seasonComplete = upcomingChecks.every((hasGames) => !hasGames);
+
+      // TODO: remove this bypass after testing
+      seasonComplete = true;
+
+      if (!seasonComplete) {
+        showState('not-ready');
+        return;
+      }
+
+      const standingsResults = await Promise.all(
+        DIVISIONS.map(async (config) => {
+          const standings = await fetchStandings(config.id);
+          return { config, standings };
+        })
+      );
+
+      for (const { config, standings } of standingsResults) {
+        if (standings.length > 0) {
+          const teams: BracketTeam[] = standings.slice(0, PLAYOFF_TEAM_COUNT).map((s, i) => ({
+            seed: i + 1,
+            name: s.Team.name,
+            record: `${s.total_wins}-${s.total_losses}${s.total_ties > 0 ? `-${s.total_ties}` : ''}`,
+          }));
+          allBrackets.set(config.id, { config, teams });
+        }
+      }
+
+      showState('brackets');
+      renderPage();
+    } catch {
+      showState('not-ready');
+    }
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('#day-tabs .tab-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#day-tabs .tab-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentDay = btn.dataset.day || 'Tue';
+      renderPage();
+    });
+  });
+
+  document.getElementById('print-btn')?.addEventListener('click', () => {
+    window.print();
+  });
+
+  init();
+</script>
