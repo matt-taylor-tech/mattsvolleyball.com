@@ -28,21 +28,30 @@ src/
 │   ├── Header.astro         # Sticky nav with mobile menu & dropdown
 │   ├── Footer.astro         # 3-column footer with social links
 │   ├── ChampionCard.astro   # Champion team card with R2 image support
-│   ├── LeagueCard.astro     # League info card with day-colored header
+│   ├── LeagueCard.astro     # League info card with registration state CTA
 │   ├── FAQAccordion.astro   # Accessible accordion
 │   └── GalleryGrid.astro    # Responsive image grid
 ├── content/
 │   ├── config.ts            # Content collection schemas
-│   ├── champions/           # Champion team markdown files
 │   └── seasons/             # Season info markdown files
+├── lib/
+│   ├── registration.ts      # TeamLinkt scrape + regStatus logic
+│   └── champions.ts         # R2 object listing + champion filename parsing
 ├── layouts/
 │   └── Layout.astro         # Base layout with SEO meta tags
 ├── pages/
 │   ├── index.astro          # Home
-│   ├── leagues.astro        # Leagues + FAQ
-│   ├── rules.astro          # Full rules
+│   ├── champions.astro      # Hall of Champions
 │   ├── contact.astro        # Contact form + social links
-│   └── image-gallery.astro  # Photo gallery
+│   ├── image-gallery.astro  # Photo gallery
+│   ├── playlists.astro      # Curated playlists
+│   ├── rainout-info.astro   # Weather/rainout policy
+│   ├── leagues/
+│   │   ├── index.astro      # Leagues + FAQ
+│   │   └── *.astro          # schedule/standings/scores/shuffle/etc.
+│   └── rules/
+│       ├── index.astro      # Rules home
+│       └── skill-levels.astro
 └── styles/
     └── global.css           # Tailwind config + custom classes
 ```
@@ -80,28 +89,42 @@ Season start/end dates are scraped from the TeamLinkt registration detail page (
 
 ## Content Collections
 
-### Adding a Champion
+Legacy Astro content collections for seasons were removed because they were unused.
+Season labels, dates, and registration status are read directly from TeamLinkt via `src/lib/registration.ts`.
 
-Create a markdown file in `src/content/champions/`:
+### Champions (R2 filename-driven)
 
-```markdown
----
-teamName: "Team Name"
-season: "Spring"
-year: 2026
-league: "4v4"
-division: "Competitive"
-day: "Tuesday"
-photo: "/champions/team-photo.jpg"
-players:
-  - "Player One"
-  - "Player Two"
----
+Champions are not read from markdown files. The champions page reads image object keys from R2 and parses metadata from each filename.
 
-Optional description of the team's season.
+Expected R2 key format:
+
+```text
+mattsvolleyball/images/champions/{year}/{season}_{day}_{division}_{team-name}.jpg
 ```
 
-The `photo` path is relative to the R2 base URL.
+Examples:
+
+```text
+mattsvolleyball/images/champions/2026/spring_tuesday_competitive_spike-squad.jpg
+mattsvolleyball/images/champions/2026/summer-i_thursday_recreational_beach-bums.jpg
+```
+
+Where this is implemented:
+
+- `src/lib/champions.ts` (`getChampions()`)
+- `src/pages/champions.astro`
+
+If you're bulk uploading and normalizing names, use:
+
+```bash
+node scripts/upload-champions.mjs
+```
+
+Dry run:
+
+```bash
+node scripts/upload-champions.mjs --dry-run
+```
 
 ## Deployment (Cloudflare Pages)
 
@@ -109,6 +132,12 @@ The `photo` path is relative to the R2 base URL.
 - **Output directory:** `dist`
 - **Environment variables:**
   - `PUBLIC_R2_BASE_URL` = `https://r2.afterhoursds.com/mattsvolleyball`
+  - `R2_ACCOUNT_ID` = Cloudflare account ID for the champions bucket
+  - `R2_ACCESS_KEY_ID` = R2 access key ID (read/list permissions)
+  - `R2_SECRET_ACCESS_KEY` = R2 secret access key
+  - `R2_BUCKET_NAME` = bucket name
+
+If the private R2 credentials are missing, the champions page safely renders without entries.
 
 ## Images
 
@@ -116,7 +145,8 @@ Images are served from Cloudflare R2. Place your logo at `public/images/vbengine
 
 ## Contact Form
 
-The contact form uses Formspree. Replace `YOUR_ID` in `src/pages/contact.astro` with your Formspree form ID.
+The contact form uses Formspree via `src/pages/contact.astro`.
+Update the form `action` URL there if you switch Formspree projects.
 
 ## External Links
 
