@@ -312,6 +312,12 @@ const heroHeading = seasonLabel || 'Sand Volleyball';
 
       try {
         const DIVISION_IDS = ['276787', '276786', '276790', '276788', '276789'];
+        const TEAMS_API_URL = 'https://app.mattsvolleyball.com/leagues/getTeams/10757/51955';
+        const DIVISIONS_BY_DAY: Record<string, string[]> = {
+          Tue: ['276787', '276786'],
+          Wed: ['276790'],
+          Thu: ['276788', '276789'],
+        };
         const DIVISION_NAME: Record<string, string> = {
           '276787': 'Competitive',
           '276786': 'Recreational',
@@ -319,20 +325,67 @@ const heroHeading = seasonLabel || 'Sand Volleyball';
           '276788': 'Competitive',
           '276789': 'Recreational',
         };
+        const teamsByDivision = new Map<string, string[]>();
+
+        async function fetchAllTeams(): Promise<void> {
+          const results = await Promise.allSettled(
+            DIVISION_IDS.map(async (id) => {
+              const body = new URLSearchParams();
+              body.set('group_ids[division]', id);
+              body.set('season_id', '51955');
+              const res = await fetch(TEAMS_API_URL, { method: 'POST', body });
+              const teams: { name: string }[] = await res.json();
+              return { id, names: teams.map((t) => t.name) };
+            })
+          );
+
+          for (const result of results) {
+            if (result.status !== 'fulfilled') continue;
+            teamsByDivision.set(result.value.id, result.value.names);
+          }
+        }
+
+        function getByeTeams(date: string, games: Array<Record<string, string | number> & { divisionId: string }>): string[] {
+          const day = date.split(' ')[0];
+          const divisionIds = DIVISIONS_BY_DAY[day];
+          if (!divisionIds) return [];
+
+          const allTeams = new Set<string>();
+          for (const id of divisionIds) {
+            const teams = teamsByDivision.get(id);
+            if (teams) teams.forEach((t) => allTeams.add(t));
+          }
+
+          if (allTeams.size === 0) return [];
+
+          const playingTeams = new Set<string>();
+          for (const g of games) {
+            const home = stripHtml(g['3'] as string);
+            const away = stripHtml(g['4'] as string);
+            playingTeams.add(home);
+            playingTeams.add(away);
+          }
+
+          return [...allTeams].filter((t) => !playingTeams.has(t)).sort();
+        }
 
         const allGames: Array<Record<string, string | number> & { divisionId: string }> = [];
-        await Promise.all(DIVISION_IDS.map(async (divId) => {
-          const body = new URLSearchParams();
-          body.set('start', '0');
-          body.set('length', '50');
-          body.set('status', 'upcoming');
-          body.set(`filters[${divId}]`, divId);
-          const res = await fetch('https://app.mattsvolleyball.com/leagues/getAllEvents/10757', { method: 'POST', body });
-          const json = await res.json();
-          for (const row of (json.data || [])) {
-            allGames.push({ ...row, divisionId: divId });
-          }
-        }));
+        const teamsReady = fetchAllTeams();
+        await Promise.all([
+          teamsReady,
+          Promise.all(DIVISION_IDS.map(async (divId) => {
+            const body = new URLSearchParams();
+            body.set('start', '0');
+            body.set('length', '50');
+            body.set('status', 'upcoming');
+            body.set(`filters[${divId}]`, divId);
+            const res = await fetch('https://app.mattsvolleyball.com/leagues/getAllEvents/10757', { method: 'POST', body });
+            const json = await res.json();
+            for (const row of (json.data || [])) {
+              allGames.push({ ...row, divisionId: divId });
+            }
+          })),
+        ]);
         allGames.sort((a, b) => (a['6'] as number) - (b['6'] as number));
 
         if (allGames.length === 0) {
@@ -370,6 +423,7 @@ const heroHeading = seasonLabel || 'Sand Volleyball';
 
         let html = '';
         for (const [date, dateGames] of grouped) {
+          const byeTeams = getByeTeams(date, dateGames);
           html += `
             <div class="mb-6">
               <h3 class="font-display font-bold text-sm text-ocean-600 mb-2">${date}</h3>
@@ -391,6 +445,14 @@ const heroHeading = seasonLabel || 'Sand Volleyball';
                     </div>
                   `;
                 }).join('')}
+                ${byeTeams.length > 0 ? `
+                  <div class="bg-white rounded-xl px-4 py-3 shadow-sm border border-sand-200 sm:col-span-2">
+                    <div class="flex items-start gap-3">
+                      <span class="text-xs font-medium text-coral-500 w-16 shrink-0">BYE</span>
+                      <span class="text-sm text-ocean-700 font-medium">${byeTeams.join(', ')}</span>
+                    </div>
+                  </div>
+                ` : ''}
               </div>
             </div>
           `;
