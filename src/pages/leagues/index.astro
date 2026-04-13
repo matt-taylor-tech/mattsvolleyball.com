@@ -5,7 +5,7 @@ import FAQAccordion from '../../components/FAQAccordion.astro';
 import { getRegistrationData, formatDate, formatFullDate, getDayFromName } from '../../lib/registration';
 import type { RegCard } from '../../lib/registration';
 
-const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose, regCards } = await getRegistrationData();
+const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose, regCards, hasEntries } = await getRegistrationData();
 const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
 
 // Group registration entries by day for the league cards
@@ -113,6 +113,7 @@ const faqItems = [
           price="$65"
           description="Maximum 14 teams. Requires 1 female minimum per team. Welcomes all skill levels, typically intermediate to competitive."
           highlight="Two divisions: recreational and competitive with separate playoffs."
+          registrationKnown={hasEntries}
           regEntries={regByDay['tuesday']}
           details={[
             '6 regular season games over 6-7 weeks plus 1 playoff week',
@@ -129,6 +130,7 @@ const faqItems = [
           description="Social focus with volleyball secondary. Individual sign-ups with weekly team redrafts. Meet new people every week!"
           link={{ href: '/leagues/shuffle/', label: 'Learn how shuffle works →' }}
           highlight='Level Up format: winning teams advance and receive handicaps, keeping every match competitive.'
+          registrationKnown={hasEntries}
           regEntries={regByDay['wednesday']}
           details={[
             'Individual sign-ups. Teams re-drafted each week',
@@ -143,6 +145,7 @@ const faqItems = [
           price="$65"
           description="Maximum 16 teams. Requires 1 female minimum per team. Welcomes all skill levels, typically intermediate to competitive."
           highlight="Two competitive divisions with separate playoffs."
+          registrationKnown={hasEntries}
           regEntries={regByDay['thursday']}
           details={[
             '7 regular season games plus 1 playoff week',

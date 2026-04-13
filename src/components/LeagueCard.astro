@@ -9,11 +9,12 @@ interface Props {
   highlight?: string;
   price?: string;
   registrationUrl?: string;
+  registrationKnown?: boolean;
   link?: { href: string; label: string };
   regEntries?: RegCard[];
 }
 
-const { day, format, description, details, highlight, price, registrationUrl = 'https://app.teamlinkt.com/register/find/mattsvolleyball', link, regEntries } = Astro.props;
+const { day, format, description, details, highlight, price, registrationUrl = 'https://app.teamlinkt.com/register/find/mattsvolleyball', registrationKnown = false, link, regEntries } = Astro.props;
 const hasRegEntries = regEntries && regEntries.length > 0;
 
 const dayColors: Record<string, string> = {
@@ -93,6 +94,10 @@ const gradientClass = dayColors[day] || 'from-ocean-500 to-ocean-600';
             </div>
           );
         })
+      ) : registrationKnown ? (
+        <span class="block text-center w-full py-2 rounded-lg bg-sand-200 text-ocean-600/70 font-semibold text-sm">
+          Registration Closed
+        </span>
       ) : (
         <a
           href={registrationUrl}
