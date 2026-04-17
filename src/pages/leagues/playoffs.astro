@@ -1,6 +1,8 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { Trophy } from 'lucide-astro';
+import { DIVISIONS as ALL_DIVISIONS, DAY_FULL_LABEL, ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
+const playoffDays = [...new Set(ALL_DIVISIONS.filter(d => d.hasPlayoffs).map(d => d.day))];
 ---
 
 <Layout title="Playoffs | Matt's Volleyball" description="Playoff brackets for Matt's Volleyball leagues - single elimination tournaments for Tuesday and Thursday divisions.">
@@ -20,10 +22,15 @@ import { Trophy } from 'lucide-astro';
   <section class="py-12 md:py-20 print:py-4">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
+      <div class="mb-6 rounded-xl border border-sand-300 bg-sand-100/70 px-4 py-3 text-sm text-ocean-700 print:hidden">
+        Playoff brackets are generated from <span class="font-semibold">{ACTIVE_SEASON_LABEL}</span> standings and schedule data.
+      </div>
+
       <!-- Day Tabs -->
       <div class="flex flex-wrap gap-2 mb-8 print:hidden" id="day-tabs">
-        <button data-day="Tue" class="tab-btn active">Tuesday</button>
-        <button data-day="Thu" class="tab-btn">Thursday</button>
+        {playoffDays.map((day, i) => (
+          <button data-day={day} class={`tab-btn${i === 0 ? ' active' : ''}`}>{DAY_FULL_LABEL[day] ?? day}</button>
+        ))}
       </div>
 
       <!-- Print Button -->
@@ -462,31 +469,19 @@ import { Trophy } from 'lucide-astro';
 
 <script>
   import { createBracket } from 'bracketry';
+  import {
+    DIVISIONS as ALL_SEASON_DIVISIONS,
+    STANDINGS_API_URL as STANDINGS_API,
+    EVENTS_API as SCHEDULE_API,
+    ACTIVE_SEASON_ID,
+    DAY_FULL_LABEL as DAY_LABELS,
+  } from '../../lib/seasonConfig';
 
-  const STANDINGS_API = 'https://app.mattsvolleyball.com/leagues/getStandings/10757/51955';
-  const SCHEDULE_API = 'https://app.mattsvolleyball.com/leagues/getAllEvents/10757';
   const PLAYOFF_TEAM_COUNT = 6;
   const PLAYOFF_TIME_SLOTS = ['6:30 PM', '7:15 PM', '8:00 PM', '8:45 PM', '9:30 PM'];
 
-  interface DivisionConfig {
-    id: string;
-    name: string;
-    day: string;
-    court: string;
-  }
-
-  // Extensible: add Sunday/Monday divisions here in the future
-  const DIVISIONS: DivisionConfig[] = [
-    { id: '276787', name: 'Competitive', day: 'Tue', court: 'Court 1' },
-    { id: '276786', name: 'Recreational', day: 'Tue', court: 'Court 2' },
-    { id: '276788', name: 'Competitive', day: 'Thu', court: 'Court 1' },
-    { id: '276789', name: 'Recreational', day: 'Thu', court: 'Court 2' },
-  ];
-
-  const DAY_LABELS: Record<string, string> = {
-    Tue: 'Tuesday',
-    Thu: 'Thursday',
-  };
+  // Only divisions with playoff brackets enabled
+  const DIVISIONS = ALL_SEASON_DIVISIONS.filter((d) => d.hasPlayoffs);
 
   interface StandingEntry {
     Team: { name: string };
@@ -505,14 +500,14 @@ import { Trophy } from 'lucide-astro';
     record: string;
   }
 
-  let currentDay = 'Tue';
+  let currentDay = DIVISIONS[0]?.day ?? 'Tue';
   let allBrackets: Map<string, { config: DivisionConfig; teams: BracketTeam[] }> = new Map();
   let seasonComplete = false;
 
   async function fetchStandings(divisionId: string): Promise<StandingEntry[]> {
     const body = new URLSearchParams();
     body.set('group_ids[division]', divisionId);
-    body.set('season_id', '51955');
+    body.set('season_id', ACTIVE_SEASON_ID);
     const res = await fetch(STANDINGS_API, { method: 'POST', body });
     const json = await res.json();
     return json.standings || [];
@@ -564,7 +559,7 @@ import { Trophy } from 'lucide-astro';
 
     const heading = document.createElement('h2');
     heading.className = 'hidden print:block font-display font-black text-2xl text-ocean-700 mb-4';
-    heading.textContent = `${DAY_LABELS[currentDay]} Playoffs`;
+    heading.textContent = `${DAY_FULL_LABEL[currentDay] ?? currentDay} Playoffs`;
     container.appendChild(heading);
 
     const formatEl = document.createElement('div');
@@ -587,7 +582,7 @@ import { Trophy } from 'lucide-astro';
       divisionEl.className = 'bracket-division mb-12';
       divisionEl.innerHTML = `
         <div class="print-division-meta">
-          <p class="print-division-day">${DAY_LABELS[currentDay]} Playoffs - ${config.name} (${config.court})</p>
+          <p class="print-division-day">${DAY_FULL_LABEL[currentDay] ?? currentDay} Playoffs - ${config.name} (${config.court})</p>
           <p class="print-division-subline">Best 2 of 3 sets, played to 21-21-15, win by 2.</p>
         </div>
         <div class="flex items-center gap-3 mb-5">

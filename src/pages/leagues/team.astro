@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { ArrowLeft, CalendarDays, ClipboardList } from 'lucide-astro';
+import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
 ---
 
 <Layout title="Team Schedule | Matt's Volleyball" description="View a team's upcoming schedule and past results.">
@@ -20,6 +21,10 @@ import { ArrowLeft, CalendarDays, ClipboardList } from 'lucide-astro';
 
   <section class="py-12 md:py-20">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <div class="mb-6 rounded-xl border border-sand-300 bg-sand-100/70 px-4 py-3 text-sm text-ocean-700">
+        Team schedule and results are from <span class="font-semibold">{ACTIVE_SEASON_LABEL}</span>.
+      </div>
 
       <!-- Back link -->
       <a href="/leagues/teams/" class="inline-flex items-center gap-2 text-ocean-500 hover:text-ocean-700 transition-colors mb-8 text-sm font-medium">
@@ -66,9 +71,9 @@ import { ArrowLeft, CalendarDays, ClipboardList } from 'lucide-astro';
 </style>
 
 <script>
-  const EVENTS_API = 'https://app.mattsvolleyball.com/leagues/getAllEvents/10757';
-  const TEAMS_API = 'https://app.mattsvolleyball.com/leagues/getTeams/10757/51955';
-  const DIVISION_IDS = ['276787', '276786', '276790', '276788', '276789'];
+  import { EVENTS_API, TEAMS_API_URL, DIVISION_IDS, ACTIVE_SEASON_ID } from '../../lib/seasonConfig';
+
+  const TEAMS_API = TEAMS_API_URL;
 
   const params = new URLSearchParams(window.location.search);
   const teamId = params.get('id') || '';
@@ -90,7 +95,7 @@ import { ArrowLeft, CalendarDays, ClipboardList } from 'lucide-astro';
       try {
         const body = new URLSearchParams();
         body.set('group_ids[division]', divId);
-        body.set('season_id', '51955');
+        body.set('season_id', ACTIVE_SEASON_ID);
 
         const res = await fetch(TEAMS_API, { method: 'POST', body });
         const teams: { id: number; name: string; imageUrl: string; groups: string }[] = await res.json();

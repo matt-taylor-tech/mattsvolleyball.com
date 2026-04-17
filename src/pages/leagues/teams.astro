@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { Users } from 'lucide-astro';
+import { DIVISIONS, DIVISION_IDS, ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
 ---
 
 <Layout title="Teams | Matt's Volleyball" description="View all teams across Matt's Volleyball leagues.">
@@ -20,13 +21,15 @@ import { Users } from 'lucide-astro';
   <section class="py-12 md:py-20">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
+      <div class="mb-6 rounded-xl border border-sand-300 bg-sand-100/70 px-4 py-3 text-sm text-ocean-700">
+        Showing team rosters from <span class="font-semibold">{ACTIVE_SEASON_LABEL}</span>.
+      </div>
+
       <!-- Division Tabs -->
       <div class="flex flex-wrap gap-2 mb-8" id="division-tabs">
-        <button data-division="276787" class="tab-btn active">Tue Competitive</button>
-        <button data-division="276786" class="tab-btn">Tue Recreational</button>
-        <button data-division="276790" class="tab-btn">Wed Shuffle</button>
-        <button data-division="276788" class="tab-btn">Thu Competitive</button>
-        <button data-division="276789" class="tab-btn">Thu Recreational</button>
+        {DIVISIONS.map((d, i) => (
+          <button data-division={d.id} class={`tab-btn${i === 0 ? ' active' : ''}`}>{d.label}</button>
+        ))}
       </div>
 
       <!-- Team Search -->
@@ -72,8 +75,10 @@ import { Users } from 'lucide-astro';
 </style>
 
 <script>
-  const API_URL = 'https://app.mattsvolleyball.com/leagues/getTeams/10757/51955';
-  let currentDivision = '276787';
+  import { TEAMS_API_URL, DIVISION_IDS, ACTIVE_SEASON_ID } from '../../lib/seasonConfig';
+
+  const API_URL = TEAMS_API_URL;
+  let currentDivision = DIVISION_IDS[0];
   let currentTeams: Team[] = [];
   let searchQuery = '';
 
@@ -87,7 +92,7 @@ import { Users } from 'lucide-astro';
   async function fetchTeams(divisionId: string): Promise<Team[]> {
     const body = new URLSearchParams();
     body.set('group_ids[division]', divisionId);
-    body.set('season_id', '51955');
+    body.set('season_id', ACTIVE_SEASON_ID);
 
     const res = await fetch(API_URL, { method: 'POST', body });
     return await res.json();
@@ -154,7 +159,7 @@ import { Users } from 'lucide-astro';
     btn.addEventListener('click', () => {
       document.querySelectorAll('#division-tabs .tab-btn').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
-      currentDivision = btn.dataset.division || '276787';
+      currentDivision = btn.dataset.division || DIVISION_IDS[0];
       loadTeams();
     });
   });

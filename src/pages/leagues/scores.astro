@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { ClipboardList } from 'lucide-astro';
+import { DIVISIONS, ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
 ---
 
 <Layout title="Scores | Matt's Volleyball" description="View recent scores and results for all Matt's Volleyball league games.">
@@ -20,14 +21,16 @@ import { ClipboardList } from 'lucide-astro';
   <section class="py-12 md:py-20">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
+      <div class="mb-6 rounded-xl border border-sand-300 bg-sand-100/70 px-4 py-3 text-sm text-ocean-700">
+        Showing live scores from <span class="font-semibold">{ACTIVE_SEASON_LABEL}</span>.
+      </div>
+
       <!-- Division Tabs -->
       <div class="flex flex-wrap gap-2 mb-8" id="division-tabs">
         <button data-division="all" class="tab-btn active">All</button>
-        <button data-division="276787" class="tab-btn">Tue Competitive</button>
-        <button data-division="276786" class="tab-btn">Tue Recreational</button>
-        <button data-division="276790" class="tab-btn">Wed Shuffle</button>
-        <button data-division="276788" class="tab-btn">Thu Competitive</button>
-        <button data-division="276789" class="tab-btn">Thu Recreational</button>
+        {DIVISIONS.map(d => (
+          <button data-division={d.id} class="tab-btn">{d.label}</button>
+        ))}
       </div>
 
       <!-- Team Search -->
@@ -73,15 +76,9 @@ import { ClipboardList } from 'lucide-astro';
 </style>
 
 <script>
-  const API_URL = 'https://app.mattsvolleyball.com/leagues/getAllEvents/10757';
-  const DIVISION_IDS = ['276787', '276786', '276790', '276788', '276789'];
-  const DIVISION_NAME: Record<string, string> = {
-    '276787': 'Competitive',
-    '276786': 'Recreational',
-    '276790': 'Shuffle',
-    '276788': 'Competitive',
-    '276789': 'Recreational',
-  };
+  import { DIVISION_IDS, DIVISION_NAME, EVENTS_API } from '../../lib/seasonConfig';
+
+  const API_URL = EVENTS_API;
 
   let currentDivision = 'all';
   let allGames: GameEvent[] = [];

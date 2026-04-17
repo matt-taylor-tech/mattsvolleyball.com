@@ -1,9 +1,10 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { CalendarDays } from 'lucide-astro';
+import { DIVISIONS, ACTIVE_DAYS, DAY_FULL_LABEL, ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
 ---
 
-<Layout title="Schedule | Matt's Volleyball" description="View the upcoming schedule for all Matt's Volleyball leagues - Tuesday, Wednesday, and Thursday nights.">
+<Layout title="Schedule | Matt's Volleyball" description="View the upcoming schedule for all Matt's Volleyball leagues.">
   <!-- Hero -->
   <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white pt-20 md:pt-28">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -20,22 +21,24 @@ import { CalendarDays } from 'lucide-astro';
   <section class="py-12 md:py-20">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
+      <div class="mb-6 rounded-xl border border-sand-300 bg-sand-100/70 px-4 py-3 text-sm text-ocean-700">
+        Showing live schedule data from <span class="font-semibold">{ACTIVE_SEASON_LABEL}</span>.
+      </div>
+
       <!-- Day Filter -->
       <div class="flex flex-wrap gap-2 mb-4" id="day-tabs">
         <button data-day="all" class="tab-btn active">All Days</button>
-        <button data-day="Tue" class="tab-btn">Tuesday</button>
-        <button data-day="Wed" class="tab-btn">Wednesday</button>
-        <button data-day="Thu" class="tab-btn">Thursday</button>
+        {ACTIVE_DAYS.map(day => (
+          <button data-day={day} class="tab-btn">{DAY_FULL_LABEL[day] ?? day}</button>
+        ))}
       </div>
 
       <!-- Division Tabs -->
       <div class="flex flex-wrap gap-2 mb-8" id="division-tabs">
         <button data-division="all" class="tab-btn active">All</button>
-        <button data-division="276787" class="tab-btn">Tue Competitive</button>
-        <button data-division="276786" class="tab-btn">Tue Recreational</button>
-        <button data-division="276790" class="tab-btn">Wed Shuffle</button>
-        <button data-division="276788" class="tab-btn">Thu Competitive</button>
-        <button data-division="276789" class="tab-btn">Thu Recreational</button>
+        {DIVISIONS.map(d => (
+          <button data-division={d.id} class="tab-btn">{d.label}</button>
+        ))}
       </div>
 
       <!-- Team Search -->
@@ -81,31 +84,12 @@ import { CalendarDays } from 'lucide-astro';
 </style>
 
 <script>
-  const API_URL = 'https://app.mattsvolleyball.com/leagues/getAllEvents/10757';
-  const TEAMS_API_URL = 'https://app.mattsvolleyball.com/leagues/getTeams/10757/51955';
-  const DIVISION_IDS = ['276787', '276786', '276790', '276788', '276789'];
+  import {
+    DIVISION_IDS, DIVISIONS_BY_DAY, DAY_FOR_DIVISION, DIVISION_NAME,
+    EVENTS_API, TEAMS_API_URL, ACTIVE_SEASON_ID,
+  } from '../../lib/seasonConfig';
 
-  const DIVISIONS_BY_DAY: Record<string, string[]> = {
-    Tue: ['276787', '276786'],
-    Wed: ['276790'],
-    Thu: ['276788', '276789'],
-  };
-
-  const DAY_FOR_DIVISION: Record<string, string> = {
-    '276787': 'Tue',
-    '276786': 'Tue',
-    '276790': 'Wed',
-    '276788': 'Thu',
-    '276789': 'Thu',
-  };
-
-  const DIVISION_NAME: Record<string, string> = {
-    '276787': 'Competitive',
-    '276786': 'Recreational',
-    '276790': 'Shuffle',
-    '276788': 'Competitive',
-    '276789': 'Recreational',
-  };
+  const API_URL = EVENTS_API;
 
   let currentDivision = 'all';
   let currentDay = 'all';
@@ -147,7 +131,7 @@ import { CalendarDays } from 'lucide-astro';
       DIVISION_IDS.map(async (id) => {
         const body = new URLSearchParams();
         body.set('group_ids[division]', id);
-        body.set('season_id', '51955');
+        body.set('season_id', ACTIVE_SEASON_ID);
         const res = await fetch(TEAMS_API_URL, { method: 'POST', body });
         const teams: { name: string }[] = await res.json();
         return { id, names: teams.map((t) => t.name) };

@@ -35,9 +35,14 @@ export interface RegistrationData {
   hasEntries: boolean;
 }
 
-const dayOrder: Record<string, number> = { tuesday: 0, wednesday: 1, thursday: 2 };
+interface RegistrationOptions {
+  preferredSeasonId?: string;
+}
+
+const dayOrder: Record<string, number> = { monday: 0, tuesday: 1, wednesday: 2, thursday: 3 };
 
 const dayColors: Record<string, string> = {
+  monday: 'bg-emerald-600',
   tuesday: 'bg-coral-500',
   wednesday: 'bg-ocean-500',
   thursday: 'bg-sand-500',
@@ -46,6 +51,7 @@ const dayColors: Record<string, string> = {
 
 export function getDayFromName(name: string): string {
   const lower = name.toLowerCase();
+  if (lower.includes('monday')) return 'monday';
   if (lower.includes('tuesday')) return 'tuesday';
   if (lower.includes('wednesday')) return 'wednesday';
   if (lower.includes('thursday')) return 'thursday';
@@ -62,7 +68,7 @@ export function formatFullDate(dateStr: string): string {
   return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 }
 
-export async function getRegistrationData(): Promise<RegistrationData> {
+export async function getRegistrationData(options: RegistrationOptions = {}): Promise<RegistrationData> {
   const fallback: RegistrationData = {
     seasonLabel: '',
     regStatus: 'closed',
@@ -85,7 +91,10 @@ export async function getRegistrationData(): Promise<RegistrationData> {
     const seasonIds = Object.keys(data).sort((a, b) => Number(b) - Number(a));
     if (seasonIds.length === 0) return fallback;
 
-    const season = data[seasonIds[0]];
+    const selectedSeasonId = (options.preferredSeasonId && data[options.preferredSeasonId])
+      ? options.preferredSeasonId
+      : seasonIds[0];
+    const season = data[selectedSeasonId];
     const entries: RegEntry[] = [];
 
     for (const eventType of Object.values(season.children)) {

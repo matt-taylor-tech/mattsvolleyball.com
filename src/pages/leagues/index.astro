@@ -3,9 +3,10 @@ import Layout from '../../layouts/Layout.astro';
 import LeagueCard from '../../components/LeagueCard.astro';
 import FAQAccordion from '../../components/FAQAccordion.astro';
 import { getRegistrationData, formatDate, formatFullDate, getDayFromName } from '../../lib/registration';
+import { UPCOMING_SEASON_ID } from '../../lib/seasonConfig';
 import type { RegCard } from '../../lib/registration';
 
-const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose, regCards, hasEntries } = await getRegistrationData();
+const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose, regCards, hasEntries } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
 const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
 
 // Group registration entries by day for the league cards
@@ -21,7 +22,7 @@ const faqItems = [
   { question: 'Is it beginner-friendly?', answer: 'Absolutely! Matt\'s Volleyball caters to players of all skill levels, including beginners. We have recreational divisions specifically designed for newer players.' },
   { question: 'How do I form a team?', answer: 'You can create your own team and invite friends, or sign up as an individual and we\'ll place you on a team. Either way, you\'ll have a great time.' },
   { question: 'Can I join multiple teams?', answer: 'Yes! You can join multiple teams across different league nights. We do our best to avoid scheduling conflicts when possible.' },
-  { question: 'What time are the games?', answer: 'Choose your weekly day. Games start at 6:30, 7:30, 8:30, or 9:30 PM. You\'ll receive your specific game time before the season starts.' },
+  { question: 'What time are the games?', answer: 'Choose your weekly day. Monday, Tuesday, and Wednesday games start at 6:30, 7:30, or 8:30 PM. Thursday adds a 9:30 PM slot as well. You\'ll receive your specific game time before the season starts.' },
   { question: 'Is there an age requirement?', answer: 'Players must be at least 21 years old to participate in our leagues.' },
   { question: 'How much does it cost?', answer: '$65 per player for Tuesday or Thursday, $55 per player for Wednesday, plus credit card processing fees. That covers the full regular season plus playoffs.' },
   { question: 'Are spectators allowed?', answer: 'Spectators are welcome and encouraged! Come out, grab some food and drinks, and enjoy the matches.' },
@@ -106,7 +107,21 @@ const faqItems = [
   <!-- League Cards -->
   <section class="pb-16 md:pb-24">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid md:grid-cols-3 gap-8">
+      <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-8">
+        <LeagueCard
+          day="Monday"
+          format="3v3 Coed"
+          description="Maximum 14 teams. Coed format requires at least 1 female on the court at all times. New for Summer 2026!"
+          registrationKnown={hasEntries}
+          regEntries={regByDay['monday']}
+          details={[
+            '6 regular season games over 7 weeks plus 1 playoff week',
+            '1 game weekly with 1 bye week',
+            'Game times: 6:30, 7:30, or 8:30 PM',
+            'Form your own team or join as individual',
+            'All skill levels welcome',
+          ]}
+        />
         <LeagueCard
           day="Tuesday"
           format="4v4"

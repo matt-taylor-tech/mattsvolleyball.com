@@ -3,10 +3,11 @@ import Layout from '../layouts/Layout.astro';
 import ChampionCard from '../components/ChampionCard.astro';
 import { getChampions } from '../lib/champions';
 import { getRegistrationData, formatDate, formatFullDate } from '../lib/registration';
+import { UPCOMING_SEASON_ID } from '../lib/seasonConfig';
 import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart } from 'lucide-astro';
 
 const champions = await getChampions();
-const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose } = await getRegistrationData();
+const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
 const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
 const heroHeading = seasonLabel || 'Sand Volleyball';
 ---
@@ -128,7 +129,17 @@ const heroHeading = seasonLabel || 'Sand Volleyball';
   <section class="py-12 md:py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <h2 class="section-heading text-center mb-12">Weekly Schedule</h2>
-      <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+      <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-8 max-w-6xl mx-auto">
+        <div class="text-center p-8 rounded-2xl bg-sand-50 border border-sand-200">
+          <div class="w-16 h-16 bg-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-white font-display font-bold text-lg">Mo</span>
+          </div>
+          <h3 class="font-display font-bold text-xl text-ocean-600 mb-2">Monday</h3>
+          <p class="text-ocean-600/70 text-sm leading-relaxed">
+            3v3 Coed league. 6 games over 7 weeks with one team bye, then playoffs in week 8.
+          </p>
+        </div>
+
         <div class="text-center p-8 rounded-2xl bg-sand-50 border border-sand-200">
           <div class="w-16 h-16 bg-coral-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <span class="text-white font-display font-bold text-lg">Tu</span>
@@ -155,7 +166,7 @@ const heroHeading = seasonLabel || 'Sand Volleyball';
           </div>
           <h3 class="font-display font-bold text-xl text-ocean-600 mb-2">Thursday</h3>
           <p class="text-ocean-600/70 text-sm leading-relaxed">
-            4v4 leagues with competitive and recreational divisions. Teams stay together for the season.
+            4v4 leagues with competitive and recreational divisions. No byes, full 7-game regular season plus playoffs.
           </p>
         </div>
       </div>
@@ -311,20 +322,7 @@ const heroHeading = seasonLabel || 'Sand Volleyball';
       if (!loading || !container) return;
 
       try {
-        const DIVISION_IDS = ['276787', '276786', '276790', '276788', '276789'];
-        const TEAMS_API_URL = 'https://app.mattsvolleyball.com/leagues/getTeams/10757/51955';
-        const DIVISIONS_BY_DAY: Record<string, string[]> = {
-          Tue: ['276787', '276786'],
-          Wed: ['276790'],
-          Thu: ['276788', '276789'],
-        };
-        const DIVISION_NAME: Record<string, string> = {
-          '276787': 'Competitive',
-          '276786': 'Recreational',
-          '276790': 'Shuffle',
-          '276788': 'Competitive',
-          '276789': 'Recreational',
-        };
+        const { DIVISION_IDS, TEAMS_API_URL, DIVISIONS_BY_DAY, DIVISION_NAME, EVENTS_API, ACTIVE_SEASON_ID } = await import('../lib/seasonConfig');
         const teamsByDivision = new Map<string, string[]>();
 
         async function fetchAllTeams(): Promise<void> {
@@ -332,7 +330,7 @@ const heroHeading = seasonLabel || 'Sand Volleyball';
             DIVISION_IDS.map(async (id) => {
               const body = new URLSearchParams();
               body.set('group_ids[division]', id);
-              body.set('season_id', '51955');
+              body.set('season_id', ACTIVE_SEASON_ID);
               const res = await fetch(TEAMS_API_URL, { method: 'POST', body });
               const teams: { name: string }[] = await res.json();
               return { id, names: teams.map((t) => t.name) };
@@ -379,7 +377,7 @@ const heroHeading = seasonLabel || 'Sand Volleyball';
             body.set('length', '50');
             body.set('status', 'upcoming');
             body.set(`filters[${divId}]`, divId);
-            const res = await fetch('https://app.mattsvolleyball.com/leagues/getAllEvents/10757', { method: 'POST', body });
+            const res = await fetch(EVENTS_API, { method: 'POST', body });
             const json = await res.json();
             for (const row of (json.data || [])) {
               allGames.push({ ...row, divisionId: divId });
