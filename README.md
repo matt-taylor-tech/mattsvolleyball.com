@@ -18,7 +18,10 @@ npm install
 npm run dev      # Start dev server
 npm run build    # Build to dist/
 npm run preview  # Preview production build
+npm run check:teamlinkt  # Validate season/division IDs against TeamLinkt
 ```
+
+TeamLinkt maintenance notes and endpoint references live in [teamlinkt.md](teamlinkt.md).
 
 ## Project Structure
 

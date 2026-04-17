@@ -1,7 +1,12 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { ClipboardList } from 'lucide-astro';
-import { DIVISIONS, ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
+import {
+  DIVISIONS,
+  ACTIVE_SEASON_LABEL,
+  UPCOMING_SEASON_LABEL,
+  REGISTRATION_PAGE_URL,
+} from '../../lib/seasonConfig';
 ---
 
 <Layout title="Scores | Matt's Volleyball" description="View recent scores and results for all Matt's Volleyball league games.">
@@ -22,7 +27,20 @@ import { DIVISIONS, ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
       <div class="mb-6 rounded-xl border border-sand-300 bg-sand-100/70 px-4 py-3 text-sm text-ocean-700">
-        Showing live scores from <span class="font-semibold">{ACTIVE_SEASON_LABEL}</span>.
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="inline-flex items-center rounded-full border border-ocean-300 bg-white px-3 py-1 font-semibold text-ocean-700">
+            Current Data: {ACTIVE_SEASON_LABEL}
+          </span>
+          <a
+            href={REGISTRATION_PAGE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center rounded-full border border-coral-400 bg-coral-500 px-3 py-1 font-semibold text-white hover:bg-coral-600 transition-colors"
+          >
+            Upcoming Registration: {UPCOMING_SEASON_LABEL}
+          </a>
+        </div>
+        <p id="scores-sync" class="mt-2 text-xs text-ocean-600/80">Data fetched from TeamLinkt when this page loads.</p>
       </div>
 
       <!-- Division Tabs -->
@@ -83,6 +101,15 @@ import { DIVISIONS, ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
   let currentDivision = 'all';
   let allGames: GameEvent[] = [];
   let searchQuery = '';
+
+  function setSyncStamp(id: string) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const stamp = new Date().toLocaleString('en-US', {
+      month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
+    });
+    el.textContent = `Data fetched from TeamLinkt at ${stamp}.`;
+  }
 
   function stripHtml(html: string): string {
     const tmp = document.createElement('div');
@@ -245,6 +272,7 @@ import { DIVISIONS, ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
     try {
       allGames = await fetchAllScores();
       filterAndRender();
+      setSyncStamp('scores-sync');
     } catch {
       loading.classList.add('hidden');
       empty.classList.remove('hidden');

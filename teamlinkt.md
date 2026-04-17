@@ -60,6 +60,21 @@ Update:
 
 The file also exports `DIVISIONS` as an alias of `ACTIVE_DIVISIONS` to keep live stats pages on the active season.
 
+## Preflight Check
+
+Run this before publishing season changes:
+
+```bash
+npm run check:teamlinkt
+```
+
+This validates configured season/division IDs against TeamLinkt dropdowns and endpoint responses.
+
+## Auto Rollover
+
+- `src/lib/seasonConfig.ts` includes `ACTIVE_ROLLOVER_DATE`.
+- After this date, active live-data pages promote `NEXT_SEASON` to active on the next build.
+
 ## Notes
 
 - Registration cards on home/leagues pages come from TeamLinkt registration scraping in `src/lib/registration.ts`.

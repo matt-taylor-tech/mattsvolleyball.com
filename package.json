@@ -6,7 +6,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "check:teamlinkt": "node scripts/check-teamlinkt-config.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.2.0",

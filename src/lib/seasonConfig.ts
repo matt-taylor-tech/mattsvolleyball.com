@@ -10,13 +10,31 @@
 // and playoffs pages consume the config below.
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ── Base seasons ──────────────────────────────────────────────────────────────
+const CURRENT_SEASON = {
+  id: '51955',
+  label: 'Spring 2026',
+};
+
+const NEXT_SEASON = {
+  id: '52672',
+  label: 'Summer I 2026',
+};
+
+// Auto-rollover trigger for live data pages.
+// Note: for static deployments this takes effect on the next build.
+export const ACTIVE_ROLLOVER_DATE = '2026-05-15T00:00:00-04:00';
+const now = new Date();
+const rolloverAt = new Date(ACTIVE_ROLLOVER_DATE);
+export const HAS_ACTIVE_ROLLED_OVER = !Number.isNaN(rolloverAt.getTime()) && now >= rolloverAt;
+
 // ── Active Season (schedule / standings / scores / teams / playoffs) ─────────
-export const ACTIVE_SEASON_ID = '51955'; // Spring 2026
-export const ACTIVE_SEASON_LABEL = 'Spring 2026';
+export const ACTIVE_SEASON_ID = HAS_ACTIVE_ROLLED_OVER ? NEXT_SEASON.id : CURRENT_SEASON.id;
+export const ACTIVE_SEASON_LABEL = HAS_ACTIVE_ROLLED_OVER ? NEXT_SEASON.label : CURRENT_SEASON.label;
 
 // ── Upcoming Season (promotion / registration) ───────────────────────────────
-export const UPCOMING_SEASON_ID = '52672'; // Summer I 2026
-export const UPCOMING_SEASON_LABEL = 'Summer I 2026';
+export const UPCOMING_SEASON_ID = NEXT_SEASON.id;
+export const UPCOMING_SEASON_LABEL = NEXT_SEASON.label;
 
 // ── Division definitions ─────────────────────────────────────────────────────
 export interface DivisionConfig {
@@ -28,7 +46,7 @@ export interface DivisionConfig {
   hasPlayoffs: boolean;
 }
 
-export const ACTIVE_DIVISIONS: DivisionConfig[] = [
+const CURRENT_DIVISIONS: DivisionConfig[] = [
   // ── Tuesday ──────────────────────────────────────────────────────────────
   { id: '276787', name: 'Competitive',  day: 'Tue', label: 'Tue Competitive',  court: 'Court 1', hasPlayoffs: true  },
   { id: '276786', name: 'Recreational', day: 'Tue', label: 'Tue Recreational', court: 'Court 2', hasPlayoffs: true  },
@@ -53,6 +71,7 @@ export const UPCOMING_DIVISIONS: DivisionConfig[] = [
 ];
 
 // Active aliases used by live stats pages (Schedule / Teams / Standings / Scores / Playoffs)
+export const ACTIVE_DIVISIONS: DivisionConfig[] = HAS_ACTIVE_ROLLED_OVER ? UPCOMING_DIVISIONS : CURRENT_DIVISIONS;
 export const DIVISIONS: DivisionConfig[] = ACTIVE_DIVISIONS;
 
 // ── Derived helpers (no need to edit below this line) ────────────────────────
@@ -98,6 +117,7 @@ export const DAY_FULL_LABEL: Record<string, string> = {
 // ── API URLs ──────────────────────────────────────────────────────────────────
 const ORG_ID = '10757';
 const API_BASE = 'https://app.mattsvolleyball.com/leagues';
+export const REGISTRATION_PAGE_URL = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
 
 export const EVENTS_API    = `${API_BASE}/getAllEvents/${ORG_ID}`;
 export const TEAMS_API_URL = `${API_BASE}/getTeams/${ORG_ID}/${ACTIVE_SEASON_ID}`;
