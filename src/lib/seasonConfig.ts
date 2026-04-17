@@ -21,6 +21,16 @@ const NEXT_SEASON = {
   label: 'Summer I 2026',
 };
 
+const NEXT_NEXT_SEASON = {
+  id: 'TBD', // Will update when Summer II season is created in TeamLinkt
+  label: 'Summer II 2026',
+};
+
+const FUTURE_SEASON = {
+  id: 'TBD', // Will update when Fall season is created in TeamLinkt
+  label: 'Fall 2026',
+};
+
 // Auto-rollover trigger for live data pages.
 // Note: for static deployments this takes effect on the next build.
 export const ACTIVE_ROLLOVER_DATE = '2026-05-15T00:00:00-04:00';
@@ -35,6 +45,10 @@ export const ACTIVE_SEASON_LABEL = HAS_ACTIVE_ROLLED_OVER ? NEXT_SEASON.label : 
 // ── Upcoming Season (promotion / registration) ───────────────────────────────
 export const UPCOMING_SEASON_ID = NEXT_SEASON.id;
 export const UPCOMING_SEASON_LABEL = NEXT_SEASON.label;
+
+// ── Future Seasons (for promotional display when current closes) ──────────────
+export const NEXT_NEXT_SEASON_LABEL = NEXT_NEXT_SEASON.label;
+export const FUTURE_SEASON_LABEL = FUTURE_SEASON.label;
 
 // ── Division definitions ─────────────────────────────────────────────────────
 export interface DivisionConfig {

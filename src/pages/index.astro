@@ -3,13 +3,12 @@ import Layout from '../layouts/Layout.astro';
 import ChampionCard from '../components/ChampionCard.astro';
 import { getChampions } from '../lib/champions';
 import { getRegistrationData, formatDate, formatFullDate } from '../lib/registration';
-import { UPCOMING_SEASON_ID } from '../lib/seasonConfig';
+import { UPCOMING_SEASON_ID, NEXT_NEXT_SEASON_LABEL } from '../lib/seasonConfig';
 import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart } from 'lucide-astro';
 
 const champions = await getChampions();
 const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
 const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
-const heroHeading = seasonLabel || 'Sand Volleyball';
 ---
 
 <Layout title="Matt's Volleyball | Coed Sand Volleyball in Lake Norman">
@@ -34,10 +33,10 @@ const heroHeading = seasonLabel || 'Sand Volleyball';
           <Fragment><span class="text-coral-400">{seasonLabel.toUpperCase()}</span><br />Is Underway!</Fragment>
         )}
         {regStatus === 'closed' && seasonLabel && (
-          <Fragment><span class="text-coral-400">{seasonLabel.toUpperCase()}</span><br />Just Wrapped!</Fragment>
+          <Fragment><span class="text-coral-400">{NEXT_NEXT_SEASON_LABEL.toUpperCase()}</span><br />Is Coming!</Fragment>
         )}
         {!seasonLabel && (
-          <Fragment><span class="text-coral-400">Summer I 2026</span><br />Sand Volleyball</Fragment>
+          <Fragment><span class="text-coral-400">Lake Norman</span><br />Sand Volleyball</Fragment>
         )}
       </h1>
       <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto mb-4">
