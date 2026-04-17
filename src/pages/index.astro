@@ -34,10 +34,10 @@ const heroHeading = seasonLabel || 'Sand Volleyball';
           <Fragment><span class="text-coral-400">{seasonLabel.toUpperCase()}</span><br />Is Underway!</Fragment>
         )}
         {regStatus === 'closed' && seasonLabel && (
-          <Fragment>Matt's<br /><span class="text-coral-400">Volleyball</span></Fragment>
+          <Fragment><span class="text-coral-400">{seasonLabel.toUpperCase()}</span><br />Just Wrapped!</Fragment>
         )}
         {!seasonLabel && (
-          <Fragment>Matt's<br /><span class="text-coral-400">Volleyball</span></Fragment>
+          <Fragment><span class="text-coral-400">Summer I 2026</span><br />Sand Volleyball</Fragment>
         )}
       </h1>
       <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto mb-4">
