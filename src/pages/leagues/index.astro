@@ -24,7 +24,7 @@ const faqItems = [
   { question: 'Can I join multiple teams?', answer: 'Yes! You can join multiple teams across different league nights. We do our best to avoid scheduling conflicts when possible.' },
   { question: 'What time are the games?', answer: 'Choose your weekly day. Monday, Tuesday, and Wednesday games start at 6:30, 7:30, or 8:30 PM. Thursday adds a 9:30 PM slot as well. You\'ll receive your specific game time before the season starts.' },
   { question: 'Is there an age requirement?', answer: 'Players must be at least 21 years old to participate in our leagues.' },
-  { question: 'How much does it cost?', answer: '$65 per player for Tuesday or Thursday, $55 per player for Wednesday, plus credit card processing fees. That covers the full regular season plus playoffs.' },
+  { question: 'How much does it cost?', answer: '$65 per player for Monday, Tuesday, or Thursday, $55 per player for Wednesday, plus credit card processing fees. That covers the full regular season plus playoffs.' },
   { question: 'Are spectators allowed?', answer: 'Spectators are welcome and encouraged! Come out, grab some food and drinks, and enjoy the matches.' },
   { question: 'What happens with bad weather?', answer: 'We have an inclement weather / rainout policy. Check our rules page or your TeamLinkt app for updates on any schedule changes.' },
 ];
@@ -111,13 +111,14 @@ const faqItems = [
         <LeagueCard
           day="Monday"
           format="3v3 Coed"
-          description="Maximum 14 teams. Coed format requires at least 1 female on the court at all times. New for Summer 2026!"
+          price="$65"
+          description="New league night! Schedule, game times, and format determined by registration numbers. May run as double-header format. Minimum teams required or league cancelled with full refund."
           registrationKnown={hasEntries}
           regEntries={regByDay['monday']}
           details={[
-            '6 regular season games over 7 weeks plus 1 playoff week',
-            '1 game weekly with 1 bye week',
-            'Game times: 6:30, 7:30, or 8:30 PM',
+            '8 week season: 7 regular season weeks plus 1 playoff week',
+            'Schedule and format TBD based on registration numbers',
+            'May run as double-header format depending on signups',
             'Form your own team or join as individual',
             'All skill levels welcome',
           ]}
@@ -159,7 +160,7 @@ const faqItems = [
           format="4v4"
           price="$65"
           description="Maximum 16 teams. Requires 1 female minimum per team. Welcomes all skill levels, typically intermediate to competitive."
-          highlight="Two competitive divisions with separate playoffs."
+          highlight="Two divisions: recreational and competitive with separate playoffs."
           registrationKnown={hasEntries}
           regEntries={regByDay['thursday']}
           details={[

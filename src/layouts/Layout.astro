@@ -72,5 +72,6 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
       <slot />
     </main>
     <Footer regStatus={regStatus} />
+    <script is:inline src="/scripts/update-registration-cta.js"></script>
   </body>
 </html>
