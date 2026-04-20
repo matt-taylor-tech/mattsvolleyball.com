@@ -6,11 +6,11 @@
  */
 
 import { getRegistrationData } from '../../src/lib/registration';
-import { UPCOMING_SEASON_ID } from '../../src/lib/seasonConfig';
+import { NEXT_NEXT_SEASON_LABEL, UPCOMING_SEASON_ID } from '../../src/lib/seasonConfig';
 
 export const onRequestGet: PagesFunction = async () => {
   try {
-    const { seasonLabel, regStatus, earliestOpen, latestClose } = await getRegistrationData({
+    const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose } = await getRegistrationData({
       preferredSeasonId: UPCOMING_SEASON_ID,
     });
 
@@ -18,8 +18,10 @@ export const onRequestGet: PagesFunction = async () => {
       {
         regStatus,
         seasonLabel,
+        seasonDates,
         earliestOpen,
         latestClose,
+        nextNextSeasonLabel: NEXT_NEXT_SEASON_LABEL,
       },
       {
         headers: {

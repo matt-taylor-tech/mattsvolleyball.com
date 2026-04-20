@@ -9,6 +9,16 @@ import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart } fr
 const champions = await getChampions();
 const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
 const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
+const heroPromoText = regStatus === 'open' && seasonLabel
+  ? `${seasonLabel} registration is open now.`
+  : regStatus === 'coming-soon' && seasonLabel
+    ? `${seasonLabel} registration opens ${formatFullDate(earliestOpen)}.`
+    : regStatus === 'in-progress' && seasonLabel
+      ? `${seasonLabel} is underway.`
+      : 'League updates land here first.';
+const heroDatesText = seasonDates
+  ? `${seasonDates.start} – ${seasonDates.end}${regStatus === 'open' ? ` · Registration closes ${formatDate(latestClose)}` : ''}`
+  : '';
 ---
 
 <Layout title="Matt's Volleyball | Coed Sand Volleyball in Lake Norman">
@@ -22,7 +32,7 @@ const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
       <p class="text-coral-400 font-bold text-sm md:text-base uppercase tracking-widest mb-4">
         Lake Norman's Premier Sand Volleyball League
       </p>
-      <h1 class="font-display font-black text-4xl sm:text-5xl md:text-7xl mb-6 leading-tight">
+      <h1 class="font-display font-black text-4xl sm:text-5xl md:text-7xl mb-6 leading-tight" data-home-hero-heading>
         {regStatus === 'open' && seasonLabel && (
           <Fragment>Sign Up for<br /><span class="text-coral-400">{seasonLabel.toUpperCase()}!</span></Fragment>
         )}
@@ -42,19 +52,15 @@ const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
       <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto mb-4">
         Get ready to dig, dive, and dominate with Matt's Volleyball - home to the hottest coed sand volleyball leagues in the Lake Norman area!
       </p>
-      <p class="text-coral-400 text-xl md:text-2xl font-bold max-w-2xl mx-auto mb-8">
-        Time to Heat Up the Sand – Summer I 2026 is Here!
+      <p class="text-coral-400 text-xl md:text-2xl font-bold max-w-2xl mx-auto mb-8" data-home-hero-promo>
+        {heroPromoText}
       </p>
 
-      {seasonDates && (
-        <p class="text-white/60 text-sm md:text-base mb-6">
-          {seasonDates.start} – {seasonDates.end}
-          {regStatus === 'open' && (<Fragment> · Registration closes {formatDate(latestClose)}</Fragment>)}
-        </p>
-      )}
-      {!seasonDates && <div class="mb-6" />}
+      <p class:list={['text-white/60 text-sm md:text-base mb-6', !heroDatesText && 'hidden']} data-home-hero-season-dates>
+        {heroDatesText}
+      </p>
 
-      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <div class="flex flex-col sm:flex-row gap-4 justify-center" data-home-hero-cta-group>
         {regStatus === 'open' ? (
           <a
             href={REG_PAGE}

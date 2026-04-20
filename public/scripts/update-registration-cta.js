@@ -19,7 +19,15 @@ async function updateRegistrationCTA() {
     if (!response.ok) throw new Error(`API returned ${response.status}`);
 
     const data = await response.json();
-    const { regStatus, seasonLabel, earliestOpen, latestClose } = data;
+    const { regStatus, seasonLabel, seasonDates, earliestOpen, latestClose, nextNextSeasonLabel } = data;
+
+    const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+    }[char]));
 
     // Format dates for display
     const formatDate = (dateStr) => {
@@ -40,6 +48,102 @@ async function updateRegistrationCTA() {
 
     const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
 
+    const updateHomeHero = () => {
+      const heading = document.querySelector('[data-home-hero-heading]');
+      const promo = document.querySelector('[data-home-hero-promo]');
+      const seasonDatesEl = document.querySelector('[data-home-hero-season-dates]');
+      const ctaGroup = document.querySelector('[data-home-hero-cta-group]');
+
+      if (heading) {
+        if (regStatus === 'open' && seasonLabel) {
+          heading.innerHTML = `Sign Up for<br><span class="text-coral-400">${escapeHtml(seasonLabel.toUpperCase())}!</span>`;
+        } else if (regStatus === 'coming-soon' && seasonLabel) {
+          heading.innerHTML = `<span class="text-coral-400">${escapeHtml(seasonLabel.toUpperCase())}</span><br>Is Coming!`;
+        } else if (regStatus === 'in-progress' && seasonLabel) {
+          heading.innerHTML = `<span class="text-coral-400">${escapeHtml(seasonLabel.toUpperCase())}</span><br>Is Underway!`;
+        } else if (regStatus === 'closed' && nextNextSeasonLabel) {
+          heading.innerHTML = `<span class="text-coral-400">${escapeHtml(nextNextSeasonLabel.toUpperCase())}</span><br>Is Coming!`;
+        } else {
+          heading.innerHTML = '<span class="text-coral-400">Lake Norman</span><br>Sand Volleyball';
+        }
+      }
+
+      if (promo) {
+        if (regStatus === 'open' && seasonLabel) {
+          promo.textContent = `${seasonLabel} registration is open now.`;
+        } else if (regStatus === 'coming-soon' && seasonLabel) {
+          promo.textContent = `${seasonLabel} registration opens ${formatFullDate(earliestOpen)}.`;
+        } else if (regStatus === 'in-progress' && seasonLabel) {
+          promo.textContent = `${seasonLabel} is underway.`;
+        } else {
+          promo.textContent = 'League updates land here first.';
+        }
+      }
+
+      if (seasonDatesEl) {
+        if (seasonDates?.start && seasonDates?.end) {
+          seasonDatesEl.textContent = `${seasonDates.start} – ${seasonDates.end}${regStatus === 'open' ? ` · Registration closes ${formatDate(latestClose)}` : ''}`;
+          seasonDatesEl.classList.remove('hidden');
+        } else {
+          seasonDatesEl.textContent = '';
+          seasonDatesEl.classList.add('hidden');
+        }
+      }
+
+      if (ctaGroup) {
+        ctaGroup.replaceChildren();
+
+        const createLink = ({ href, text, className, target, rel, disabled = false }) => {
+          const link = document.createElement('a');
+          link.href = href;
+          link.textContent = text;
+          link.className = className;
+          if (target) link.target = target;
+          if (rel) link.rel = rel;
+          if (disabled) {
+            link.setAttribute('aria-disabled', 'true');
+          }
+          return link;
+        };
+
+        if (regStatus === 'open') {
+          ctaGroup.append(
+            createLink({
+              href: REG_PAGE,
+              text: 'Register Now',
+              className: 'btn-primary text-xl py-4 px-10',
+              target: '_blank',
+              rel: 'noopener noreferrer',
+            }),
+            createLink({
+              href: '/leagues/',
+              text: 'View Leagues',
+              className: 'btn-secondary text-xl py-4 px-10',
+            }),
+          );
+        } else if (regStatus === 'coming-soon') {
+          ctaGroup.append(
+            createLink({
+              href: '#',
+              text: `Registration Opens ${formatFullDate(earliestOpen)}`,
+              className: 'inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-8 py-4 rounded-lg font-bold text-lg pointer-events-none opacity-75',
+              disabled: true,
+            }),
+          );
+        } else {
+          ctaGroup.append(
+            createLink({
+              href: '/leagues/',
+              text: 'View Leagues',
+              className: 'btn-primary text-xl py-4 px-10',
+            }),
+          );
+        }
+      }
+    };
+
+    updateHomeHero();
+
     // Update all elements with registration CTA markers
     document.querySelectorAll('[data-cta-type]').forEach((el) => {
       const type = el.getAttribute('data-cta-type');
@@ -50,6 +154,7 @@ async function updateRegistrationCTA() {
           el.href = REG_PAGE;
           el.target = '_blank';
           el.rel = 'noopener noreferrer';
+          el.classList.remove('pointer-events-none', 'opacity-75');
           el.classList.remove('hidden');
         } else if (regStatus === 'coming-soon') {
           el.textContent = `Registration Opens ${formatFullDate(earliestOpen)}`;
@@ -88,6 +193,7 @@ async function updateRegistrationCTA() {
         headerCTA.href = REG_PAGE;
         headerCTA.target = '_blank';
         headerCTA.rel = 'noopener noreferrer';
+        headerCTA.classList.remove('pointer-events-none', 'opacity-75');
       } else if (regStatus === 'coming-soon') {
         headerCTA.textContent = 'Coming Soon';
         headerCTA.href = '#';
@@ -95,6 +201,7 @@ async function updateRegistrationCTA() {
       } else {
         headerCTA.textContent = 'Leagues';
         headerCTA.href = '/leagues/';
+        headerCTA.classList.remove('pointer-events-none', 'opacity-75');
       }
     }
 
