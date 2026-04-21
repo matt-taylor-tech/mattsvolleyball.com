@@ -16,6 +16,7 @@ interface SeasonGroup {
 
 export interface RegCard {
   name: string;
+  divisionLabel: string;
   colorClass: string;
   isOpen: boolean;
   isFuture: boolean;
@@ -66,6 +67,17 @@ export function formatDate(dateStr: string): string {
 export function formatFullDate(dateStr: string): string {
   const d = new Date(dateStr.replace(' ', 'T'));
   return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
+function getDivisionLabel(name: string, groupName: string): string {
+  const nameTokens = name.toLowerCase().split(/\s+/).filter(Boolean);
+  const groupTokens = groupName.split(/\s+/).filter(Boolean);
+  const remainder = groupTokens.filter((token, idx) => {
+    if (idx >= nameTokens.length) return true;
+    return token.toLowerCase() !== nameTokens[idx];
+  }).join(' ').trim();
+
+  return remainder || name;
 }
 
 export async function getRegistrationData(options: RegistrationOptions = {}): Promise<RegistrationData> {
@@ -180,6 +192,7 @@ export async function getRegistrationData(options: RegistrationOptions = {}): Pr
     const regCards: RegCard[] = entries.map((e) => {
       const reg = e.AssociationRegistration;
       const day = getDayFromName(reg.name);
+      const divisionLabel = getDivisionLabel(reg.name, reg.group_name);
       const colorClass = dayColors[day] || dayColors.other;
       const open = new Date(reg.open_datetime.replace(' ', 'T'));
       const close = new Date(reg.close_datetime.replace(' ', 'T'));
@@ -187,7 +200,7 @@ export async function getRegistrationData(options: RegistrationOptions = {}): Pr
       const isFuture = now < open;
       const daysLeft = Math.ceil((close.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
       const regUrl = `https://app.teamlinkt.com/register/go/mattsvolleyball/${reg.id}`;
-      return { name: reg.name, colorClass, isOpen, isFuture, daysLeft, regUrl, closeDate: formatDate(reg.close_datetime), openDate: formatDate(reg.open_datetime) };
+      return { name: reg.name, divisionLabel, colorClass, isOpen, isFuture, daysLeft, regUrl, closeDate: formatDate(reg.close_datetime), openDate: formatDate(reg.open_datetime) };
     });
 
     return {

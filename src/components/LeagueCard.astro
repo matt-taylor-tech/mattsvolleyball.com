@@ -74,7 +74,7 @@ const gradientClass = dayColors[day] || 'from-ocean-500 to-ocean-600';
     <div class="reg-cta space-y-3">
       {hasRegEntries ? (
         regEntries.map((entry) => {
-          const label = entry.name.replace(/^(tuesday|wednesday|thursday)\s+4v4\s*/i, '').trim() || entry.name;
+          const label = entry.divisionLabel || entry.name;
           return entry.isOpen ? (
             <div>
               <a href={entry.regUrl} target="_blank" rel="noopener noreferrer" class="btn-primary text-center w-full block">
