@@ -123,10 +123,20 @@ export async function getRegistrationData(options: RegistrationOptions = {}): Pr
       return d < min ? d : min;
     }, entries[0].AssociationRegistration.open_datetime);
 
-    const latestClose = entries.reduce((max, e) => {
+    const latestCloseOverall = entries.reduce((max, e) => {
       const d = e.AssociationRegistration.close_datetime;
       return d > max ? d : max;
     }, entries[0].AssociationRegistration.close_datetime);
+
+    // Wednesday registration may stay open longer, but sitewide close-date copy
+    // should follow Thursday leagues when available.
+    const thursdayEntries = entries.filter((e) => getDayFromName(e.AssociationRegistration.name) === 'thursday');
+    const latestClose = thursdayEntries.length > 0
+      ? thursdayEntries.reduce((max, e) => {
+        const d = e.AssociationRegistration.close_datetime;
+        return d > max ? d : max;
+      }, thursdayEntries[0].AssociationRegistration.close_datetime)
+      : latestCloseOverall;
 
     // Sort by day of week
     entries.sort((a, b) => {
