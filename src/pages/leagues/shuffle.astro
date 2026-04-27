@@ -1,6 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { Shuffle, Layers, BookOpen, Sparkles, Dices, Users, Scale, TrendingUp, Check, ArrowRight, MapPin } from 'lucide-astro';
+import { Shuffle as ShuffleIcon, Layers, BookOpen, Sparkles, Dices, Users, Scale, TrendingUp, Check, ArrowRight, MapPin } from 'lucide-astro';
 import { getRegistrationData } from '../../lib/registration';
 
 const { regStatus } = await getRegistrationData();
@@ -12,7 +12,7 @@ const { regStatus } = await getRegistrationData();
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">Shuffle League</h1>
       <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
-        This is a social league first, volleyball second.
+        Social league first, volleyball second. Check in Wednesday night and get placed on balanced teams built from who's there.
       </p>
       <p class="text-white/50 text-sm mt-4">
         Powered by <a href="https://volleyballengine.com" target="_blank" rel="noopener noreferrer" class="underline hover:text-white/80 transition-colors">Volleyball Engine</a>
@@ -28,19 +28,22 @@ const { regStatus } = await getRegistrationData();
 
       <!-- The Format -->
       <div class="mb-16">
-        <h2 class="section-heading mb-6"><Shuffle class="w-6 h-6 inline-block mr-2 -mt-1 text-ocean-500" />The Format</h2>
+        <h2 class="section-heading mb-6"><ShuffleIcon class="w-6 h-6 inline-block mr-2 -mt-1 text-ocean-500" />The Format</h2>
         <div class="text-ocean-700 leading-relaxed space-y-4">
           <p>
-            Everyone signs up as an individual. Teams are re-drafted every week, so you'll play with and against everyone by the end of the season. All skill levels are welcome.
+            Everyone signs up as an individual. Each Wednesday, teams are generated from checked-in players so you'll play with and against different people over the season. All skill levels are welcome.
           </p>
           <p>
-            The format is called "Level Up." Every team starts at Level 1. Win a game and your team levels up, picking up a handicap. The better you do, the harder it gets. It keeps every match competitive no matter who's on the court.
+            The format is called "Level Up." Teams start each night at Level 1. Win a game and your team levels up, picking up a tougher handicap. The better you do, the harder it gets, which keeps matches competitive.
           </p>
           <p>
-            Each season runs 7 regular season games over 7 weeks, plus 1 week of playoffs. The top teams advance to a single-elimination championship bracket with handicaps removed.
+            Level 1 is intentionally social. Light icebreaker handicaps help new teammates learn names, communicate faster, and get comfortable playing together right away.
           </p>
           <p>
-            Play runs for about 2 hours each night. Come late or leave early, no problem. We shuffle teams as players come and go.
+            Each season runs 7 regular-season nights over 7 weeks, plus 1 playoff night. Top teams advance to a single-elimination championship bracket with handicaps removed.
+          </p>
+          <p>
+            Play runs for about 2 hours each night. Come late or leave early, no problem. On-time check-in helps us place you in the first wave of balanced teams.
           </p>
         </div>
       </div>
@@ -53,7 +56,7 @@ const { regStatus } = await getRegistrationData();
             <span class="w-10 h-10 bg-ocean-100 rounded-full flex items-center justify-center text-ocean-600 font-display font-bold shrink-0">1</span>
             <div>
               <h3 class="font-display font-bold text-lg text-ocean-600 mb-1">Check in by 6:30 PM</h3>
-              <p class="text-ocean-700 text-sm leading-relaxed">Show up and get marked present in the system. This is how we know who's playing and can build balanced teams.</p>
+              <p class="text-ocean-700 text-sm leading-relaxed">Show up and get marked present in the system. This is how we know who's playing and can build balanced teams. Checking in on time gives you the best chance to be in the first wave of games.</p>
             </div>
           </div>
           <div class="card p-6 flex gap-4 items-start">
@@ -82,14 +85,14 @@ const { regStatus } = await getRegistrationData();
 
       <!-- The Five Levels -->
       <div class="mb-16">
-        <h2 class="section-heading mb-8"><Layers class="w-6 h-6 inline-block mr-2 -mt-1 text-ocean-500" />The Five Levels</h2>
+        <h2 class="section-heading mb-8"><Layers class="w-6 h-6 inline-block mr-2 -mt-1 text-ocean-500" />Sample Restrictions by Level</h2>
         <div class="space-y-4">
           <div class="card p-6 border-l-4 border-sand-300">
             <div class="flex items-center gap-3 mb-2">
               <span class="w-10 h-10 bg-sand-300 rounded-full flex items-center justify-center text-white font-display font-bold">1</span>
               <h3 class="font-display font-bold text-xl text-ocean-600">Level 1: Standard Play</h3>
             </div>
-            <p class="text-ocean-700 leading-relaxed">Standard play, occasionally with social icebreaker handicaps (learning teammates' names, high-fives).</p>
+            <p class="text-ocean-700 leading-relaxed">Standard play with social icebreaker handicaps designed to help teammates connect quickly (learning names, high-fives, extra communication cues).</p>
           </div>
 
           <div class="card p-6 border-l-4 border-sand-400">
@@ -124,7 +127,7 @@ const { regStatus } = await getRegistrationData();
             <p class="text-ocean-700 leading-relaxed">Extreme restrictions like prohibiting jumping or limiting touches to one per possession.</p>
           </div>
         </div>
-        <p class="text-ocean-600/70 text-sm mt-4 italic">Handicaps rotate weekly to ensure variety.</p>
+        <p class="text-ocean-600/70 text-sm mt-4 italic">These are examples. Handicaps rotate weekly to keep things fresh.</p>
       </div>
 
       <!-- Baseline Rules -->
@@ -165,14 +168,14 @@ const { regStatus } = await getRegistrationData();
               <Users class="w-5 h-5 text-ocean-500" />
               <h3 class="font-display font-bold text-lg text-ocean-600">Social</h3>
             </div>
-            <p class="text-ocean-700 text-sm leading-relaxed">Prevents cliques. You'll play with and against everyone by the end of the season.</p>
+            <p class="text-ocean-700 text-sm leading-relaxed">Prevents cliques. You'll play with and against everyone by the end of the season. Level 1 social handicaps help break the ice fast.</p>
           </div>
           <div class="card p-6">
             <div class="flex items-center gap-2 mb-2">
               <Scale class="w-5 h-5 text-ocean-500" />
               <h3 class="font-display font-bold text-lg text-ocean-600">Self-Balancing</h3>
             </div>
-            <p class="text-ocean-700 text-sm leading-relaxed">Stronger teams are handicapped as they win, keeping every match competitive.</p>
+            <p class="text-ocean-700 text-sm leading-relaxed">Stronger teams are handicapped as they win, and teams are generated from check-ins to keep games balanced and competitive.</p>
           </div>
           <div class="card p-6">
             <div class="flex items-center gap-2 mb-2">
@@ -195,8 +198,8 @@ const { regStatus } = await getRegistrationData();
       </h2>
       <p class="text-ocean-600/80 text-lg mb-8">
         {regStatus === 'open'
-          ? 'Sign up for Wednesday nights and meet the whole league.'
-          : 'Check out the Wednesday night league and meet the whole crew.'}
+          ? 'Join Wednesday Shuffle for balanced games, rotating teammates, and a great social night.'
+          : 'Check out Wednesday Shuffle for balanced games, rotating teammates, and a great social night.'}
       </p>
       {regStatus === 'open' ? (
         <a
