@@ -218,7 +218,12 @@ import {
 
   async function fetchAllSchedule(): Promise<GameEvent[]> {
     const results = await Promise.all(DIVISION_IDS.map(fetchDivision));
-    return results.flat().sort((a, b) => a.timestamp - b.timestamp);
+    return results.flat().sort((a, b) => {
+      if (a.timestamp !== b.timestamp) return a.timestamp - b.timestamp;
+      const courtA = parseInt(a.location.name.match(/\d+/)?.[0] ?? '0', 10);
+      const courtB = parseInt(b.location.name.match(/\d+/)?.[0] ?? '0', 10);
+      return courtA - courtB;
+    });
   }
 
   function groupByDate(games: GameEvent[]): Map<string, GameEvent[]> {
