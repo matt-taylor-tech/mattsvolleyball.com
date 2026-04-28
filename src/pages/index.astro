@@ -439,7 +439,7 @@ const heroDatesText = seasonDates
             <div class="mb-6">
               <h3 class="font-display font-bold text-sm text-ocean-600 mb-2">${date}</h3>
               <div class="grid sm:grid-cols-2 gap-2">
-                ${dateGames.map((g) => {
+                ${dateGames.slice().sort((a, b) => extractLocationName(a['5'] as string).localeCompare(extractLocationName(b['5'] as string))).map((g) => {
                   const time = (g['1'] as string).split(' - ')[0];
                   const home = stripHtml(g['3'] as string);
                   const away = stripHtml(g['4'] as string);
