@@ -80,10 +80,10 @@ const gradientClass = dayColors[day] || 'from-ocean-500 to-ocean-600';
       <div class="mb-3 space-y-1">
         {countedDivisions.map((div) => (
           <p
-            class="text-center text-sm text-ocean-700 min-h-[1.25rem]"
+            class="text-center text-sm text-ocean-700 opacity-60 italic min-h-[1.25rem]"
             data-team-count-division={div.id}
             data-division-name={showDivisionPrefix ? div.name : null}
-          >&nbsp;</p>
+          >Checking spots…</p>
         ))}
       </div>
     )}

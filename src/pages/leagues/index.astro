@@ -223,6 +223,7 @@ const faqItems = [
           el.textContent = spotsLeft === 0
             ? `${prefix}All teams set · Join an existing team or as a free agent`
             : `${prefix}${count} of ${max} teams · ${spotsLeft} spot${spotsLeft === 1 ? '' : 's'} left`;
+          el.classList.remove('italic', 'opacity-60');
         });
       } catch {
         // Leave placeholders empty on failure.

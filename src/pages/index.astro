@@ -154,9 +154,9 @@ const heroDatesText = seasonDates
           </p>
           {monCountedDivision && (
             <p
-              class="mt-3 text-sm text-ocean-700 min-h-[1.25rem]"
+              class="mt-3 text-sm text-ocean-700 opacity-60 italic min-h-[1.25rem]"
               data-team-count-division={monCountedDivision.id}
-            >&nbsp;</p>
+            >Checking spots…</p>
           )}
         </div>
 
@@ -611,6 +611,7 @@ const heroDatesText = seasonDates
           el.textContent = spotsLeft === 0
             ? `${prefix}All teams set · Join an existing team or as a free agent`
             : `${prefix}${count} of ${max} teams · ${spotsLeft} spot${spotsLeft === 1 ? '' : 's'} left`;
+          el.classList.remove('italic', 'opacity-60');
         });
       } catch {
         // Leave placeholders empty on failure.
