@@ -3,12 +3,13 @@ import Layout from '../layouts/Layout.astro';
 import ChampionCard from '../components/ChampionCard.astro';
 import { getChampions } from '../lib/champions';
 import { getRegistrationData, formatDate, formatFullDate } from '../lib/registration';
-import { UPCOMING_SEASON_ID, NEXT_NEXT_SEASON_LABEL } from '../lib/seasonConfig';
+import { UPCOMING_DIVISIONS, UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_SEASON_ID, NEXT_NEXT_SEASON_LABEL } from '../lib/seasonConfig';
 import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart } from 'lucide-astro';
 
 const champions = await getChampions();
 const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
 const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
+const monCountedDivision = UPCOMING_DIVISIONS.find((d) => d.day === 'Mon' && d.id in UPCOMING_MAX_TEAMS_BY_DIVISION);
 const heroPromoText = regStatus === 'open' && seasonLabel
   ? `${seasonLabel} registration is open now.`
   : regStatus === 'coming-soon' && seasonLabel
@@ -149,8 +150,14 @@ const heroDatesText = seasonDates
           </div>
           <h3 class="font-display font-bold text-xl text-ocean-600 mb-2">Monday</h3>
           <p class="text-ocean-600/70 text-sm leading-relaxed">
-            3v3 Coed league. New for Summer 2026! Format and schedule determined by registration. May run as double-header. Minimum teams required or league cancelled with full refund.
+            3v3 Coed league. New for Summer 2026! May run as double-header depending on final signups.
           </p>
+          {monCountedDivision && (
+            <p
+              class="mt-3 text-sm text-ocean-700 min-h-[1.25rem]"
+              data-team-count-division={monCountedDivision.id}
+            >&nbsp;</p>
+          )}
         </div>
 
         <div class="text-center p-8 rounded-2xl bg-sand-50 border border-sand-200">
@@ -582,4 +589,32 @@ const heroDatesText = seasonDates
       </a>
     </div>
   </section>
+
+  <script>
+    import { fetchUpcomingTeamCountsByDivision } from '../lib/teamCounts';
+    import { UPCOMING_MAX_TEAMS_BY_DIVISION } from '../lib/seasonConfig';
+
+    (async () => {
+      const slots = document.querySelectorAll<HTMLElement>('[data-team-count-division]');
+      if (slots.length === 0) return;
+      try {
+        const counts = await fetchUpcomingTeamCountsByDivision();
+        slots.forEach((el) => {
+          const divId = el.dataset.teamCountDivision;
+          if (!divId) return;
+          const max = UPCOMING_MAX_TEAMS_BY_DIVISION[divId];
+          if (!max) return;
+          const name = el.dataset.divisionName;
+          const prefix = name ? `${name}: ` : '';
+          const count = counts[divId] ?? 0;
+          const spotsLeft = Math.max(0, max - count);
+          el.textContent = spotsLeft === 0
+            ? `${prefix}All teams set · Join an existing team or as a free agent`
+            : `${prefix}${count} of ${max} teams · ${spotsLeft} spot${spotsLeft === 1 ? '' : 's'} left`;
+        });
+      } catch {
+        // Leave placeholders empty on failure.
+      }
+    })();
+  </script>
 </Layout>

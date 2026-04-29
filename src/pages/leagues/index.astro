@@ -112,12 +112,11 @@ const faqItems = [
           day="Monday"
           format="3v3 Coed"
           price="$65"
-          description="New league night! Schedule, game times, and format determined by registration numbers. May run as double-header format. Minimum teams required or league cancelled with full refund."
+          description="New league night! Schedule, game times, and final format determined by registration. May run as double-header format."
           registrationKnown={hasEntries}
           regEntries={regByDay['monday']}
           details={[
             '8 week season: 7 regular season weeks plus 1 playoff week',
-            'Schedule and format TBD based on registration numbers',
             'May run as double-header format depending on signups',
             'Form your own team or join as individual',
             'All skill levels welcome',
@@ -127,7 +126,7 @@ const faqItems = [
           day="Tuesday"
           format="4v4"
           price="$65"
-          description="Maximum 14 teams. Requires 1 female minimum per team. Welcomes all skill levels, typically intermediate to competitive."
+          description="Requires 1 female minimum per team. Welcomes all skill levels, typically intermediate to competitive."
           highlight="Two divisions: recreational and competitive with separate playoff nights."
           registrationKnown={hasEntries}
           regEntries={regByDay['tuesday']}
@@ -159,7 +158,7 @@ const faqItems = [
           day="Thursday"
           format="4v4"
           price="$65"
-          description="Maximum 16 teams. Requires 1 female minimum per team. Welcomes all skill levels, typically intermediate to competitive."
+          description="Requires 1 female minimum per team. Welcomes all skill levels, typically intermediate to competitive."
           highlight="Two divisions: recreational and competitive with separate playoff nights."
           registrationKnown={hasEntries}
           regEntries={regByDay['thursday']}
@@ -202,4 +201,32 @@ const faqItems = [
       </a>
     </div>
   </section>
+
+  <script>
+    import { fetchUpcomingTeamCountsByDivision } from '../../lib/teamCounts';
+    import { UPCOMING_MAX_TEAMS_BY_DIVISION } from '../../lib/seasonConfig';
+
+    (async () => {
+      const slots = document.querySelectorAll<HTMLElement>('[data-team-count-division]');
+      if (slots.length === 0) return;
+      try {
+        const counts = await fetchUpcomingTeamCountsByDivision();
+        slots.forEach((el) => {
+          const divId = el.dataset.teamCountDivision;
+          if (!divId) return;
+          const max = UPCOMING_MAX_TEAMS_BY_DIVISION[divId];
+          if (!max) return;
+          const name = el.dataset.divisionName;
+          const prefix = name ? `${name}: ` : '';
+          const count = counts[divId] ?? 0;
+          const spotsLeft = Math.max(0, max - count);
+          el.textContent = spotsLeft === 0
+            ? `${prefix}All teams set · Join an existing team or as a free agent`
+            : `${prefix}${count} of ${max} teams · ${spotsLeft} spot${spotsLeft === 1 ? '' : 's'} left`;
+        });
+      } catch {
+        // Leave placeholders empty on failure.
+      }
+    })();
+  </script>
 </Layout>

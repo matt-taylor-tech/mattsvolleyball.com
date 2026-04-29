@@ -1,5 +1,6 @@
 ---
 import type { RegCard } from '../lib/registration';
+import { UPCOMING_DIVISIONS, UPCOMING_MAX_TEAMS_BY_DIVISION } from '../lib/seasonConfig';
 
 interface Props {
   day: string;
@@ -15,6 +16,11 @@ interface Props {
 }
 
 const { day, format, description, details, highlight, price, registrationUrl = 'https://app.teamlinkt.com/register/find/mattsvolleyball', registrationKnown = false, link, regEntries } = Astro.props;
+const dayKey = day.slice(0, 3);
+const countedDivisions = UPCOMING_DIVISIONS.filter(
+  (d) => d.day === dayKey && d.id in UPCOMING_MAX_TEAMS_BY_DIVISION
+);
+const showDivisionPrefix = countedDivisions.length > 1;
 const hasRegEntries = regEntries && regEntries.length > 0;
 
 const dayColors: Record<string, string> = {
@@ -69,6 +75,18 @@ const gradientClass = dayColors[day] || 'from-ocean-500 to-ocean-600';
         </li>
       ))}
     </ul>
+
+    {countedDivisions.length > 0 && (
+      <div class="mb-3 space-y-1">
+        {countedDivisions.map((div) => (
+          <p
+            class="text-center text-sm text-ocean-700 min-h-[1.25rem]"
+            data-team-count-division={div.id}
+            data-division-name={showDivisionPrefix ? div.name : null}
+          >&nbsp;</p>
+        ))}
+      </div>
+    )}
 
     <!-- Registration CTA -->
     <div class="reg-cta space-y-3">

@@ -136,3 +136,14 @@ export const REGISTRATION_PAGE_URL = 'https://app.teamlinkt.com/register/find/ma
 export const EVENTS_API    = `${API_BASE}/getAllEvents/${ORG_ID}`;
 export const TEAMS_API_URL = `${API_BASE}/getTeams/${ORG_ID}/${ACTIVE_SEASON_ID}`;
 export const STANDINGS_API_URL = `${API_BASE}/getStandings/${ORG_ID}/${ACTIVE_SEASON_ID}`;
+export const UPCOMING_TEAMS_API_URL = `${API_BASE}/getTeams/${ORG_ID}/${UPCOMING_SEASON_ID}`;
+
+// Max teams per division for the upcoming season. Keyed by division id.
+// Wednesday omitted because shuffle is individual sign-ups, not team registrations.
+export const UPCOMING_MAX_TEAMS_BY_DIVISION: Record<string, number> = {
+  '293497': 12, // Mon 3v3 Coed
+  '280407': 8,  // Tue Competitive
+  '280406': 6,  // Tue Recreational
+  '280408': 10, // Thu Competitive
+  '280409': 6,  // Thu Recreational
+};
