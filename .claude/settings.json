@@ -11,7 +11,20 @@
       "Bash(git push:*)",
       "Bash(npx astro:*)",
       "WebFetch(domain:localhost)",
-      "Bash(curl -s http://localhost:4321/leagues/playoffs/)"
+      "Bash(curl -s http://localhost:4321/leagues/playoffs/)",
+      "Bash(git rebase *)",
+      "Bash(GIT_EDITOR=true git rebase --continue)",
+      "Bash(git -c core.editor=true rebase --continue)",
+      "Bash(git diff *)",
+      "Read(//tmp/**)",
+      "Bash(git branch *)",
+      "Bash(git reset *)",
+      "Bash(curl -s http://localhost:4321/ -o /dev/null)",
+      "Bash(curl -s http://localhost:4321/leagues/)",
+      "Bash(curl -s http://localhost:4321/)",
+      "Bash(curl -s -X POST 'https://app.mattsvolleyball.com/leagues/getTeams/10757/52672' --data 'group_ids[division]=293497&season_id=52672')",
+      "Bash(curl -s -X POST https://app.mattsvolleyball.com/leagues/getTeams/10757/52672 --data 'group_ids[division]=__TRACKED_VAR__&season_id=52672')",
+      "Bash(kill %1)"
     ]
   }
 }
