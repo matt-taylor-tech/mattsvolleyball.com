@@ -17,11 +17,17 @@ interface Props {
 
 const { day, format, description, details, highlight, price, registrationUrl = 'https://app.teamlinkt.com/register/find/mattsvolleyball', registrationKnown = false, link, regEntries } = Astro.props;
 const dayKey = day.slice(0, 3);
-const countedDivisions = UPCOMING_DIVISIONS.filter(
+const dayDivisions = UPCOMING_DIVISIONS.filter(
   (d) => d.day === dayKey && d.id in UPCOMING_MAX_TEAMS_BY_DIVISION
 );
-const showDivisionPrefix = countedDivisions.length > 1;
 const hasRegEntries = regEntries && regEntries.length > 0;
+
+// Match a registration entry to a counted division by name keyword.
+// Checks both divisionLabel (e.g. "Competitive") and name (e.g. "Monday 3v3 Coed").
+function divisionFor(entry: RegCard) {
+  const haystack = `${entry.divisionLabel || ''} ${entry.name || ''}`.toLowerCase();
+  return dayDivisions.find((d) => haystack.includes(d.name.toLowerCase()));
+}
 
 const dayColors: Record<string, string> = {
   Monday: 'from-emerald-600 to-emerald-700',
@@ -76,23 +82,12 @@ const gradientClass = dayColors[day] || 'from-ocean-500 to-ocean-600';
       ))}
     </ul>
 
-    {countedDivisions.length > 0 && (
-      <div class="mb-3 space-y-1">
-        {countedDivisions.map((div) => (
-          <p
-            class="text-center text-sm text-ocean-700 opacity-60 italic min-h-[1.25rem]"
-            data-team-count-division={div.id}
-            data-division-name={showDivisionPrefix ? div.name : null}
-          >Checking spots…</p>
-        ))}
-      </div>
-    )}
-
     <!-- Registration CTA -->
     <div class="reg-cta space-y-3">
       {hasRegEntries ? (
         regEntries.map((entry) => {
           const label = entry.divisionLabel || entry.name;
+          const matchedDiv = divisionFor(entry);
           return entry.isOpen ? (
             <div>
               <a href={entry.regUrl} target="_blank" rel="noopener noreferrer" class="btn-primary text-center w-full block">
@@ -101,6 +96,12 @@ const gradientClass = dayColors[day] || 'from-ocean-500 to-ocean-600';
               <p class="text-xs text-ocean-600/70 text-center mt-1">
                 {entry.daysLeft} day{entry.daysLeft !== 1 ? 's' : ''} left · Closes {entry.closeDate}
               </p>
+              {matchedDiv && (
+                <p
+                  class="text-xs text-ocean-700 opacity-60 italic text-center mt-1 min-h-[1rem]"
+                  data-team-count-division={matchedDiv.id}
+                >Checking spots…</p>
+              )}
             </div>
           ) : entry.isFuture ? (
             <div>

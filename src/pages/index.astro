@@ -604,13 +604,11 @@ const heroDatesText = seasonDates
           if (!divId) return;
           const max = UPCOMING_MAX_TEAMS_BY_DIVISION[divId];
           if (!max) return;
-          const name = el.dataset.divisionName;
-          const prefix = name ? `${name}: ` : '';
           const count = counts[divId] ?? 0;
           const spotsLeft = Math.max(0, max - count);
           el.textContent = spotsLeft === 0
-            ? `${prefix}All teams set · Join an existing team or as a free agent`
-            : `${prefix}${count} of ${max} teams · ${spotsLeft} spot${spotsLeft === 1 ? '' : 's'} left`;
+            ? 'All teams set · Join an existing team or as a free agent'
+            : `${count} of ${max} teams · ${spotsLeft} spot${spotsLeft === 1 ? '' : 's'} left`;
           el.classList.remove('italic', 'opacity-60');
         });
       } catch {
