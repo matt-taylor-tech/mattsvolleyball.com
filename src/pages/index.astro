@@ -397,17 +397,21 @@ const heroDatesText = seasonDates
             }
           })),
         ]);
-        allGames.sort((a, b) => (a['6'] as number) - (b['6'] as number));
+        // Show today + next 6 days. Drops stale "upcoming" rows from past dates
+        // that never had scores entered.
+        const startOfTodaySec = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000);
+        const oneWeek = 7 * 24 * 60 * 60;
+        const games = allGames
+          .filter((g) => {
+            const ts = g['6'] as number;
+            return ts >= startOfTodaySec && ts < startOfTodaySec + oneWeek;
+          })
+          .sort((a, b) => (a['6'] as number) - (b['6'] as number));
 
-        if (allGames.length === 0) {
+        if (games.length === 0) {
           loading.classList.add('hidden');
           return;
         }
-
-        // Get the first game's date, then include all games within 7 days
-        const firstTimestamp = allGames[0]['6'] as number;
-        const oneWeek = 7 * 24 * 60 * 60;
-        const games = allGames.filter((g) => (g['6'] as number) - firstTimestamp < oneWeek);
 
         function stripHtml(html: string): string {
           const tmp = document.createElement('div');
