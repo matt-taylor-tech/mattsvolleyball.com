@@ -1,0 +1,221 @@
+<!--
+  Matt's Volleyball : League-wide registration email
+  ---------------------------------------------------
+  PLACEHOLDERS to fill in before sending (search-and-replace):
+    {{SEASON_LABEL}}         e.g. "Summer I 2026"     (see src/lib/seasonConfig.ts, UPCOMING_SEASON_LABEL)
+    {{SEASON_START_DATE}}    e.g. "May 18"            (date the first night of play begins)
+    {{SEASON_WEEKS}}         e.g. "7"                 (number of regular-season weeks)
+    {{REG_CLOSE_DATE}}       e.g. "May 11"            (date registration closes; pick the earliest division close)
+    {{PRICE_PER_PLAYER}}     e.g. "$60"               (most common per-player price across divisions)
+
+  USAGE
+    - Brevo: paste the entire <html>...</html> into the HTML editor.
+    - Teamlinkt GUI: rebuild visually using this as a copy/CTA reference; the inline CSS won't survive their editor.
+
+  Keep it 600px wide. Don't add external CSS. Every style is inline so Gmail and Outlook render it.
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="x-apple-disable-message-reformatting" />
+    <meta name="color-scheme" content="light" />
+    <meta name="supported-color-schemes" content="light" />
+    <title>{{SEASON_LABEL}} Registration is Open</title>
+    <style>
+      :root {
+        color-scheme: light;
+        supported-color-schemes: light;
+      }
+      @media only screen and (max-width: 600px) {
+        .email-pad { padding-left: 20px !important; padding-right: 20px !important; }
+        .email-h1 { font-size: 24px !important; line-height: 1.2 !important; }
+        .email-cta-btn { display: block !important; padding: 16px 24px !important; }
+        .email-cta-table { width: 100% !important; }
+        .email-cta-table td { width: 100% !important; }
+      }
+    </style>
+  </head>
+  <body style="margin:0;padding:0;background-color:#F0EEEA;font-family:'Helvetica Neue',Arial,sans-serif;color:#363133;-webkit-text-size-adjust:100%;">
+    <!-- Preheader (hidden, shows in inbox preview) -->
+    <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#F0EEEA;">
+      {{SEASON_LABEL}} sign-ups are open at Matt's Volleyball. Mon 3v3, Tue/Thu 4v4, Wed Shuffle.
+    </div>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F0EEEA;">
+      <tr>
+        <td align="center" style="padding:24px 12px;">
+          <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:100%;background-color:#FFFFFF;border-radius:6px;overflow:hidden;">
+
+            <!-- Banner -->
+            <tr>
+              <td class="email-pad" style="background:linear-gradient(135deg,#BB4430 0%,#A13926 100%);background-color:#BB4430;padding:32px 32px 28px 32px;text-align:left;color:#FFFFFF;">
+                <p style="margin:0 0 6px 0;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#FFFFFF;opacity:0.85;">Matt's Volleyball</p>
+                <h1 class="email-h1" style="margin:0;font-family:'Helvetica Neue',Arial,sans-serif;font-weight:800;font-size:30px;line-height:1.15;color:#FFFFFF;">
+                  {{SEASON_LABEL}} registration is open
+                </h1>
+                <p style="margin:10px 0 0 0;font-size:16px;line-height:1.4;color:#FFFFFF;opacity:0.95;">
+                  Lock in your spot before divisions fill up.
+                </p>
+              </td>
+            </tr>
+
+            <!-- Body -->
+            <tr>
+              <td class="email-pad" style="padding:28px 32px 8px 32px;">
+                <p style="margin:0 0 16px 0;font-size:16px;line-height:1.55;color:#363133;">
+                  Hey there,
+                </p>
+                <p style="margin:0 0 16px 0;font-size:16px;line-height:1.55;color:#363133;">
+                  We're back for <strong>{{SEASON_LABEL}}</strong>. {{SEASON_WEEKS}} weeks of regular-season play start <strong>{{SEASON_START_DATE}}</strong>, and registration closes <strong>{{REG_CLOSE_DATE}}</strong> (or sooner once a division fills).
+                </p>
+
+                <!-- Highlight callout -->
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 20px 0;">
+                  <tr>
+                    <td style="background-color:#F7F6F3;border-left:4px solid #BB4430;padding:14px 16px;border-radius:0 4px 4px 0;">
+                      <p style="margin:0;font-size:15px;line-height:1.5;color:#363133;">
+                        Pick the night that fits your schedule and skill level. From <strong>$60/player</strong>, all gear and refs included.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Division grid -->
+            <tr>
+              <td class="email-pad" style="padding:0 32px 8px 32px;">
+                <h2 style="margin:0 0 14px 0;font-family:'Helvetica Neue',Arial,sans-serif;font-weight:800;font-size:20px;line-height:1.2;color:#363133;">
+                  Choose your night
+                </h2>
+              </td>
+            </tr>
+
+            <!-- Monday 3v3 Coed -->
+            <tr>
+              <td class="email-pad" style="padding:0 32px 12px 32px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #E8E6E1;border-radius:6px;">
+                  <tr>
+                    <td style="padding:16px 18px;">
+                      <p style="margin:0 0 4px 0;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:#BB4430;font-weight:700;">Monday · NEW</p>
+                      <h3 style="margin:0 0 6px 0;font-size:18px;font-weight:700;color:#363133;">3v3 Coed</h3>
+                      <p style="margin:0;font-size:14px;line-height:1.5;color:#4B5563;">
+                        Faster pace, smaller teams, more touches per player. Great for sharper hitters and anyone wanting more reps.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Tuesday -->
+            <tr>
+              <td class="email-pad" style="padding:0 32px 12px 32px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #E8E6E1;border-radius:6px;">
+                  <tr>
+                    <td style="padding:16px 18px;">
+                      <p style="margin:0 0 4px 0;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:#BB4430;font-weight:700;">Tuesday · 4v4</p>
+                      <h3 style="margin:0 0 6px 0;font-size:18px;font-weight:700;color:#363133;">Competitive &amp; Recreational</h3>
+                      <p style="margin:0;font-size:14px;line-height:1.5;color:#4B5563;">
+                        Two skill tiers so you play teams at your level. Bring a full roster or sign up as a free agent.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Wednesday Shuffle -->
+            <tr>
+              <td class="email-pad" style="padding:0 32px 12px 32px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #E8E6E1;border-radius:6px;">
+                  <tr>
+                    <td style="padding:16px 18px;">
+                      <p style="margin:0 0 4px 0;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:#BB4430;font-weight:700;">Wednesday · 4v4</p>
+                      <h3 style="margin:0 0 6px 0;font-size:18px;font-weight:700;color:#363133;">Shuffle (One Big Happy Team)</h3>
+                      <p style="margin:0;font-size:14px;line-height:1.5;color:#4B5563;">
+                        Solo sign-up, mixed teams every week. The most social night of the week. Show up, get placed, play.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Thursday -->
+            <tr>
+              <td class="email-pad" style="padding:0 32px 22px 32px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #E8E6E1;border-radius:6px;">
+                  <tr>
+                    <td style="padding:16px 18px;">
+                      <p style="margin:0 0 4px 0;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:#BB4430;font-weight:700;">Thursday · 4v4</p>
+                      <h3 style="margin:0 0 6px 0;font-size:18px;font-weight:700;color:#363133;">Competitive &amp; Recreational</h3>
+                      <p style="margin:0;font-size:14px;line-height:1.5;color:#4B5563;">
+                        Same two-tier setup as Tuesday. The Thursday rec division usually has the most spots open late.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Bulletproof CTA button -->
+            <tr>
+              <td align="center" class="email-pad" style="padding:0 32px 28px 32px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" class="email-cta-table" style="margin:0 auto;">
+                  <tr>
+                    <td align="center" bgcolor="#BB4430" style="background-color:#BB4430;border-radius:4px;">
+                      <a class="email-cta-btn" href="https://app.teamlinkt.com/register/find/mattsvolleyball"
+                         target="_blank"
+                         style="display:inline-block;padding:14px 36px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:16px;font-weight:700;color:#FFFFFF;text-decoration:none;border-radius:4px;">
+                        Sign Up Now
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:14px 0 0 0;font-size:13px;color:#64748B;text-align:center;">
+                  Spots are filled first-come, first-served.
+                </p>
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td class="email-pad" style="background-color:#F7F6F3;padding:20px 32px;border-top:1px solid #E8E6E1;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto 16px auto;">
+                  <tr>
+                    <td style="padding:0 14px;">
+                      <a href="https://www.facebook.com/groups/mattsvolleyball/" target="_blank" rel="noopener noreferrer" style="text-decoration:none;">
+                        <img src="https://cdn.simpleicons.org/facebook/64748B" width="32" height="32" alt="Facebook" style="display:block;border:0;width:32px;height:32px;" />
+                      </a>
+                    </td>
+                    <td style="padding:0 14px;">
+                      <a href="https://instagram.com/mattsvolleyball/" target="_blank" rel="noopener noreferrer" style="text-decoration:none;">
+                        <img src="https://cdn.simpleicons.org/instagram/64748B" width="32" height="32" alt="Instagram" style="display:block;border:0;width:32px;height:32px;" />
+                      </a>
+                    </td>
+                    <td style="padding:0 14px;">
+                      <a href="https://chat.whatsapp.com/BQmVIkBv1bc7AN7KZlzxjU?mode=r_c" target="_blank" rel="noopener noreferrer" style="text-decoration:none;">
+                        <img src="https://cdn.simpleicons.org/whatsapp/64748B" width="32" height="32" alt="WhatsApp" style="display:block;border:0;width:32px;height:32px;" />
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:0 0 6px 0;font-size:13px;line-height:1.5;color:#64748B;text-align:center;">
+                  Questions? Just reply to this email.
+                </p>
+                <p style="margin:0;font-size:12px;line-height:1.5;color:#87847D;text-align:center;">
+                  Matt's Volleyball &middot; <a href="https://mattsvolleyball.com" style="color:#64748B;text-decoration:underline;">mattsvolleyball.com</a><br />
+                  You're receiving this because you've registered with us before.
+                </p>
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
