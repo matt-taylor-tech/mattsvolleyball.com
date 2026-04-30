@@ -203,24 +203,34 @@ const faqItems = [
   </section>
 
   <script>
-    import { fetchUpcomingTeamCountsByDivision } from '../../lib/teamCounts';
-    import { UPCOMING_MAX_TEAMS_BY_DIVISION } from '../../lib/seasonConfig';
+    import { fetchUpcomingTeamCountsByDivision, fetchUpcomingPlayerCountsByDivision } from '../../lib/teamCounts';
+    import { UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_PLAYER_CAPS_BY_DIVISION } from '../../lib/seasonConfig';
 
     (async () => {
       const slots = document.querySelectorAll<HTMLElement>('[data-team-count-division]');
       if (slots.length === 0) return;
       try {
-        const counts = await fetchUpcomingTeamCountsByDivision();
+        const [teamCounts, playerCounts] = await Promise.all([
+          fetchUpcomingTeamCountsByDivision(),
+          fetchUpcomingPlayerCountsByDivision(),
+        ]);
         slots.forEach((el) => {
           const divId = el.dataset.teamCountDivision;
           if (!divId) return;
-          const max = UPCOMING_MAX_TEAMS_BY_DIVISION[divId];
+          const isPlayers = el.dataset.countUnit === 'players';
+          const max = isPlayers ? UPCOMING_PLAYER_CAPS_BY_DIVISION[divId] : UPCOMING_MAX_TEAMS_BY_DIVISION[divId];
           if (!max) return;
-          const count = counts[divId] ?? 0;
+          const count = isPlayers ? (playerCounts[divId] ?? 0) : (teamCounts[divId] ?? 0);
+          const unit = isPlayers ? 'players' : 'teams';
+          const name = el.dataset.divisionName;
+          const prefix = name ? `${name}: ` : '';
           const spotsLeft = Math.max(0, max - count);
+          const cappedMsg = isPlayers
+            ? `${prefix}All ${max} player spots taken`
+            : `${prefix}All teams set · Join an existing team or as a free agent`;
           el.textContent = spotsLeft === 0
-            ? 'All teams set · Join an existing team or as a free agent'
-            : `${count} of ${max} teams · ${spotsLeft} spot${spotsLeft === 1 ? '' : 's'} left`;
+            ? cappedMsg
+            : `${prefix}${count} of ${max} ${unit} · ${spotsLeft} spot${spotsLeft === 1 ? '' : 's'} left`;
           el.classList.remove('italic', 'opacity-60');
         });
       } catch {

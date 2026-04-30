@@ -24,7 +24,19 @@
       "Bash(curl -s http://localhost:4321/)",
       "Bash(curl -s -X POST 'https://app.mattsvolleyball.com/leagues/getTeams/10757/52672' --data 'group_ids[division]=293497&season_id=52672')",
       "Bash(curl -s -X POST https://app.mattsvolleyball.com/leagues/getTeams/10757/52672 --data 'group_ids[division]=__TRACKED_VAR__&season_id=52672')",
-      "Bash(kill %1)"
+      "Bash(kill %1)",
+      "Bash(curl -s -X POST 'https://app.mattsvolleyball.com/leagues/getTeams/10757/52672' --data 'group_ids[division]=280410&season_id=52672')",
+      "Bash(curl -s -o /tmp/r.txt -w 'HTTP:%{http_code} bytes:%{size_download}\\\\n' https://app.mattsvolleyball.com/__TRACKED_VAR__)",
+      "Bash(curl -s 'https://app.mattsvolleyball.com/leagues/getTeam/10757/860408')",
+      "Bash(python -m json.tool)",
+      "Bash(curl -s -X POST 'https://app.mattsvolleyball.com/leagues/getRoster/10757/860408' -d 'season_id=52672')",
+      "Bash(curl -s 'https://app.mattsvolleyball.com/leagues/getRoster?team_id=860408')",
+      "Bash(curl -s 'https://app.mattsvolleyball.com/leagues/getMembers/10757/860408')",
+      "Bash(curl -s 'https://app.mattsvolleyball.com/leagues/getTeamMembers/10757/860408')",
+      "Bash(curl -s -X POST 'https://app.mattsvolleyball.com/leagues/getTeams/10757/51955' --data 'group_ids[division]=276790&season_id=51955')",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(d[0] if d else 'empty'\\)\")",
+      "Bash(curl -s 'https://app.mattsvolleyball.com/leagues/getTeam/10757/816657')",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); t=d['payload']['Team']; print\\('team_member_count:', t.get\\('team_member_count'\\)\\); print\\('player_count:', t.get\\('player_count'\\)\\)\")"
     ]
   }
 }

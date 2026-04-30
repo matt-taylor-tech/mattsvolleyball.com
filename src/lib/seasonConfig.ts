@@ -139,11 +139,18 @@ export const STANDINGS_API_URL = `${API_BASE}/getStandings/${ORG_ID}/${ACTIVE_SE
 export const UPCOMING_TEAMS_API_URL = `${API_BASE}/getTeams/${ORG_ID}/${UPCOMING_SEASON_ID}`;
 
 // Max teams per division for the upcoming season. Keyed by division id.
-// Wednesday omitted because shuffle is individual sign-ups, not team registrations.
+// Wednesday uses a player cap instead — see UPCOMING_PLAYER_CAPS_BY_DIVISION.
 export const UPCOMING_MAX_TEAMS_BY_DIVISION: Record<string, number> = {
   '293497': 12, // Mon 3v3 Coed
   '280407': 8,  // Tue Competitive
   '280406': 6,  // Tue Recreational
   '280408': 10, // Thu Competitive
   '280409': 6,  // Thu Recreational
+};
+
+// Max players per division for the upcoming season. Used for shuffle-style
+// leagues where individuals sign up to a single roster (One Big Happy Team)
+// rather than registering as teams.
+export const UPCOMING_PLAYER_CAPS_BY_DIVISION: Record<string, number> = {
+  '280410': 28, // Wed Shuffle: One Big Happy Team
 };
