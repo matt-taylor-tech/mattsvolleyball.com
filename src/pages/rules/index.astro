@@ -1,6 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { Circle, ArrowUp, Zap, Grid3x3, Check, Ban, Flame, ArrowUpFromLine, Cable, RefreshCw, ArrowLeftRight, Trophy } from 'lucide-astro';
+import { Circle, ArrowUp, Zap, Grid3x3, Check, Ban, Flame, ArrowUpFromLine, Cable, RefreshCw, ArrowLeftRight, Trophy, Lightbulb } from 'lucide-astro';
 ---
 
 <Layout title="Rules | Matt's Volleyball" description="Official rules for Matt's Volleyball sand volleyball leagues in Lake Norman. Game rules, serving, spiking, net play, substitutions, and playoffs.">
@@ -251,6 +251,22 @@ import { Circle, ArrowUp, Zap, Grid3x3, Check, Ban, Flame, ArrowUpFromLine, Cabl
                 <p class="mb-2">If your team hits the ball into the power line <strong>on your side</strong> of the court, <strong>keep playing</strong>.</p>
                 <p>If your team hits the ball into the power line on the <strong>OTHER side</strong> of the court, the play is dead, and your team <strong>loses the point</strong>.</p>
               </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- LIGHTS OUT -->
+        <div>
+          <h2 class="font-display font-extrabold text-2xl md:text-3xl text-ocean-600 mb-6 flex items-center gap-3">
+            <span class="w-10 h-10 bg-ocean-700 rounded-xl flex items-center justify-center text-white">
+              <Lightbulb class="w-5 h-5" />
+            </span>
+            Lights Out
+          </h2>
+          <ul class="space-y-4 text-ocean-700 leading-relaxed list-none pl-0">
+            <li class="flex items-start gap-3">
+              <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-ocean-500" viewBox="0 0 24 24" fill="currentColor"><path d="M19.04 4.85C17.34 3.2 15.33 2.25 13 2v3.62l9 5.18c-.28-2.3-1.27-4.3-2.96-5.95M12 22c3.44 0 6.16-1.38 8.17-4.14L17.06 16l-8.99 5.2c1.25.53 2.57.8 3.93.8m1-10.59l8.15 4.66c.44-.94.73-1.93.85-2.96l-9-5.18zm-9.12 6.4c.66.91 1.38 1.65 2.17 2.19l8.99-5.1L12 13.15zM11.04 2C10 2.09 9 2.36 8 2.8v10.35l3.04-1.74zM2 12c0 1.39.3 2.77.89 4.12L6 14.28V4c-2.67 2-4 4.65-4 8"/></svg>
+              <span>The park's stadium lights are on a timer and shut off at a scheduled time each night. When they go out, there is a brief 2-second darkness before the court's motion-sensor lights kick on. If a point is actively in play when the lights go out, <strong>replay the point</strong>. No exceptions — it's not fair to lose a point to the darkness.</span>
             </li>
           </ul>
         </div>
