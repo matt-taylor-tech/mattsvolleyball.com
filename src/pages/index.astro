@@ -446,16 +446,23 @@ const heroDatesText = seasonDates
             }
           })),
         ]);
-        // Show today + next 6 days. Drops stale "upcoming" rows from past dates
-        // that never had scores entered.
+        // Show upcoming dates pulled from TeamLinkt and drop stale rows that remain
+        // marked as "upcoming" after scores were never entered.
         const startOfTodaySec = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000);
-        const oneWeek = 7 * 24 * 60 * 60;
-        const games = allGames
-          .filter((g) => {
-            const ts = g['6'] as number;
-            return ts >= startOfTodaySec && ts < startOfTodaySec + oneWeek;
-          })
+        const upcomingGames = allGames
+          .filter((g) => (g['6'] as number) >= startOfTodaySec)
           .sort((a, b) => (a['6'] as number) - (b['6'] as number));
+
+        // Keep the homepage compact by only showing the next few game dates.
+        const MAX_DATES_TO_SHOW = 4;
+        const allowedDates = new Set<string>();
+        for (const game of upcomingGames) {
+          if (allowedDates.size >= MAX_DATES_TO_SHOW && !allowedDates.has(game['0'] as string)) {
+            continue;
+          }
+          allowedDates.add(game['0'] as string);
+        }
+        const games = upcomingGames.filter((g) => allowedDates.has(g['0'] as string));
 
         if (games.length === 0) {
           loading.classList.add('hidden');
