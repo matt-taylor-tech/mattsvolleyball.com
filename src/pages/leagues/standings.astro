@@ -118,11 +118,68 @@ import {
     score_for: number;
     score_against: number;
     win_percent: string;
+    [key: string]: unknown;
+  }
+
+  interface StandingColumnMeta {
+    abbreviation: string;
+    column_name: string;
+    column_type: string;
   }
 
   interface StandingsResponse {
-    columns: Array<{ AssociationStandingColumn: { abbreviation: string; column_name: string; column_type: string } }>;
+    columns: Array<{ AssociationStandingColumn: StandingColumnMeta }>;
     standings: StandingEntry[];
+  }
+
+  // Head-to-head is not exposed as a standings column in TeamLinkt,
+  // so the table follows the remaining visible tiebreakers in this order.
+  const TIEBREAKER_COLUMN_ORDER = [
+    'win_percent',
+    'score_differential',
+    'score_for',
+    'score_against',
+    'total_wins',
+    'total_points',
+    'set_points_differential',
+    'games_back',
+  ];
+
+  function getOrderedColumns(data: StandingsResponse): StandingColumnMeta[] {
+    const incoming = (data.columns || []).map((c) => c.AssociationStandingColumn).filter(Boolean);
+    const uniqueByType = new Map<string, StandingColumnMeta>();
+    for (const column of incoming) {
+      if (!uniqueByType.has(column.column_type)) {
+        uniqueByType.set(column.column_type, column);
+      }
+    }
+
+    const ordered: StandingColumnMeta[] = [];
+    const pushIfPresent = (columnType: string) => {
+      const col = uniqueByType.get(columnType);
+      if (!col) return;
+      ordered.push(col);
+      uniqueByType.delete(columnType);
+    };
+
+    for (const columnType of TIEBREAKER_COLUMN_ORDER) pushIfPresent(columnType);
+
+    for (const column of incoming) {
+      if (!uniqueByType.has(column.column_type)) continue;
+      ordered.push(column);
+      uniqueByType.delete(column.column_type);
+    }
+
+    return ordered;
+  }
+
+  function formatColumnValue(entry: StandingEntry, column: StandingColumnMeta): string {
+    const raw = entry[column.column_type];
+    if (raw === null || raw === undefined || raw === '') return '—';
+    if (column.column_type === 'win_percent' && typeof raw === 'number') {
+      return raw.toFixed(3);
+    }
+    return String(raw);
   }
 
   function setSyncStamp(id: string) {
@@ -160,6 +217,8 @@ import {
     container.classList.remove('hidden');
 
     const standings = data.standings;
+    const orderedColumns = getOrderedColumns(data);
+    const mobileColumns = orderedColumns.slice(0, 4);
 
     // Mobile cards + desktop table
     container.innerHTML = `
@@ -174,11 +233,8 @@ import {
               </div>
               <span class="text-sm font-bold text-ocean-600">${s.total_wins}-${s.total_losses}${s.total_ties > 0 ? `-${s.total_ties}` : ''}</span>
             </div>
-            <div class="flex gap-4 text-xs text-ocean-500 ml-9">
-              <span>GP: ${s.games_played}</span>
-              <span>PF: ${s.score_for}</span>
-              <span>PA: ${s.score_against}</span>
-              <span>Pts: ${s.total_points}</span>
+            <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-ocean-500 ml-9">
+              ${mobileColumns.map((col) => `<span>${col.abbreviation}: ${formatColumnValue(s, col)}</span>`).join('')}
             </div>
           </div>
         `).join('')}
@@ -191,13 +247,12 @@ import {
             <tr class="border-b border-sand-200">
               <th class="text-left px-4 py-3 text-sm font-display font-bold text-ocean-600">#</th>
               <th class="text-left px-4 py-3 text-sm font-display font-bold text-ocean-600">Team</th>
-              <th class="text-right px-3 py-3 text-sm font-display font-bold text-ocean-600">GP</th>
-              <th class="text-right px-3 py-3 text-sm font-display font-bold text-ocean-600">W</th>
-              <th class="text-right px-3 py-3 text-sm font-display font-bold text-ocean-600">L</th>
-              <th class="text-right px-3 py-3 text-sm font-display font-bold text-ocean-600">T</th>
-              <th class="text-right px-3 py-3 text-sm font-display font-bold text-ocean-600">PF</th>
-              <th class="text-right px-3 py-3 text-sm font-display font-bold text-ocean-600">PA</th>
-              <th class="text-right px-4 py-3 text-sm font-display font-bold text-ocean-600">Pts</th>
+              ${orderedColumns.map((col, idx) => `
+                <th
+                  title="${col.column_name}"
+                  class="text-right ${idx === orderedColumns.length - 1 ? 'px-4' : 'px-3'} py-3 text-sm font-display font-bold text-ocean-600 whitespace-nowrap"
+                >${col.abbreviation}</th>
+              `).join('')}
             </tr>
           </thead>
           <tbody>
@@ -205,13 +260,9 @@ import {
               <tr class="border-b border-sand-200 ${i % 2 === 1 ? 'bg-sand-50' : ''}">
                 <td class="px-4 py-2 text-sm font-bold text-ocean-500">${i + 1}</td>
                 <td class="px-4 py-2 text-sm font-bold whitespace-nowrap"><a href="/leagues/team/?name=${encodeURIComponent(s.Team.name)}" class="text-ocean-700 hover:text-ocean-500 transition-colors">${s.Team.name}</a></td>
-                <td class="px-3 py-2 text-sm text-ocean-700 text-right tabular-nums">${s.games_played}</td>
-                <td class="px-3 py-2 text-sm text-ocean-700 text-right tabular-nums">${s.total_wins}</td>
-                <td class="px-3 py-2 text-sm text-ocean-700 text-right tabular-nums">${s.total_losses}</td>
-                <td class="px-3 py-2 text-sm text-ocean-700 text-right tabular-nums">${s.total_ties}</td>
-                <td class="px-3 py-2 text-sm text-ocean-700 text-right tabular-nums">${s.score_for}</td>
-                <td class="px-3 py-2 text-sm text-ocean-700 text-right tabular-nums">${s.score_against}</td>
-                <td class="px-4 py-2 text-sm font-bold text-ocean-700 text-right tabular-nums">${s.total_points}</td>
+                ${orderedColumns.map((col, idx) => `
+                  <td class="${idx === orderedColumns.length - 1 ? 'px-4 font-bold' : 'px-3'} py-2 text-sm text-ocean-700 text-right tabular-nums">${formatColumnValue(s, col)}</td>
+                `).join('')}
               </tr>
             `).join('')}
           </tbody>
