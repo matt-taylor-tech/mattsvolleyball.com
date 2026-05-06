@@ -21,8 +21,11 @@ const r2Base = import.meta.env.PUBLIC_R2_BASE_URL || '';
       <img
         src={`${r2Base}${photo}`}
         alt={`${teamName} - ${season} ${year} Champions`}
+        width="600"
+        height="600"
         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         loading="lazy"
+        decoding="async"
       />
     </div>
   ) : (
