@@ -49,6 +49,9 @@ async function updateRegistrationCTA() {
     const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
 
     const updateHomeHero = () => {
+      const heroSection = document.querySelector('[data-hero-no-update]');
+      if (heroSection) return; // Skip if hero has intentional override
+      
       const heading = document.querySelector('[data-home-hero-heading]');
       const promo = document.querySelector('[data-home-hero-promo]');
       const seasonDatesEl = document.querySelector('[data-home-hero-season-dates]');
