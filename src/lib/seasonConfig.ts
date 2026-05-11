@@ -12,28 +12,28 @@
 
 // ── Base seasons ──────────────────────────────────────────────────────────────
 const CURRENT_SEASON = {
-  id: '51955',
-  label: 'Spring 2026',
-};
-
-const NEXT_SEASON = {
   id: '52672',
   label: 'Summer I 2026',
 };
 
-const NEXT_NEXT_SEASON = {
+const NEXT_SEASON = {
   id: 'TBD', // Will update when Summer II season is created in TeamLinkt
   label: 'Summer II 2026',
 };
 
-const FUTURE_SEASON = {
+const NEXT_NEXT_SEASON = {
   id: 'TBD', // Will update when Fall season is created in TeamLinkt
   label: 'Fall 2026',
 };
 
+const FUTURE_SEASON = {
+  id: 'TBD', // Will update when next season is created in TeamLinkt
+  label: 'TBD',
+};
+
 // Auto-rollover trigger for live data pages.
 // Note: for static deployments this takes effect on the next build.
-export const ACTIVE_ROLLOVER_DATE = '2026-05-15T00:00:00-04:00';
+export const ACTIVE_ROLLOVER_DATE = 'TBD'; // Update when Summer II is released
 const now = new Date();
 const rolloverAt = new Date(ACTIVE_ROLLOVER_DATE);
 export const HAS_ACTIVE_ROLLED_OVER = !Number.isNaN(rolloverAt.getTime()) && now >= rolloverAt;
@@ -61,17 +61,6 @@ export interface DivisionConfig {
 }
 
 const CURRENT_DIVISIONS: DivisionConfig[] = [
-  // ── Tuesday ──────────────────────────────────────────────────────────────
-  { id: '276787', name: 'Competitive',  day: 'Tue', label: 'Tue Competitive',  court: 'Court 1', hasPlayoffs: true  },
-  { id: '276786', name: 'Recreational', day: 'Tue', label: 'Tue Recreational', court: 'Court 2', hasPlayoffs: true  },
-  // ── Wednesday ────────────────────────────────────────────────────────────
-  { id: '276790', name: 'Shuffle',      day: 'Wed', label: 'Wed Shuffle',       court: 'Court 1', hasPlayoffs: false },
-  // ── Thursday ─────────────────────────────────────────────────────────────
-  { id: '276788', name: 'Competitive',  day: 'Thu', label: 'Thu Competitive',  court: 'Court 1', hasPlayoffs: true  },
-  { id: '276789', name: 'Recreational', day: 'Thu', label: 'Thu Recreational', court: 'Court 2', hasPlayoffs: true  },
-];
-
-export const UPCOMING_DIVISIONS: DivisionConfig[] = [
   // ── Monday ───────────────────────────────────────────────────────────────
   { id: '293497', name: '3v3 Coed',      day: 'Mon', label: 'Mon 3v3 Coed',      court: 'Court 1', hasPlayoffs: true  },
   // ── Tuesday ──────────────────────────────────────────────────────────────
@@ -82,6 +71,10 @@ export const UPCOMING_DIVISIONS: DivisionConfig[] = [
   // ── Thursday ─────────────────────────────────────────────────────────────
   { id: '280408', name: 'Competitive',  day: 'Thu', label: 'Thu Competitive',  court: 'Court 1', hasPlayoffs: true  },
   { id: '280409', name: 'Recreational', day: 'Thu', label: 'Thu Recreational', court: 'Court 2', hasPlayoffs: true  },
+];
+
+export const UPCOMING_DIVISIONS: DivisionConfig[] = [
+  // TBD - will update when Summer II season is finalized in TeamLinkt
 ];
 
 // Active aliases used by live stats pages (Schedule / Teams / Standings / Scores / Playoffs)
