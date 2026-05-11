@@ -26,15 +26,17 @@ const homeDayCounts = {
 function isPlayerCap(divId: string) {
   return divId in UPCOMING_PLAYER_CAPS_BY_DIVISION;
 }
-const heroPromoText = regStatus === 'open' && seasonLabel
+// For hero section: treat Summer I as in-progress (regular registration closed, Wednesday handled elsewhere)
+const heroRegStatus = 'in-progress';
+const heroPromoText = heroRegStatus === 'open' && seasonLabel
   ? `${seasonLabel} registration is open now.`
-  : regStatus === 'coming-soon' && seasonLabel
+  : heroRegStatus === 'coming-soon' && seasonLabel
     ? `${seasonLabel} registration opens ${formatFullDate(earliestOpen)}.`
-    : regStatus === 'in-progress' && seasonLabel
-      ? `${seasonLabel} is underway.`
+    : heroRegStatus === 'in-progress' && seasonLabel
+      ? `Schedules are live. Check the matchups and join the action.`
       : 'League updates land here first.';
 const heroDatesText = seasonDates
-  ? `${seasonDates.start} – ${seasonDates.end}${regStatus === 'open' ? ` · Registration closes ${formatDate(latestClose)}` : ''}`
+  ? `${seasonDates.start} – ${seasonDates.end}${heroRegStatus === 'open' ? ` · Registration closes ${formatDate(latestClose)}` : ''}`
   : '';
 ---
 
@@ -50,16 +52,16 @@ const heroDatesText = seasonDates
         Lake Norman's Premier Sand Volleyball League
       </p>
       <h1 class="font-display font-black text-4xl sm:text-5xl md:text-7xl mb-6 leading-tight" data-home-hero-heading>
-        {regStatus === 'open' && seasonLabel && (
+        {heroRegStatus === 'open' && seasonLabel && (
           <Fragment>Sign Up for<br /><span class="text-coral-400">{seasonLabel.toUpperCase()}!</span></Fragment>
         )}
-        {regStatus === 'coming-soon' && seasonLabel && (
+        {heroRegStatus === 'coming-soon' && seasonLabel && (
           <Fragment><span class="text-coral-400">{seasonLabel.toUpperCase()}</span><br />Is Coming!</Fragment>
         )}
-        {regStatus === 'in-progress' && seasonLabel && (
+        {heroRegStatus === 'in-progress' && seasonLabel && (
           <Fragment><span class="text-coral-400">{seasonLabel.toUpperCase()}</span><br />Is Underway!</Fragment>
         )}
-        {regStatus === 'closed' && seasonLabel && (
+        {heroRegStatus === 'closed' && seasonLabel && (
           <Fragment><span class="text-coral-400">{NEXT_NEXT_SEASON_LABEL.toUpperCase()}</span><br />Is Coming!</Fragment>
         )}
         {!seasonLabel && (
@@ -78,7 +80,7 @@ const heroDatesText = seasonDates
       </p>
 
       <div class="flex flex-col sm:flex-row gap-4 justify-center" data-home-hero-cta-group>
-        {regStatus === 'open' ? (
+        {heroRegStatus === 'open' ? (
           <a
             href={REG_PAGE}
             target="_blank"
@@ -88,7 +90,7 @@ const heroDatesText = seasonDates
           >
             Register Now
           </a>
-        ) : regStatus === 'coming-soon' ? (
+        ) : heroRegStatus === 'coming-soon' ? (
           <a
             href="#"
             class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-8 py-4 rounded-lg font-bold text-lg pointer-events-none opacity-75"
@@ -97,11 +99,11 @@ const heroDatesText = seasonDates
             Registration Opens {formatFullDate(earliestOpen)}
           </a>
         ) : (
-          <a href="/leagues/" class="btn-primary text-xl py-4 px-10" data-cta-type="view-leagues">
-            View Leagues
+          <a href="/leagues/schedule/" class="btn-primary text-xl py-4 px-10" data-cta-type="view-schedule">
+            View Schedule
           </a>
         )}
-        {regStatus === 'open' && (
+        {heroRegStatus !== 'open' && (
           <a href="/leagues/" class="btn-secondary text-xl py-4 px-10" data-cta-type="view-leagues">
             View Leagues
           </a>
@@ -158,7 +160,7 @@ const heroDatesText = seasonDates
   <!-- Schedule -->
   <section class="py-12 md:py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="section-heading text-center mb-12">Weekly Schedule</h2>
+      <h2 class="section-heading text-center mb-12">Find Your Night</h2>
       <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-8 max-w-6xl mx-auto">
         <div class="text-center p-8 rounded-2xl bg-sand-50 border border-sand-200">
           <div class="w-16 h-16 bg-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -166,7 +168,7 @@ const heroDatesText = seasonDates
           </div>
           <h3 class="font-display font-bold text-xl text-ocean-600 mb-2">Monday</h3>
           <p class="text-ocean-600/70 text-sm leading-relaxed">
-            3v3 Coed league. New for Summer 2026! May run as double-header depending on final signups.
+            Brand new for Summer 2026! 3v3 coed format with double-headers every night. More reps, more rallies, more fun.
           </p>
           {homeDayCounts.Mon.map((div) => (
             <p
@@ -204,6 +206,9 @@ const heroDatesText = seasonDates
           <p class="text-ocean-600/70 text-sm leading-relaxed">
             Shuffle league. Teams are re-drafted each week so you'll meet everyone. Play our Level Up format where winning teams take on progressive handicaps, keeping every match competitive.
           </p>
+          <a href="/leagues/shuffle/" class="inline-block mt-3 text-sm font-semibold text-ocean-500 hover:text-ocean-700 transition-colors">
+            Learn how shuffle works &rarr;
+          </a>
           {homeDayCounts.Wed.map((div) => (
             <p
               class="mt-3 text-sm text-ocean-700 opacity-60 italic min-h-[1.25rem]"
