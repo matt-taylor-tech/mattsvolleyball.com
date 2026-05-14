@@ -1,1 +1,389 @@
-[]
+[
+  {
+    "year": 2026,
+    "season": "Spring",
+    "day": "Thursday",
+    "division": "Competitive",
+    "teamName": "Hittie Twisters",
+    "photo": "/images/champions/2026/spring_thursday_competitive_hittie-twisters.jpg",
+    "_seasonOrder": 1
+  },
+  {
+    "year": 2026,
+    "season": "Spring",
+    "day": "Thursday",
+    "division": "Recreational",
+    "teamName": "Spike Tysons",
+    "photo": "/images/champions/2026/spring_thursday_recreational_spike-tysons.jpg",
+    "_seasonOrder": 1
+  },
+  {
+    "year": 2026,
+    "season": "Spring",
+    "day": "Tuesday",
+    "division": "Competitive",
+    "teamName": "Big Dig Energy",
+    "photo": "/images/champions/2026/spring_tuesday_competitive_big-dig-energy.jpg",
+    "_seasonOrder": 1
+  },
+  {
+    "year": 2026,
+    "season": "Spring",
+    "day": "Tuesday",
+    "division": "Recreational",
+    "teamName": "Certified Ballerz",
+    "photo": "/images/champions/2026/spring_tuesday_recreational_certified-ballerz.jpg",
+    "_seasonOrder": 1
+  },
+  {
+    "year": 2026,
+    "season": "Spring",
+    "day": "Wednesday",
+    "division": "Shuffle",
+    "teamName": "Squires",
+    "photo": "/images/champions/2026/spring_wednesday_shuffle_squires.jpg",
+    "_seasonOrder": 1
+  },
+  {
+    "year": 2025,
+    "season": "Fall",
+    "day": "Thursday",
+    "division": "Recreational",
+    "teamName": "Hit For Brains",
+    "photo": "/images/champions/2025/fall_thursday_recreational_hit-for-brains.jpg",
+    "_seasonOrder": 4
+  },
+  {
+    "year": 2025,
+    "season": "Fall",
+    "day": "Tuesday",
+    "division": "Competitive",
+    "teamName": "Big Dig Energy",
+    "photo": "/images/champions/2025/fall_tuesday_competitive_big-dig-energy.jpg",
+    "_seasonOrder": 4
+  },
+  {
+    "year": 2025,
+    "season": "Fall",
+    "day": "Tuesday",
+    "division": "Recreational",
+    "teamName": "Maaa",
+    "photo": "/images/champions/2025/fall_tuesday_recreational_maaa.jpg",
+    "_seasonOrder": 4
+  },
+  {
+    "year": 2025,
+    "season": "Fall",
+    "day": "Wednesday",
+    "division": "Shuffle",
+    "teamName": "Shuffle Champs",
+    "photo": "/images/champions/2025/fall_wednesday_shuffle_shuffle-champs.jpg",
+    "_seasonOrder": 4
+  },
+  {
+    "year": 2025,
+    "season": "Summer II",
+    "day": "Thursday",
+    "division": "Competitive",
+    "teamName": "Loctite",
+    "photo": "/images/champions/2025/summer-ii_thursday_competitive_loctite.jpg",
+    "_seasonOrder": 3
+  },
+  {
+    "year": 2025,
+    "season": "Summer II",
+    "day": "Thursday",
+    "division": "Recreational",
+    "teamName": "Jizzfish",
+    "photo": "/images/champions/2025/summer-ii_thursday_recreational_jizzfish.jpg",
+    "_seasonOrder": 3
+  },
+  {
+    "year": 2025,
+    "season": "Summer II",
+    "day": "Tuesday",
+    "division": "Competitive",
+    "teamName": "Hittie Twisters",
+    "photo": "/images/champions/2025/summer-ii_tuesday_competitive_hittie-twisters.jpg",
+    "_seasonOrder": 3
+  },
+  {
+    "year": 2025,
+    "season": "Summer II",
+    "day": "Tuesday",
+    "division": "Recreational",
+    "teamName": "Spike Tysons",
+    "photo": "/images/champions/2025/summer-ii_tuesday_recreational_spike-tysons.jpg",
+    "_seasonOrder": 3
+  },
+  {
+    "year": 2025,
+    "season": "Summer I",
+    "day": "Thursday",
+    "division": "Competitive",
+    "teamName": "Brandons Team",
+    "photo": "/images/champions/2025/summer-i_thursday_competitive_brandons-team.jpg",
+    "_seasonOrder": 2
+  },
+  {
+    "year": 2025,
+    "season": "Summer I",
+    "day": "Thursday",
+    "division": "Recreational",
+    "teamName": "Jizzfish",
+    "photo": "/images/champions/2025/summer-i_thursday_recreational_jizzfish.jpg",
+    "_seasonOrder": 2
+  },
+  {
+    "year": 2025,
+    "season": "Summer I",
+    "day": "Tuesday",
+    "division": "Competitive",
+    "teamName": "Hittie Twisters",
+    "photo": "/images/champions/2025/summer-i_tuesday_competitive_hittie-twisters.jpg",
+    "_seasonOrder": 2
+  },
+  {
+    "year": 2025,
+    "season": "Spring",
+    "day": "Thursday",
+    "division": "Competitive",
+    "teamName": "Loctite",
+    "photo": "/images/champions/2025/spring_thursday_competitive_loctite.jpg",
+    "_seasonOrder": 1
+  },
+  {
+    "year": 2025,
+    "season": "Spring",
+    "day": "Tuesday",
+    "division": "Competitive",
+    "teamName": "Mitens Hittin Kittens",
+    "photo": "/images/champions/2025/spring_tuesday_competitive_mitens-hittin-kittens.jpg",
+    "_seasonOrder": 1
+  },
+  {
+    "year": 2025,
+    "season": "Spring",
+    "day": "Tuesday",
+    "division": "Recreational",
+    "teamName": "Maaa",
+    "photo": "/images/champions/2025/spring_tuesday_recreational_maaa.jpg",
+    "_seasonOrder": 1
+  },
+  {
+    "year": 2024,
+    "season": "Fall",
+    "day": "Thursday",
+    "division": "Competitive",
+    "teamName": "Loctite",
+    "photo": "/images/champions/2024/fall_thursday_competitive_loctite.jpg",
+    "_seasonOrder": 4
+  },
+  {
+    "year": 2024,
+    "season": "Fall",
+    "day": "Thursday",
+    "division": "Recreational",
+    "teamName": "Dune Our Best",
+    "photo": "/images/champions/2024/fall_thursday_recreational_dune-our-best.jpg",
+    "_seasonOrder": 4
+  },
+  {
+    "year": 2024,
+    "season": "Fall",
+    "day": "Tuesday",
+    "division": "Competitive",
+    "teamName": "Hits And Giggles",
+    "photo": "/images/champions/2024/fall_tuesday_competitive_hits-and-giggles.jpg",
+    "_seasonOrder": 4
+  },
+  {
+    "year": 2024,
+    "season": "Fall",
+    "day": "Tuesday",
+    "division": "Recreational",
+    "teamName": "We Get It Up",
+    "photo": "/images/champions/2024/fall_tuesday_recreational_we-get-it-up.jpg",
+    "_seasonOrder": 4
+  },
+  {
+    "year": 2024,
+    "season": "Fall",
+    "day": "Wednesday",
+    "division": "Shuffle",
+    "teamName": "Jam",
+    "photo": "/images/champions/2024/fall_wednesday_shuffle_jam.jpg",
+    "_seasonOrder": 4
+  },
+  {
+    "year": 2024,
+    "season": "Summer II",
+    "day": "Thursday",
+    "division": "Competitive",
+    "teamName": "Were Super Setsy",
+    "photo": "/images/champions/2024/summer-ii_thursday_competitive_were-super-setsy.jpg",
+    "_seasonOrder": 3
+  },
+  {
+    "year": 2024,
+    "season": "Summer II",
+    "day": "Thursday",
+    "division": "Recreational",
+    "teamName": "Dinkin Dune Tysons",
+    "photo": "/images/champions/2024/summer-ii_thursday_recreational_dinkin-dune-tysons.jpg",
+    "_seasonOrder": 3
+  },
+  {
+    "year": 2024,
+    "season": "Summer II",
+    "day": "Tuesday",
+    "division": "Competitive",
+    "teamName": "Big Dig Energy",
+    "photo": "/images/champions/2024/summer-ii_tuesday_competitive_big-dig-energy.jpg",
+    "_seasonOrder": 3
+  },
+  {
+    "year": 2024,
+    "season": "Summer II",
+    "day": "Tuesday",
+    "division": "Recreational",
+    "teamName": "Poking Fun",
+    "photo": "/images/champions/2024/summer-ii_tuesday_recreational_poking-fun.jpg",
+    "_seasonOrder": 3
+  },
+  {
+    "year": 2024,
+    "season": "Summer I",
+    "day": "Thursday",
+    "division": "Competitive",
+    "teamName": "One Hit Wonders",
+    "photo": "/images/champions/2024/summer-i_thursday_competitive_one-hit-wonders.jpg",
+    "_seasonOrder": 2
+  },
+  {
+    "year": 2024,
+    "season": "Summer I",
+    "day": "Thursday",
+    "division": "Recreational",
+    "teamName": "Consensual Sets",
+    "photo": "/images/champions/2024/summer-i_thursday_recreational_consensual-sets.jpg",
+    "_seasonOrder": 2
+  },
+  {
+    "year": 2024,
+    "season": "Summer I",
+    "day": "Tuesday",
+    "division": "Competitive",
+    "teamName": "Sand Blasters",
+    "photo": "/images/champions/2024/summer-i_tuesday_competitive_sand-blasters.jpg",
+    "_seasonOrder": 2
+  },
+  {
+    "year": 2024,
+    "season": "Summer I",
+    "day": "Tuesday",
+    "division": "Recreational",
+    "teamName": "Sand In My Clam",
+    "photo": "/images/champions/2024/summer-i_tuesday_recreational_sand-in-my-clam.jpg",
+    "_seasonOrder": 2
+  },
+  {
+    "year": 2024,
+    "season": "Summer I",
+    "day": "Wednesday",
+    "division": "Doubles",
+    "teamName": "J+L",
+    "photo": "/images/champions/2024/summer-i_wednesday_doubles_j+l.jpg",
+    "_seasonOrder": 2
+  },
+  {
+    "year": 2024,
+    "season": "Summer I",
+    "day": "Wednesday",
+    "division": "Triples",
+    "teamName": "Were Super Setsy",
+    "photo": "/images/champions/2024/summer-i_wednesday_triples_were-super-setsy.jpg",
+    "_seasonOrder": 2
+  },
+  {
+    "year": 2024,
+    "season": "Spring",
+    "day": "Thursday",
+    "division": "Competitive",
+    "teamName": "Big Dig Energy",
+    "photo": "/images/champions/2024/spring_thursday_competitive_big-dig-energy.jpg",
+    "_seasonOrder": 1
+  },
+  {
+    "year": 2024,
+    "season": "Spring",
+    "day": "Thursday",
+    "division": "Recreational",
+    "teamName": "Setting Ducks",
+    "photo": "/images/champions/2024/spring_thursday_recreational_setting-ducks.jpg",
+    "_seasonOrder": 1
+  },
+  {
+    "year": 2024,
+    "season": "Spring",
+    "day": "Tuesday",
+    "division": "Competitive",
+    "teamName": "Bumpin Uglies",
+    "photo": "/images/champions/2024/spring_tuesday_competitive_bumpin-uglies.jpg",
+    "_seasonOrder": 1
+  },
+  {
+    "year": 2024,
+    "season": "Spring",
+    "day": "Tuesday",
+    "division": "Recreational",
+    "teamName": "Sand In My Clam",
+    "photo": "/images/champions/2024/spring_tuesday_recreational_sand-in-my-clam.jpg",
+    "_seasonOrder": 1
+  },
+  {
+    "year": 2023,
+    "season": "Fall",
+    "day": "Thursday",
+    "division": "Competitive",
+    "teamName": "Block Party",
+    "photo": "/images/champions/2023/fall_thursday_competitive_block-party.jpg",
+    "_seasonOrder": 4
+  },
+  {
+    "year": 2023,
+    "season": "Fall",
+    "day": "Thursday",
+    "division": "Recreational",
+    "teamName": "Consensual Sets",
+    "photo": "/images/champions/2023/fall_thursday_recreational_consensual-sets.jpg",
+    "_seasonOrder": 4
+  },
+  {
+    "year": 2023,
+    "season": "Fall",
+    "day": "Tuesday",
+    "division": "Competitive",
+    "teamName": "Sandblasters",
+    "photo": "/images/champions/2023/fall_tuesday_competitive_sandblasters.jpg",
+    "_seasonOrder": 4
+  },
+  {
+    "year": 2023,
+    "season": "Summer I",
+    "day": "Thursday",
+    "division": "Competitive",
+    "teamName": "Block Party",
+    "photo": "/images/champions/2023/summer-i_thursday_competitive_block-party.jpg",
+    "_seasonOrder": 2
+  },
+  {
+    "year": 2023,
+    "season": "Summer I",
+    "day": "Tuesday",
+    "division": "Competitive",
+    "teamName": "Big Dig Energy",
+    "photo": "/images/champions/2023/summer-i_tuesday_competitive_big-dig-energy.jpg",
+    "_seasonOrder": 2
+  }
+]
