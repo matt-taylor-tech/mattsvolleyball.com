@@ -7,7 +7,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "check:teamlinkt": "node scripts/check-teamlinkt-config.mjs"
+    "check:teamlinkt": "node scripts/check-teamlinkt-config.mjs",
+    "sync:champions": "node scripts/sync-champions-cache.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.2.0",

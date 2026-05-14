@@ -1,4 +1,5 @@
 import { S3Client, ListObjectsV2Command } from '@aws-sdk/client-s3';
+import fallbackChampions from '../data/champions.fallback.json';
 
 export interface Champion {
   teamName: string;
@@ -73,6 +74,26 @@ function parseChampionKey(key: string): Champion | null {
   };
 }
 
+/**
+ * Read the committed fallback list as a last-resort source of truth.
+ * Populated by `node scripts/sync-champions-cache.mjs` after R2 uploads —
+ * commit the resulting JSON so a transient R2 outage at build time can't
+ * produce an empty Champions page.
+ */
+function readFallback(): Champion[] {
+  const items = fallbackChampions as Array<Partial<Champion>>;
+  return items
+    .filter((c): c is Champion =>
+      typeof c.teamName === 'string' &&
+      typeof c.season === 'string' &&
+      typeof c.year === 'number' &&
+      typeof c.day === 'string' &&
+      typeof c.division === 'string' &&
+      typeof c.photo === 'string' &&
+      typeof c._seasonOrder === 'number'
+    );
+}
+
 export async function getChampions(): Promise<Champion[]> {
   // Trim env vars to strip hidden chars (Cloudflare Pages can inject \r, BOM, etc.)
   const accountId = (import.meta.env.R2_ACCOUNT_ID ?? '').trim();
@@ -81,8 +102,9 @@ export async function getChampions(): Promise<Champion[]> {
   const bucket = (import.meta.env.R2_BUCKET_NAME ?? '').trim();
 
   if (!accountId || !accessKeyId || !secretAccessKey || !bucket) {
-    console.warn('[champions] R2 credentials not configured, skipping.');
-    return [];
+    const fallback = readFallback();
+    console.warn(`[champions] R2 credentials not configured — using fallback (${fallback.length} champions).`);
+    return fallback;
   }
 
   let client: S3Client;
@@ -93,8 +115,9 @@ export async function getChampions(): Promise<Champion[]> {
       credentials: { accessKeyId, secretAccessKey },
     });
   } catch (err) {
-    console.error('[champions] Failed to create S3 client:', err);
-    return [];
+    const fallback = readFallback();
+    console.error(`[champions] Failed to create S3 client — using fallback (${fallback.length} champions):`, err);
+    return fallback;
   }
 
   const champions: Champion[] = [];
@@ -121,8 +144,19 @@ export async function getChampions(): Promise<Champion[]> {
         : undefined;
     } while (continuationToken);
   } catch (err) {
-    console.error('[champions] R2 listing failed:', err);
-    return [];
+    const fallback = readFallback();
+    console.error(`[champions] R2 listing failed — using fallback (${fallback.length} champions):`, err);
+    return fallback;
+  }
+
+  // R2 listed successfully but came back empty. Treat that as a hiccup —
+  // an unexpected empty bucket should never silently wipe the Champions page.
+  if (champions.length === 0) {
+    const fallback = readFallback();
+    if (fallback.length > 0) {
+      console.warn(`[champions] R2 returned 0 results — using fallback (${fallback.length} champions).`);
+      return fallback;
+    }
   }
 
   // Sort newest first: year desc, then season order desc

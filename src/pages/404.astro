@@ -1,5 +1,33 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { CalendarDays, Trophy, ListChecks, MessageCircle } from 'lucide-astro';
+
+const links = [
+  {
+    href: '/leagues/',
+    icon: CalendarDays,
+    label: 'Find Your Night',
+    desc: 'See Monday–Thursday formats and sign-up info.',
+  },
+  {
+    href: '/champions/',
+    icon: Trophy,
+    label: 'Hall of Champions',
+    desc: 'Every team that’s earned the title.',
+  },
+  {
+    href: '/leagues/schedule/',
+    icon: ListChecks,
+    label: 'Schedule & Scores',
+    desc: 'Match times, results, and standings.',
+  },
+  {
+    href: '/contact/',
+    icon: MessageCircle,
+    label: 'Contact',
+    desc: 'Questions, rainouts, league enquiries.',
+  },
+];
 ---
 
 <Layout title="Page Not Found | Matt's Volleyball" description="The page you're looking for doesn't exist.">
@@ -15,10 +43,32 @@ import Layout from '../layouts/Layout.astro';
     </svg>
   </section>
 
-  <section class="py-16 md:py-24 text-center">
-    <div class="max-w-xl mx-auto px-4">
-      <p class="text-ocean-600/70 mb-8">The page you're looking for doesn't exist or has been moved.</p>
-      <a href="/" class="btn-primary">Back to Home</a>
+  <section class="py-16 md:py-24">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <p class="text-center text-ocean-700/80 text-lg mb-10">
+        Looks like that page doesn’t exist. Try one of these:
+      </p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+        {links.map(({ href, icon: Icon, label, desc }) => (
+          <a
+            href={href}
+            class="group flex items-start gap-4 rounded-lg border border-sand-200 bg-white p-5 shadow-sm transition-all hover:border-ocean-500 hover:shadow-md"
+          >
+            <div class="shrink-0 rounded-md bg-ocean-50 p-3 text-ocean-600 group-hover:bg-ocean-100">
+              <Icon class="h-6 w-6" />
+            </div>
+            <div class="min-w-0">
+              <h2 class="font-display font-bold text-lg text-ocean-700 group-hover:text-ocean-600">
+                {label}
+              </h2>
+              <p class="text-sm text-ocean-600/80 mt-1">{desc}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+      <div class="text-center mt-10">
+        <a href="/" class="btn-primary">Back to Home</a>
+      </div>
     </div>
   </section>
 </Layout>
