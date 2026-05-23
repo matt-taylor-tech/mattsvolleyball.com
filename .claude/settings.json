@@ -115,7 +115,8 @@
       "Bash(awk -F',' 'NR>1 { print $1\"|\"$2\"|\"$6; print $1\"|\"$2\"|\"$8 }' /Users/suigeneris/Downloads/league_schedule_20260510_203145.csv)",
       "Bash(awk '$1 > 1 { print }')",
       "Bash(awk -F',' 'NR>1 && tolower\\($5\\) ~ /thursday/ && \\($6==\"Ace’s Faves\" || $8==\"Ace’s Faves\"\\) { dt=$1\"|\"$2; ace[dt]=1 } NR>1 && tolower\\($5\\) ~ /thursday/ && \\($6==\"Hittie Twisters\" || $8==\"Hittie Twisters\"\\) { dt=$1\"|\"$2; if \\(ace[dt]\\) print \"CLASH: \" dt }' /Users/suigeneris/Downloads/league_schedule_20260510_203145.csv)",
-      "Bash(awk -F',' 'NR>1 && tolower\\($4\\)==\"active\" { fname=$8; gsub\\(/^\"|\"$/, \"\", fname\\); lname=$9; gsub\\(/^\"|\"$/, \"\", lname\\); div=$6; gsub\\(/^\"|\"$/, \"\", div\\); team=$7; gsub\\(/^\"|\"$/, \"\", team\\); if \\(\\(fname \" \" lname\\)==\"Jeff Bowers\"\\) print team \" \\(\" div \"\\)\" }' /Users/suigeneris/Github/VolleyballEngine/multiple_registration_entries_1778336114.csv)"
+      "Bash(awk -F',' 'NR>1 && tolower\\($4\\)==\"active\" { fname=$8; gsub\\(/^\"|\"$/, \"\", fname\\); lname=$9; gsub\\(/^\"|\"$/, \"\", lname\\); div=$6; gsub\\(/^\"|\"$/, \"\", div\\); team=$7; gsub\\(/^\"|\"$/, \"\", team\\); if \\(\\(fname \" \" lname\\)==\"Jeff Bowers\"\\) print team \" \\(\" div \"\\)\" }' /Users/suigeneris/Github/VolleyballEngine/multiple_registration_entries_1778336114.csv)",
+      "Bash(node -e ' *)"
     ]
   }
 }
