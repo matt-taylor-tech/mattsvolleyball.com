@@ -17,9 +17,11 @@
     @apply font-display;
   }
 
-  /* Prevent inline gap below SVG wave dividers */
+  /* Prevent inline gap below SVG wave dividers; force iOS Safari to scale
+     them to the viewport instead of using viewBox width as intrinsic size. */
   section > svg {
-    @apply block;
+    @apply block w-full;
+    aspect-ratio: 1440 / 80;
   }
 }
 
