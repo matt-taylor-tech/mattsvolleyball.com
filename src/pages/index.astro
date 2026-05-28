@@ -153,7 +153,7 @@ const heroDatesText = seasonDates
       </div>
 
       <!-- Tailwind safelist for dynamically rendered classes -->
-      <span class="hidden space-y-2 text-ocean-500 text-ocean-500/70 text-ocean-600 text-ocean-700 font-display font-bold text-sm text-xs truncate sm:grid-cols-2 ml-[76px]"></span>
+      <span class="hidden card border-l-4 border-l-coral-500 border-l-emerald-500 border-l-violet-500 border-l-amber-400 bg-ocean-600 bg-coral-500 text-white text-ocean-400 text-ocean-500 text-ocean-500/70 text-ocean-600 text-ocean-700 text-ocean-800 font-display font-normal font-medium font-semibold font-bold text-sm text-xs truncate sm:grid-cols-2 sm:col-span-2 gap-1.5 gap-2 mb-1 mt-1 px-2 py-0.5 p-2 rounded-full min-w-0 shrink-0 inline-block"></span>
     </div>
   </section>
 
@@ -512,24 +512,34 @@ const heroDatesText = seasonDates
                   const time = (g['1'] as string).split(' - ')[0];
                   const home = stripHtml(g['3'] as string);
                   const away = stripHtml(g['4'] as string);
-                  const court = extractLocationName(g['5'] as string);
+                  const court = extractLocationName(g['5'] as string).split(' - ')[0];
+                  const divisionName = DIVISION_NAME[g.divisionId] || '';
+                  const stripeClass = divisionName.includes('3v3') ? 'border-l-violet-500'
+                    : divisionName.toLowerCase().includes('rec') ? 'border-l-emerald-500'
+                    : 'border-l-coral-500';
                   return `
-                    <div class="bg-white rounded-xl px-4 py-3 shadow-sm border border-sand-200">
-                      <div class="flex items-center gap-3">
-                        <span class="text-xs font-medium text-ocean-500 w-16 shrink-0">${time}</span>
-                        <span class="text-sm text-ocean-700 font-medium truncate">${home}</span>
-                        <span class="text-xs text-ocean-500 shrink-0">vs</span>
-                        <span class="text-sm text-ocean-700 font-medium truncate">${away}</span>
+                    <div class="card border-l-4 ${stripeClass} p-2">
+                      <div class="flex items-center gap-1.5 text-xs text-ocean-500 mb-1">
+                        <span class="inline-block bg-ocean-600 text-white font-semibold px-2 py-0.5 rounded-full shrink-0">${time}</span>
+                        <span class="truncate">${court}</span>
+                        <span class="text-ocean-400 shrink-0">·</span>
+                        <span class="truncate">${divisionName}</span>
                       </div>
-                      <div class="text-xs text-ocean-600 mt-1 ml-[76px]">${court} <span class="text-ocean-400">·</span> <span>${DIVISION_NAME[g.divisionId] || ''}</span></div>
+                      <div class="flex items-center gap-2 text-ocean-800 font-bold">
+                        <span class="truncate">${home}</span>
+                        <span class="text-ocean-500 text-xs font-normal shrink-0">vs</span>
+                        <span class="truncate">${away}</span>
+                      </div>
                     </div>
                   `;
                 }).join('')}
                 ${byeTeams.length > 0 ? `
-                  <div class="bg-white rounded-xl px-4 py-3 shadow-sm border border-sand-200 sm:col-span-2">
-                    <div class="flex items-start gap-3">
-                      <span class="text-xs font-medium text-coral-500 w-16 shrink-0">BYE</span>
-                      <span class="text-sm text-ocean-700 font-medium">${byeTeams.join(', ')}</span>
+                  <div class="card border-l-4 border-l-amber-400 p-2 sm:col-span-2">
+                    <div class="flex items-center gap-2">
+                      <span class="inline-block bg-coral-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shrink-0">BYE</span>
+                      <div class="flex-1 min-w-0">
+                        <div class="text-sm text-ocean-700 font-medium truncate">${byeTeams.join(', ')}</div>
+                      </div>
                     </div>
                   </div>
                 ` : ''}
