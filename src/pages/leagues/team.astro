@@ -51,10 +51,10 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
       </div>
 
       <!-- Games Container -->
-      <div id="games-container" class="space-y-8 hidden"></div>
+      <div id="games-container" class="space-y-4 sm:space-y-8 hidden"></div>
 
       <!-- Tailwind safelist for dynamically rendered classes -->
-      <span class="hidden card p-4 sm:p-5 flex-col sm:flex-row sm:items-center sm:w-32 text-ocean-500 text-ocean-500/70 text-ocean-600 text-ocean-700 text-xs font-display font-bold text-lg min-w-0 truncate text-coral-500 hover:text-coral-600 font-semibold"></span>
+      <span class="hidden card p-2 sm:p-5 p-4 flex flex-col sm:flex-row sm:hidden sm:inline-block sm:flex items-center sm:items-center sm:w-32 text-ocean-500 text-ocean-500/70 text-ocean-400 text-ocean-600 text-ocean-700 text-xs font-display font-bold font-semibold text-lg min-w-0 truncate text-coral-500 hover:text-coral-600 hover:text-ocean-700 gap-1.5 gap-2 sm:gap-3 mb-1 mt-1 space-y-1.5 sm:space-y-3"></span>
 
     </div>
   </section>
@@ -214,7 +214,7 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
     for (const [date, dateGames] of grouped) {
       html += `
         <div>
-          <h3 class="font-display font-bold text-lg text-ocean-600 mb-3 flex items-center gap-2">
+          <h3 class="font-display font-bold text-lg text-ocean-600 mb-2 sm:mb-3 flex items-center gap-2">
             <svg class="w-5 h-5 text-ocean-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke-width="2"/>
               <line x1="16" y1="2" x2="16" y2="6" stroke-width="2"/>
@@ -223,22 +223,29 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
             </svg>
             ${date}
           </h3>
-          <div class="space-y-3">
+          <div class="space-y-1.5 sm:space-y-3">
             ${dateGames.map((g) => {
               const isHome = g.home.toLowerCase() === name;
               const opponent = isHome ? g.away : g.home;
               const label = isHome ? 'vs' : '@';
 
               return `
-                <div class="card p-4 sm:p-5">
-                  <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-                    <span class="text-sm font-medium text-ocean-500 sm:w-32 shrink-0">${g.time.replace(' - ', ' \u2013 ')}</span>
+                <div class="card p-2 sm:p-5">
+                  <div class="flex items-center gap-1.5 text-xs text-ocean-500 mb-1 sm:hidden">
+                    <span class="font-semibold">${g.time.split(' - ')[0]}</span>
+                    <span class="text-ocean-400">\u00b7</span>
+                    <a href="${g.location.url}" target="_blank" rel="noopener noreferrer"
+                       class="hover:text-ocean-700 transition-colors">${g.location.name.split(' - ')[0]}</a>
+                    ${g.summaryUrl ? `<span class="text-ocean-400">\u00b7</span><a href="${g.summaryUrl}" target="_blank" rel="noopener noreferrer" class="text-coral-500 hover:text-coral-600 font-semibold transition-colors">Summary</a>` : ''}
+                  </div>
+                  <div class="flex items-center gap-2 sm:gap-3">
+                    <span class="hidden sm:inline-block text-sm font-medium text-ocean-500 sm:w-32 shrink-0">${g.time.replace(' - ', ' \u2013 ')}</span>
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-2 text-ocean-700 font-medium">
                         <span class="text-ocean-500 text-xs shrink-0">${label}</span>
                         <span class="truncate font-semibold">${opponent}</span>
                       </div>
-                      <div class="flex items-center gap-3 mt-1">
+                      <div class="hidden sm:flex items-center gap-3 mt-1">
                         <a href="${g.location.url}" target="_blank" rel="noopener noreferrer"
                            class="text-sm text-ocean-500/70 hover:text-ocean-600 transition-colors">
                           ${g.location.name}
