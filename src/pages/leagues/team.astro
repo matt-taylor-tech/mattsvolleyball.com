@@ -54,7 +54,7 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
       <div id="games-container" class="space-y-4 sm:space-y-8 hidden"></div>
 
       <!-- Tailwind safelist for dynamically rendered classes -->
-      <span class="hidden card p-2 sm:p-5 p-4 flex flex-col sm:flex-row sm:hidden sm:inline-block sm:flex items-center sm:items-center sm:w-32 text-ocean-500 text-ocean-500/70 text-ocean-400 text-ocean-600 text-ocean-700 text-xs font-display font-bold font-semibold text-lg min-w-0 truncate text-coral-500 hover:text-coral-600 hover:text-ocean-700 gap-1.5 gap-2 sm:gap-3 mb-1 mt-1 space-y-1.5 sm:space-y-3"></span>
+      <span class="hidden card border-l-4 border-l-ocean-600 bg-ocean-600 text-white px-2 py-0.5 rounded-full p-2 sm:p-5 p-4 flex flex-col sm:flex-row sm:hidden sm:inline-block sm:flex items-center sm:items-center sm:w-32 text-ocean-500 text-ocean-500/70 text-ocean-400 text-ocean-600 text-ocean-700 text-ocean-800 text-xs font-display font-normal font-bold font-semibold text-lg min-w-0 truncate text-coral-500 hover:text-coral-600 hover:text-ocean-700 gap-1.5 gap-2 sm:gap-3 mb-1 mt-1 space-y-1.5 sm:space-y-3"></span>
 
     </div>
   </section>
@@ -230,10 +230,9 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
               const label = isHome ? 'vs' : '@';
 
               return `
-                <div class="card p-2 sm:p-5">
+                <div class="card border-l-4 border-l-ocean-600 p-2 sm:p-5">
                   <div class="flex items-center gap-1.5 text-xs text-ocean-500 mb-1 sm:hidden">
-                    <span class="font-semibold">${g.time.split(' - ')[0]}</span>
-                    <span class="text-ocean-400">\u00b7</span>
+                    <span class="inline-block bg-ocean-600 text-white font-semibold px-2 py-0.5 rounded-full">${g.time.split(' - ')[0]}</span>
                     <a href="${g.location.url}" target="_blank" rel="noopener noreferrer"
                        class="hover:text-ocean-700 transition-colors">${g.location.name.split(' - ')[0]}</a>
                     ${g.summaryUrl ? `<span class="text-ocean-400">\u00b7</span><a href="${g.summaryUrl}" target="_blank" rel="noopener noreferrer" class="text-coral-500 hover:text-coral-600 font-semibold transition-colors">Summary</a>` : ''}
@@ -241,9 +240,9 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
                   <div class="flex items-center gap-2 sm:gap-3">
                     <span class="hidden sm:inline-block text-sm font-medium text-ocean-500 sm:w-32 shrink-0">${g.time.replace(' - ', ' \u2013 ')}</span>
                     <div class="flex-1 min-w-0">
-                      <div class="flex items-center gap-2 text-ocean-700 font-medium">
-                        <span class="text-ocean-500 text-xs shrink-0">${label}</span>
-                        <span class="truncate font-semibold">${opponent}</span>
+                      <div class="flex items-center gap-2 text-ocean-800 font-bold">
+                        <span class="text-ocean-500 text-xs font-normal shrink-0">${label}</span>
+                        <span class="truncate">${opponent}</span>
                       </div>
                       <div class="hidden sm:flex items-center gap-3 mt-1">
                         <a href="${g.location.url}" target="_blank" rel="noopener noreferrer"

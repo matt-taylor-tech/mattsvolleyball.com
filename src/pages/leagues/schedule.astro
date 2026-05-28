@@ -87,7 +87,7 @@ import {
       <div id="schedule-container" class="space-y-4 sm:space-y-8 hidden"></div>
 
       <!-- Tailwind safelist for dynamically rendered classes -->
-      <span class="hidden card p-2 sm:p-5 p-2.5 flex flex-col sm:flex-row sm:hidden sm:inline-block sm:flex items-center sm:items-center sm:w-32 text-ocean-500 text-ocean-500/70 text-ocean-500/50 text-ocean-500/60 text-ocean-600 text-ocean-700 text-coral-500 text-xs font-display font-semibold font-bold text-lg min-w-0 truncate gap-2 gap-1.5 sm:gap-3 mb-1 mt-0.5 sm:mt-1 space-y-1.5 sm:space-y-3 space-y-4 sm:space-y-8 hover:text-ocean-500 hover:text-ocean-700"></span>
+      <span class="hidden card border-l-4 border-l-coral-500 border-l-emerald-500 border-l-violet-500 border-l-amber-400 bg-ocean-600 bg-coral-500 text-white px-2 py-0.5 rounded-full p-2 sm:p-5 p-2.5 flex flex-col sm:flex-row sm:hidden sm:inline-block sm:flex items-center sm:items-center sm:w-32 text-ocean-500 text-ocean-500/70 text-ocean-500/50 text-ocean-500/60 text-ocean-600 text-ocean-700 text-ocean-800 text-coral-500 text-xs text-sm font-display font-normal font-semibold font-bold text-lg min-w-0 truncate gap-2 gap-1.5 sm:gap-3 mb-1 mt-0.5 sm:mt-1 space-y-1.5 sm:space-y-3 space-y-4 sm:space-y-8 hover:text-ocean-500 hover:text-ocean-700"></span>
 
     </div>
   </section>
@@ -273,43 +273,48 @@ import {
             ${date}
           </h3>
           <div class="space-y-1.5 sm:space-y-3">
-            ${dateGames.map((g) => `
-              <div class="card p-2 sm:p-5">
-                <div class="flex items-center gap-1.5 text-xs text-ocean-500 mb-1 sm:hidden">
-                  <span class="font-semibold">${g.time.split(' - ')[0]}</span>
-                  <span class="text-ocean-400">·</span>
-                  <a href="${g.location.url}" target="_blank" rel="noopener noreferrer"
-                     class="hover:text-ocean-700 transition-colors">${g.location.name.split(' - ')[0]}</a>
-                  <span class="text-ocean-400">·</span>
-                  <span>${DIVISION_NAME[g.divisionId] || ''}</span>
-                </div>
-                <div class="flex items-center gap-2 sm:gap-3">
-                  <span class="hidden sm:inline-block text-sm font-medium text-ocean-500 sm:w-32 shrink-0">${g.time.split(' - ')[0]}</span>
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 text-ocean-700 font-medium">
-                      <a href="/leagues/team/?name=${encodeURIComponent(g.home)}" class="truncate hover:text-ocean-500 transition-colors">${g.home}</a>
-                      <span class="text-ocean-500 text-xs shrink-0">vs</span>
-                      <a href="/leagues/team/?name=${encodeURIComponent(g.away)}" class="truncate hover:text-ocean-500 transition-colors">${g.away}</a>
-                    </div>
-                    <div class="hidden sm:flex items-center gap-2 mt-1">
-                      <span class="text-sm text-ocean-600">${DIVISION_NAME[g.divisionId] || ''}</span>
-                      <span class="text-ocean-400">·</span>
-                      <a href="${g.location.url}" target="_blank" rel="noopener noreferrer"
-                         class="text-sm text-ocean-600 hover:text-ocean-700 transition-colors">
-                        ${g.location.name}
-                      </a>
+            ${dateGames.map((g) => {
+              const divisionName = DIVISION_NAME[g.divisionId] || '';
+              const stripeClass = divisionName.includes('3v3') ? 'border-l-violet-500'
+                : divisionName.toLowerCase().includes('rec') ? 'border-l-emerald-500'
+                : 'border-l-coral-500';
+              return `
+                <div class="card border-l-4 ${stripeClass} p-2 sm:p-5">
+                  <div class="flex items-center gap-1.5 text-xs text-ocean-500 mb-1 sm:hidden">
+                    <span class="inline-block bg-ocean-600 text-white font-semibold px-2 py-0.5 rounded-full">${g.time.split(' - ')[0]}</span>
+                    <a href="${g.location.url}" target="_blank" rel="noopener noreferrer"
+                       class="hover:text-ocean-700 transition-colors">${g.location.name.split(' - ')[0]}</a>
+                    <span class="text-ocean-400">·</span>
+                    <span>${divisionName}</span>
+                  </div>
+                  <div class="flex items-center gap-2 sm:gap-3">
+                    <span class="hidden sm:inline-block text-sm font-medium text-ocean-500 sm:w-32 shrink-0">${g.time.split(' - ')[0]}</span>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-2 text-ocean-800 font-bold">
+                        <a href="/leagues/team/?name=${encodeURIComponent(g.home)}" class="truncate hover:text-ocean-500 transition-colors">${g.home}</a>
+                        <span class="text-ocean-500 text-xs font-normal shrink-0">vs</span>
+                        <a href="/leagues/team/?name=${encodeURIComponent(g.away)}" class="truncate hover:text-ocean-500 transition-colors">${g.away}</a>
+                      </div>
+                      <div class="hidden sm:flex items-center gap-2 mt-1">
+                        <span class="text-sm text-ocean-600">${divisionName}</span>
+                        <span class="text-ocean-400">·</span>
+                        <a href="${g.location.url}" target="_blank" rel="noopener noreferrer"
+                           class="text-sm text-ocean-600 hover:text-ocean-700 transition-colors">
+                          ${g.location.name}
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            `).join('')}
+              `;
+            }).join('')}
             ${(() => {
               const byes = getByeTeams(date, dateGames);
               if (byes.length === 0) return '';
               return `
-                <div class="card p-2 sm:p-5">
+                <div class="card border-l-4 border-l-amber-400 p-2 sm:p-5">
                   <div class="flex items-center gap-2 sm:gap-3">
-                    <span class="text-sm font-medium text-coral-500 sm:w-32 shrink-0">BYE</span>
+                    <span class="inline-block bg-coral-500 text-white text-xs font-bold px-2 py-0.5 rounded-full sm:text-sm shrink-0">BYE</span>
                     <div class="flex-1 min-w-0">
                       <div class="text-ocean-700 font-medium truncate">${byes.join(', ')}</div>
                     </div>
