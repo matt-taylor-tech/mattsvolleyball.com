@@ -7,7 +7,7 @@ import { UPCOMING_DIVISIONS, UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_PLAYER_CAP
 import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart } from 'lucide-astro';
 
 const champions = await getChampions();
-const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
+const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose, hasOpenRegistration, openRegUrl, openRegIsExternal, openRegDay } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
 const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
 function countedDivisionsFor(day: string) {
   return UPCOMING_DIVISIONS.filter(
@@ -26,9 +26,15 @@ const homeDayCounts = {
 function isPlayerCap(divId: string) {
   return divId in UPCOMING_PLAYER_CAPS_BY_DIVISION;
 }
-// For hero section: treat Summer I as in-progress (regular registration closed, Wednesday handled elsewhere)
-const heroRegStatus = 'in-progress';
-const heroPromoText = heroRegStatus === 'open' && seasonLabel
+// For hero section: treat Summer I as in-progress (regular registration closed).
+// Late-open leagues (e.g. Wednesday shuffle) still surface a Sign Up CTA via
+// hasOpenRegistration below.
+const heroRegStatus: 'open' | 'coming-soon' | 'in-progress' | 'closed' = 'in-progress';
+const heroPromoText = hasOpenRegistration
+  ? (openRegDay
+      ? `${openRegDay} is still taking signups — jump in!`
+      : `Registration is still open — sign up today!`)
+  : heroRegStatus === 'open' && seasonLabel
   ? `${seasonLabel} registration is open now.`
   : heroRegStatus === 'coming-soon' && seasonLabel
     ? `${seasonLabel} registration opens ${formatFullDate(earliestOpen)}.`
@@ -80,7 +86,21 @@ const heroDatesText = seasonDates
       </p>
 
       <div class="flex flex-col sm:flex-row gap-4 justify-center" data-home-hero-cta-group>
-        {heroRegStatus === 'open' ? (
+        {hasOpenRegistration ? (
+          <Fragment>
+            <a
+              href={openRegUrl}
+              target={openRegIsExternal ? '_blank' : undefined}
+              rel={openRegIsExternal ? 'noopener noreferrer' : undefined}
+              class="btn-primary text-xl py-4 px-10"
+            >
+              {openRegDay ? `Sign Up for ${openRegDay}` : 'Sign Up'}
+            </a>
+            <a href="/leagues/schedule/" class="btn-secondary text-xl py-4 px-10">
+              View Schedule
+            </a>
+          </Fragment>
+        ) : heroRegStatus === 'open' ? (
           <a
             href={REG_PAGE}
             target="_blank"
@@ -91,22 +111,27 @@ const heroDatesText = seasonDates
             Register Now
           </a>
         ) : heroRegStatus === 'coming-soon' ? (
-          <a
-            href="#"
-            class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-8 py-4 rounded-lg font-bold text-lg pointer-events-none opacity-75"
-            data-cta-type="register-now"
-          >
-            Registration Opens {formatFullDate(earliestOpen)}
-          </a>
+          <Fragment>
+            <a
+              href="#"
+              class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-8 py-4 rounded-lg font-bold text-lg pointer-events-none opacity-75"
+              data-cta-type="register-now"
+            >
+              Registration Opens {formatFullDate(earliestOpen)}
+            </a>
+            <a href="/leagues/" class="btn-secondary text-xl py-4 px-10" data-cta-type="view-leagues">
+              View Leagues
+            </a>
+          </Fragment>
         ) : (
-          <a href="/leagues/schedule/" class="btn-primary text-xl py-4 px-10" data-cta-type="view-schedule">
-            View Schedule
-          </a>
-        )}
-        {heroRegStatus !== 'open' && (
-          <a href="/leagues/" class="btn-secondary text-xl py-4 px-10" data-cta-type="view-leagues">
-            View Leagues
-          </a>
+          <Fragment>
+            <a href="/leagues/schedule/" class="btn-primary text-xl py-4 px-10" data-cta-type="view-schedule">
+              View Schedule
+            </a>
+            <a href="/leagues/" class="btn-secondary text-xl py-4 px-10" data-cta-type="view-leagues">
+              View Leagues
+            </a>
+          </Fragment>
         )}
       </div>
     </div>

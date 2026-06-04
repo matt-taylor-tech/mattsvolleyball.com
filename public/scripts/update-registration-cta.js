@@ -19,7 +19,7 @@ async function updateRegistrationCTA() {
     if (!response.ok) throw new Error(`API returned ${response.status}`);
 
     const data = await response.json();
-    const { regStatus, seasonLabel, seasonDates, earliestOpen, latestClose, nextNextSeasonLabel } = data;
+    const { regStatus, seasonLabel, seasonDates, earliestOpen, latestClose, nextNextSeasonLabel, hasOpenRegistration, openRegUrl, openRegIsExternal } = data;
 
     const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
       '&': '&amp;',
@@ -191,19 +191,29 @@ async function updateRegistrationCTA() {
     // Update header CTA button if it exists
     const headerCTA = document.querySelector('[data-header-cta]');
     if (headerCTA) {
-      if (regStatus === 'open') {
+      // Show "Sign Up" whenever registration is open — including a late-open
+      // league during an in-progress season (hasOpenRegistration).
+      if (regStatus === 'open' || hasOpenRegistration) {
+        const external = regStatus === 'open' || openRegIsExternal;
         headerCTA.textContent = 'Sign Up';
-        headerCTA.href = REG_PAGE;
-        headerCTA.target = '_blank';
-        headerCTA.rel = 'noopener noreferrer';
+        headerCTA.href = regStatus === 'open' ? REG_PAGE : (openRegUrl || '/leagues/');
+        if (external) {
+          headerCTA.target = '_blank';
+          headerCTA.rel = 'noopener noreferrer';
+        } else {
+          headerCTA.removeAttribute('target');
+          headerCTA.removeAttribute('rel');
+        }
         headerCTA.classList.remove('pointer-events-none', 'opacity-75');
       } else if (regStatus === 'coming-soon') {
         headerCTA.textContent = 'Coming Soon';
         headerCTA.href = '#';
         headerCTA.classList.add('pointer-events-none', 'opacity-75');
       } else {
-        headerCTA.textContent = 'Leagues';
+        headerCTA.textContent = 'View Leagues';
         headerCTA.href = '/leagues/';
+        headerCTA.removeAttribute('target');
+        headerCTA.removeAttribute('rel');
         headerCTA.classList.remove('pointer-events-none', 'opacity-75');
       }
     }

@@ -10,7 +10,10 @@ import { NEXT_NEXT_SEASON_LABEL, UPCOMING_SEASON_ID } from '../../src/lib/season
 
 export const onRequestGet: PagesFunction = async () => {
   try {
-    const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose } = await getRegistrationData({
+    const {
+      seasonLabel, regStatus, seasonDates, earliestOpen, latestClose,
+      hasOpenRegistration, openRegUrl, openRegIsExternal, openRegDay,
+    } = await getRegistrationData({
       preferredSeasonId: UPCOMING_SEASON_ID,
     });
 
@@ -22,6 +25,10 @@ export const onRequestGet: PagesFunction = async () => {
         earliestOpen,
         latestClose,
         nextNextSeasonLabel: NEXT_NEXT_SEASON_LABEL,
+        hasOpenRegistration,
+        openRegUrl,
+        openRegIsExternal,
+        openRegDay,
       },
       {
         headers: {

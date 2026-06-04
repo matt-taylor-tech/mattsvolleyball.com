@@ -34,6 +34,17 @@ export interface RegistrationData {
   latestClose: string;
   regCards: RegCard[];
   hasEntries: boolean;
+  // True whenever at least one division is accepting signups right now — even
+  // if the season is already 'in-progress'. Lets the site keep showing a
+  // registration CTA for late-open leagues (e.g. Wednesday shuffle).
+  hasOpenRegistration: boolean;
+  // Where the primary "Sign Up" CTA should point. When exactly one division is
+  // open we deep-link straight to its TeamLinkt registration; otherwise we send
+  // people to the leagues page to choose. Empty when nothing is open.
+  openRegUrl: string;
+  openRegIsExternal: boolean;
+  // Day name when exactly one division is open (e.g. "Wednesday"), else ''.
+  openRegDay: string;
 }
 
 interface RegistrationOptions {
@@ -57,6 +68,12 @@ export function getDayFromName(name: string): string {
   if (lower.includes('wednesday')) return 'wednesday';
   if (lower.includes('thursday')) return 'thursday';
   return 'other';
+}
+
+/** Capitalizes a day key for display; returns '' for the 'other' bucket. */
+function capitalize(day: string): string {
+  if (!day || day === 'other') return '';
+  return day.charAt(0).toUpperCase() + day.slice(1);
 }
 
 export function formatDate(dateStr: string): string {
@@ -89,6 +106,10 @@ export async function getRegistrationData(options: RegistrationOptions = {}): Pr
     latestClose: '',
     regCards: [],
     hasEntries: false,
+    hasOpenRegistration: false,
+    openRegUrl: '/leagues/',
+    openRegIsExternal: false,
+    openRegDay: '',
   };
 
   try {
@@ -203,6 +224,17 @@ export async function getRegistrationData(options: RegistrationOptions = {}): Pr
       return { name: reg.name, divisionLabel, colorClass, isOpen, isFuture, daysLeft, regUrl, closeDate: formatDate(reg.close_datetime), openDate: formatDate(reg.open_datetime) };
     });
 
+    // Surface open registration independently of the season-level status: a
+    // season can be 'in-progress' while a late-open league (e.g. Wednesday
+    // shuffle, which re-drafts weekly) still accepts signups.
+    const openCards = regCards.filter((c) => c.isOpen);
+    const hasOpenRegistration = openCards.length > 0;
+    const openRegIsExternal = openCards.length === 1;
+    const openRegUrl = openRegIsExternal ? openCards[0].regUrl : '/leagues/';
+    const openRegDay = openCards.length === 1
+      ? capitalize(getDayFromName(openCards[0].name))
+      : '';
+
     return {
       seasonLabel: season.label,
       regStatus,
@@ -211,6 +243,10 @@ export async function getRegistrationData(options: RegistrationOptions = {}): Pr
       latestClose,
       regCards,
       hasEntries: true,
+      hasOpenRegistration,
+      openRegUrl,
+      openRegIsExternal,
+      openRegDay,
     };
   } catch {
     return fallback;

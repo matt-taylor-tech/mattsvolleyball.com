@@ -1,9 +1,18 @@
 ---
 interface Props {
   regStatus: 'open' | 'coming-soon' | 'in-progress' | 'closed';
+  hasOpenRegistration?: boolean;
+  openRegUrl?: string;
+  openRegIsExternal?: boolean;
 }
 
-const { regStatus } = Astro.props;
+const { regStatus, hasOpenRegistration = false, openRegUrl = '/leagues/', openRegIsExternal = false } = Astro.props;
+const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
+// Show a "Sign Up" CTA whenever registration is open — including a late-open
+// league during an in-progress season. Falls back to "View Leagues" otherwise.
+const showSignUp = regStatus === 'open' || hasOpenRegistration;
+const signUpHref = regStatus === 'open' ? REG_PAGE : openRegUrl;
+const signUpExternal = regStatus === 'open' || openRegIsExternal;
 const r2Base = import.meta.env.PUBLIC_R2_BASE_URL || '';
 const currentPath = Astro.url.pathname;
 
@@ -92,11 +101,11 @@ function isActive(href: string): boolean {
           Player Portal
         </a>
 
-        {regStatus === 'open' ? (
+        {showSignUp ? (
           <a
-            href="https://app.teamlinkt.com/register/find/mattsvolleyball"
-            target="_blank"
-            rel="noopener noreferrer"
+            href={signUpHref}
+            target={signUpExternal ? '_blank' : undefined}
+            rel={signUpExternal ? 'noopener noreferrer' : undefined}
             class="ml-2 btn-primary !py-2 !px-6 !text-sm"
             data-header-cta
           >
@@ -161,11 +170,11 @@ function isActive(href: string): boolean {
           Player Portal ↗
         </a>
 
-        {regStatus === 'open' ? (
+        {showSignUp ? (
           <a
-            href="https://app.teamlinkt.com/register/find/mattsvolleyball"
-            target="_blank"
-            rel="noopener noreferrer"
+            href={signUpHref}
+            target={signUpExternal ? '_blank' : undefined}
+            rel={signUpExternal ? 'noopener noreferrer' : undefined}
             class="btn-primary text-center mt-2"
           >
             Sign Up

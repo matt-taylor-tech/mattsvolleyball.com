@@ -6,7 +6,7 @@ import { getRegistrationData, formatDate, formatFullDate, getDayFromName } from 
 import { UPCOMING_SEASON_ID } from '../../lib/seasonConfig';
 import type { RegCard } from '../../lib/registration';
 
-const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose, regCards, hasEntries } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
+const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose, regCards, hasEntries, hasOpenRegistration, openRegUrl, openRegIsExternal, openRegDay } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
 const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
 
 // Group registration entries by day for the league cards
@@ -74,7 +74,9 @@ const faqItems = [
       )}
       {regStatus === 'in-progress' && (
         <p class="text-white/70 text-lg mb-8">
-          Games are underway!
+          {hasOpenRegistration
+            ? (openRegDay ? `Games are underway — ${openRegDay} is still taking signups!` : 'Games are underway — registration is still open!')
+            : 'Games are underway!'}
         </p>
       )}
       {regStatus === 'closed' && seasonLabel && (
@@ -96,6 +98,16 @@ const faqItems = [
           class="btn-primary text-lg"
         >
           Register Now
+        </a>
+      )}
+      {regStatus !== 'open' && hasOpenRegistration && (
+        <a
+          href={openRegUrl}
+          target={openRegIsExternal ? '_blank' : undefined}
+          rel={openRegIsExternal ? 'noopener noreferrer' : undefined}
+          class="btn-primary text-lg"
+        >
+          {openRegDay ? `Sign Up for ${openRegDay}` : 'Sign Up'}
         </a>
       )}
     </div>
