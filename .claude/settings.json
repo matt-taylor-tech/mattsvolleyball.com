@@ -116,7 +116,12 @@
       "Bash(awk '$1 > 1 { print }')",
       "Bash(awk -F',' 'NR>1 && tolower\\($5\\) ~ /thursday/ && \\($6==\"Ace’s Faves\" || $8==\"Ace’s Faves\"\\) { dt=$1\"|\"$2; ace[dt]=1 } NR>1 && tolower\\($5\\) ~ /thursday/ && \\($6==\"Hittie Twisters\" || $8==\"Hittie Twisters\"\\) { dt=$1\"|\"$2; if \\(ace[dt]\\) print \"CLASH: \" dt }' /Users/suigeneris/Downloads/league_schedule_20260510_203145.csv)",
       "Bash(awk -F',' 'NR>1 && tolower\\($4\\)==\"active\" { fname=$8; gsub\\(/^\"|\"$/, \"\", fname\\); lname=$9; gsub\\(/^\"|\"$/, \"\", lname\\); div=$6; gsub\\(/^\"|\"$/, \"\", div\\); team=$7; gsub\\(/^\"|\"$/, \"\", team\\); if \\(\\(fname \" \" lname\\)==\"Jeff Bowers\"\\) print team \" \\(\" div \"\\)\" }' /Users/suigeneris/Github/VolleyballEngine/multiple_registration_entries_1778336114.csv)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(perl -0777 -ne 'if \\(/data-home-hero-cta-group\\(.*?\\)<\\\\/div>/s\\){ $g=$1; while\\($g=~/<a\\\\s[^>]*href=\"\\([^\"]*\\)\"[^>]*>\\\\s*\\([^<]*?\\)\\\\s*</gs\\){print \"$2 -> $1\\\\n\"}}' dist/index.html)",
+      "Bash(perl -0777 -ne 'while\\(/<a\\\\s\\([^>]*data-header-cta[^>]*\\)>\\\\s*\\([^<]*?\\)\\\\s*<\\\\/a>/gs\\){print \"text: $2\\\\n attrs: $1\\\\n\\\\n\"}' dist/index.html)",
+      "Bash(perl -0777 -ne 'if\\(/Games are underway[^<]*/\\){print \"$&\\\\n\"} while\\(/<a\\\\s[^>]*href=\"\\(https:\\\\/\\\\/app.teamlinkt[^\"]*\\)\"[^>]*class=\"btn-primary text-lg\"[^>]*>\\\\s*\\([^<]*?\\)\\\\s*<\\\\/a>/gs\\){print \"btn: $2 -> $1\\\\n\"}' dist/leagues/index.html)",
+      "Bash(git check-ignore *)",
+      "Bash(git checkout *)"
     ]
   }
 }
