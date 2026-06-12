@@ -33,7 +33,6 @@ export interface RegistrationData {
   earliestOpen: string;
   latestClose: string;
   regCards: RegCard[];
-  hasEntries: boolean;
   // True whenever at least one division is accepting signups right now — even
   // if the season is already 'in-progress'. Lets the site keep showing a
   // registration CTA for late-open leagues (e.g. Wednesday shuffle).
@@ -45,6 +44,10 @@ export interface RegistrationData {
   openRegIsExternal: boolean;
   // Day name when exactly one division is open (e.g. "Wednesday"), else ''.
   openRegDay: string;
+  // True when TeamLinkt was reached and parsed successfully — even with zero
+  // forms listed (registration genuinely closed). False only on fetch/parse
+  // failure, where callers should avoid asserting a closed state.
+  registrationKnown: boolean;
 }
 
 interface RegistrationOptions {
@@ -105,11 +108,11 @@ export async function getRegistrationData(options: RegistrationOptions = {}): Pr
     earliestOpen: '',
     latestClose: '',
     regCards: [],
-    hasEntries: false,
     hasOpenRegistration: false,
     openRegUrl: '/leagues/',
     openRegIsExternal: false,
     openRegDay: '',
+    registrationKnown: false,
   };
 
   try {
@@ -117,12 +120,14 @@ export async function getRegistrationData(options: RegistrationOptions = {}): Pr
       headers: { 'User-Agent': 'MattsVolleyball/1.0' },
     });
     const html = await res.text();
-    const match = html.match(/season_registration_grouped\s*=\s*(\{[\s\S]*?\});\s*\n/);
+    // TeamLinkt serves an object keyed by season id when forms exist, and a
+    // bare `[]` when none are available (all registration closed).
+    const match = html.match(/season_registration_grouped\s*=\s*(\{[\s\S]*?\}|\[\]);/);
     if (!match) return fallback;
 
     const data: Record<string, SeasonGroup> = JSON.parse(match[1]);
     const seasonIds = Object.keys(data).sort((a, b) => Number(b) - Number(a));
-    if (seasonIds.length === 0) return fallback;
+    if (seasonIds.length === 0) return { ...fallback, registrationKnown: true };
 
     const selectedSeasonId = (options.preferredSeasonId && data[options.preferredSeasonId])
       ? options.preferredSeasonId
@@ -136,7 +141,7 @@ export async function getRegistrationData(options: RegistrationOptions = {}): Pr
       }
     }
 
-    if (entries.length === 0) return { ...fallback, seasonLabel: season.label };
+    if (entries.length === 0) return { ...fallback, seasonLabel: season.label, registrationKnown: true };
 
     const now = new Date();
     const anyOpen = entries.some((e) => {
@@ -242,11 +247,11 @@ export async function getRegistrationData(options: RegistrationOptions = {}): Pr
       earliestOpen,
       latestClose,
       regCards,
-      hasEntries: true,
       hasOpenRegistration,
       openRegUrl,
       openRegIsExternal,
       openRegDay,
+      registrationKnown: true,
     };
   } catch {
     return fallback;

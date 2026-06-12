@@ -6,7 +6,7 @@ import { getRegistrationData, formatDate, formatFullDate, getDayFromName } from 
 import { UPCOMING_SEASON_ID } from '../../lib/seasonConfig';
 import type { RegCard } from '../../lib/registration';
 
-const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose, regCards, hasEntries, hasOpenRegistration, openRegUrl, openRegIsExternal, openRegDay } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
+const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose, regCards, hasOpenRegistration, openRegUrl, openRegIsExternal, openRegDay, registrationKnown } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
 const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
 
 // Group registration entries by day for the league cards
@@ -125,7 +125,7 @@ const faqItems = [
           format="3v3 Coed"
           price="$65"
           description="New league night! Schedule, game times, and final format determined by registration. May run as double-header format."
-          registrationKnown={hasEntries}
+          registrationKnown={registrationKnown}
           regEntries={regByDay['monday']}
           details={[
             '8 week season: 7 regular season weeks plus 1 playoff week',
@@ -140,7 +140,7 @@ const faqItems = [
           price="$65"
           description="Requires 1 female minimum per team. Welcomes all skill levels, typically intermediate to competitive."
           highlight="Two divisions: recreational and competitive with separate playoff nights."
-          registrationKnown={hasEntries}
+          registrationKnown={registrationKnown}
           regEntries={regByDay['tuesday']}
           details={[
             '6 regular season games over 7 weeks plus a division-specific playoff night',
@@ -157,7 +157,7 @@ const faqItems = [
           description="Social focus with volleyball secondary. Individual sign-ups with weekly team redrafts. Meet new people every week!"
           link={{ href: '/leagues/shuffle/', label: 'Learn how shuffle works →' }}
           highlight='Level Up format: winning teams advance and receive handicaps, keeping every match competitive.'
-          registrationKnown={hasEntries}
+          registrationKnown={registrationKnown}
           regEntries={regByDay['wednesday']}
           details={[
             'Individual sign-ups. Teams re-drafted each week',
@@ -172,7 +172,7 @@ const faqItems = [
           price="$65"
           description="Requires 1 female minimum per team. Welcomes all skill levels, typically intermediate to competitive."
           highlight="Two divisions: recreational and competitive with separate playoff nights."
-          registrationKnown={hasEntries}
+          registrationKnown={registrationKnown}
           regEntries={regByDay['thursday']}
           details={[
             '7 regular season games plus a division-specific playoff night',

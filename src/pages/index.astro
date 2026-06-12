@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import ChampionCard from '../components/ChampionCard.astro';
 import { getChampions } from '../lib/champions';
 import { getRegistrationData, formatDate, formatFullDate } from '../lib/registration';
-import { UPCOMING_DIVISIONS, UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_PLAYER_CAPS_BY_DIVISION, UPCOMING_SEASON_ID, NEXT_NEXT_SEASON_LABEL } from '../lib/seasonConfig';
+import { UPCOMING_DIVISIONS, UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_PLAYER_CAPS_BY_DIVISION, UPCOMING_SEASON_ID, NEXT_NEXT_SEASON_LABEL, ACTIVE_SEASON_LABEL } from '../lib/seasonConfig';
 import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart } from 'lucide-astro';
 
 const champions = await getChampions();
@@ -30,15 +30,18 @@ function isPlayerCap(divId: string) {
 // Late-open leagues (e.g. Wednesday shuffle) still surface a Sign Up CTA via
 // hasOpenRegistration below.
 const heroRegStatus: 'open' | 'coming-soon' | 'in-progress' | 'closed' = 'in-progress';
+// Once TeamLinkt removes all registration forms mid-season, seasonLabel comes
+// back empty — keep the in-progress hero on the configured active season.
+const heroSeasonLabel = seasonLabel || ACTIVE_SEASON_LABEL;
 const heroPromoText = hasOpenRegistration
   ? (openRegDay
       ? `${openRegDay} is still taking signups — jump in!`
       : `Registration is still open — sign up today!`)
-  : heroRegStatus === 'open' && seasonLabel
-  ? `${seasonLabel} registration is open now.`
-  : heroRegStatus === 'coming-soon' && seasonLabel
-    ? `${seasonLabel} registration opens ${formatFullDate(earliestOpen)}.`
-    : heroRegStatus === 'in-progress' && seasonLabel
+  : heroRegStatus === 'open' && heroSeasonLabel
+  ? `${heroSeasonLabel} registration is open now.`
+  : heroRegStatus === 'coming-soon' && heroSeasonLabel
+    ? `${heroSeasonLabel} registration opens ${formatFullDate(earliestOpen)}.`
+    : heroRegStatus === 'in-progress' && heroSeasonLabel
       ? `Schedules are live. Check the matchups and join the action.`
       : 'League updates land here first.';
 const heroDatesText = seasonDates
@@ -58,19 +61,19 @@ const heroDatesText = seasonDates
         Lake Norman's Premier Sand Volleyball League
       </p>
       <h1 class="font-display font-black text-4xl sm:text-5xl md:text-7xl mb-6 leading-tight" data-home-hero-heading>
-        {heroRegStatus === 'open' && seasonLabel && (
-          <Fragment>Sign Up for<br /><span class="text-coral-400">{seasonLabel.toUpperCase()}!</span></Fragment>
+        {heroRegStatus === 'open' && heroSeasonLabel && (
+          <Fragment>Sign Up for<br /><span class="text-coral-400">{heroSeasonLabel.toUpperCase()}!</span></Fragment>
         )}
-        {heroRegStatus === 'coming-soon' && seasonLabel && (
-          <Fragment><span class="text-coral-400">{seasonLabel.toUpperCase()}</span><br />Is Coming!</Fragment>
+        {heroRegStatus === 'coming-soon' && heroSeasonLabel && (
+          <Fragment><span class="text-coral-400">{heroSeasonLabel.toUpperCase()}</span><br />Is Coming!</Fragment>
         )}
-        {heroRegStatus === 'in-progress' && seasonLabel && (
-          <Fragment><span class="text-coral-400">{seasonLabel.toUpperCase()}</span><br />Is Underway!</Fragment>
+        {heroRegStatus === 'in-progress' && heroSeasonLabel && (
+          <Fragment><span class="text-coral-400">{heroSeasonLabel.toUpperCase()}</span><br />Is Underway!</Fragment>
         )}
-        {heroRegStatus === 'closed' && seasonLabel && (
+        {heroRegStatus === 'closed' && heroSeasonLabel && (
           <Fragment><span class="text-coral-400">{NEXT_NEXT_SEASON_LABEL.toUpperCase()}</span><br />Is Coming!</Fragment>
         )}
-        {!seasonLabel && (
+        {!heroSeasonLabel && (
           <Fragment><span class="text-coral-400">Lake Norman</span><br />Sand Volleyball</Fragment>
         )}
       </h1>
