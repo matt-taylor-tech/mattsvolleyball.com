@@ -134,7 +134,8 @@
       "Bash(curl -s -H 'Authorization: Bearer __CMDSUB_OUTPUT__' -H 'Content-Type: application/json' -X POST https://api.supabase.com/v1/projects/enbnplqyjzewairxgcxe/database/query -d '{\"query\":\"select c.relname as table, c.relrowsecurity as rls_enabled, \\(select count\\(*\\) from pg_policies p where p.schemaname=n.nspname and p.tablename=c.relname\\) as policies from pg_class c join pg_namespace n on n.oid=c.relnamespace where c.relkind=r and n.nspname=public order by rls_enabled asc, policies asc, c.relname;\"}')",
       "Bash(curl -s -A 'MattsVolleyball/1.0' 'https://app.teamlinkt.com/register/find/mattsvolleyball')",
       "Bash(python3 -c ' *)",
-      "Bash(curl -s -A 'MattsVolleyball/1.0' 'https://app.teamlinkt.com/register/find/mattsvolleyball' -o /tmp/tl.html)"
+      "Bash(curl -s -A 'MattsVolleyball/1.0' 'https://app.teamlinkt.com/register/find/mattsvolleyball' -o /tmp/tl.html)",
+      "Bash(python3 -)"
     ]
   }
 }
