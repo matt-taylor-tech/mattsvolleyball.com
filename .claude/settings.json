@@ -135,7 +135,12 @@
       "Bash(curl -s -A 'MattsVolleyball/1.0' 'https://app.teamlinkt.com/register/find/mattsvolleyball')",
       "Bash(python3 -c ' *)",
       "Bash(curl -s -A 'MattsVolleyball/1.0' 'https://app.teamlinkt.com/register/find/mattsvolleyball' -o /tmp/tl.html)",
-      "Bash(python3 -)"
+      "Bash(python3 -)",
+      "Bash(grep -n -E \"const updateTeam|updateTeam =|boostersEnabled,|boosterStreakThreshold,|randomizeHandicaps,|value=\\\\{\\\\{|updateTeam\\\\b\" src/contexts/tournament-context.tsx)",
+      "Bash(gh auth *)",
+      "Bash(gh api *)",
+      "Bash(git -C /Users/suigeneris/Github/mattsvolleyball.com remote -v)",
+      "Bash(git -C /Users/suigeneris/Github/VolleyballEngine remote -v)"
     ]
   }
 }
