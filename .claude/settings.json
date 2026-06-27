@@ -140,7 +140,8 @@
       "Bash(gh auth *)",
       "Bash(gh api *)",
       "Bash(git -C /Users/suigeneris/Github/mattsvolleyball.com remote -v)",
-      "Bash(git -C /Users/suigeneris/Github/VolleyballEngine remote -v)"
+      "Bash(git -C /Users/suigeneris/Github/VolleyballEngine remote -v)",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\(p.scripts,null,2\\)\\)\")"
     ]
   }
 }
