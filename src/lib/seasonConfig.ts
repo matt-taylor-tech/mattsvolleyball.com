@@ -17,8 +17,8 @@ const CURRENT_SEASON = {
 };
 
 const NEXT_SEASON = {
-  id: 'TBD', // Will update when Summer II season is created in TeamLinkt
-  label: 'Summer II 2026',
+  id: '57274',
+  label: 'Summer Redux 2026',
 };
 
 const NEXT_NEXT_SEASON = {
@@ -45,6 +45,13 @@ export const ACTIVE_SEASON_LABEL = HAS_ACTIVE_ROLLED_OVER ? NEXT_SEASON.label : 
 // ── Upcoming Season (promotion / registration) ───────────────────────────────
 export const UPCOMING_SEASON_ID = NEXT_SEASON.id;
 export const UPCOMING_SEASON_LABEL = NEXT_SEASON.label;
+
+// Announced registration open date/time for the upcoming season. Used to drive a
+// "coming soon" hero BEFORE TeamLinkt publishes the forms on its public page.
+// Once the forms are public, live TeamLinkt data takes over automatically and
+// this becomes inert. Set to '' to disable the announcement.
+// Format: 'YYYY-MM-DD HH:MM:SS' (local time).
+export const UPCOMING_REG_OPEN_DATETIME = '2026-07-06 00:00:00';
 
 // ── Future Seasons (for promotional display when current closes) ──────────────
 export const NEXT_NEXT_SEASON_LABEL = NEXT_NEXT_SEASON.label;
@@ -74,7 +81,17 @@ const CURRENT_DIVISIONS: DivisionConfig[] = [
 ];
 
 export const UPCOMING_DIVISIONS: DivisionConfig[] = [
-  // TBD - will update when Summer II season is finalized in TeamLinkt
+  // ── Monday ───────────────────────────────────────────────────────────────
+  { id: '305895', name: '3v3 Coed',      day: 'Mon', label: 'Mon 3v3 Coed',      court: 'Court 1', hasPlayoffs: true  },
+  // ── Tuesday ──────────────────────────────────────────────────────────────
+  { id: '305891', name: 'Competitive',  day: 'Tue', label: 'Tue Competitive',  court: 'Court 1', hasPlayoffs: true  },
+  { id: '305890', name: 'Recreational', day: 'Tue', label: 'Tue Recreational', court: 'Court 2', hasPlayoffs: true  },
+  // ── Wednesday ────────────────────────────────────────────────────────────
+  // Kept as just "Shuffle": may run 3v3 or 4v4 depending on nightly attendance.
+  { id: '305894', name: 'Shuffle',      day: 'Wed', label: 'Wed Shuffle',       court: 'Court 1', hasPlayoffs: false },
+  // ── Thursday ─────────────────────────────────────────────────────────────
+  { id: '305892', name: 'Competitive',  day: 'Thu', label: 'Thu Competitive',  court: 'Court 1', hasPlayoffs: true  },
+  { id: '305893', name: 'Recreational', day: 'Thu', label: 'Thu Recreational', court: 'Court 2', hasPlayoffs: true  },
 ];
 
 // Active aliases used by live stats pages (Schedule / Teams / Standings / Scores / Playoffs)
@@ -134,16 +151,16 @@ export const UPCOMING_TEAMS_API_URL = `${API_BASE}/getTeams/${ORG_ID}/${UPCOMING
 // Max teams per division for the upcoming season. Keyed by division id.
 // Wednesday uses a player cap instead — see UPCOMING_PLAYER_CAPS_BY_DIVISION.
 export const UPCOMING_MAX_TEAMS_BY_DIVISION: Record<string, number> = {
-  '293497': 12, // Mon 3v3 Coed
-  '280407': 8,  // Tue Competitive
-  '280406': 6,  // Tue Recreational
-  '280408': 10, // Thu Competitive
-  '280409': 6,  // Thu Recreational
+  '305895': 12, // Mon 3v3 Coed
+  '305891': 8,  // Tue Competitive
+  '305890': 6,  // Tue Recreational
+  '305892': 8,  // Thu Competitive (reduced from 10 — dropped the 9:30 slot)
+  '305893': 6,  // Thu Recreational
 };
 
 // Max players per division for the upcoming season. Used for shuffle-style
 // leagues where individuals sign up to a single roster (One Big Happy Team)
 // rather than registering as teams.
 export const UPCOMING_PLAYER_CAPS_BY_DIVISION: Record<string, number> = {
-  '280410': 28, // Wed Shuffle: One Big Happy Team
+  '305894': 28, // Wed Shuffle: One Big Happy Team
 };

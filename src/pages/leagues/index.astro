@@ -3,11 +3,25 @@ import Layout from '../../layouts/Layout.astro';
 import LeagueCard from '../../components/LeagueCard.astro';
 import FAQAccordion from '../../components/FAQAccordion.astro';
 import { getRegistrationData, formatDate, formatFullDate, getDayFromName } from '../../lib/registration';
-import { UPCOMING_SEASON_ID } from '../../lib/seasonConfig';
+import { UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME } from '../../lib/seasonConfig';
 import type { RegCard } from '../../lib/registration';
 
 const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose, regCards, hasOpenRegistration, openRegUrl, openRegIsExternal, openRegDay, registrationKnown } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
 const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
+
+// Hero status, mirroring the homepage: follow live TeamLinkt data when the
+// upcoming season's forms are public; otherwise, if an open date is announced and
+// still in the future, show a config-driven "coming soon". Hands off to live data
+// automatically once the forms go public (no manual revert needed).
+const now = new Date();
+const announcedOpenDate = UPCOMING_REG_OPEN_DATETIME
+  ? new Date(UPCOMING_REG_OPEN_DATETIME.replace(' ', 'T'))
+  : null;
+const showComingSoon = !seasonLabel && announcedOpenDate !== null && now < announcedOpenDate;
+
+const heroRegStatus = seasonLabel ? regStatus : showComingSoon ? 'coming-soon' : regStatus;
+const heroSeasonLabel = seasonLabel || (showComingSoon ? UPCOMING_SEASON_LABEL : '');
+const heroEarliestOpen = seasonLabel ? earliestOpen : showComingSoon ? UPCOMING_REG_OPEN_DATETIME : earliestOpen;
 
 // Group registration entries by day for the league cards
 const regByDay: Record<string, RegCard[]> = {};
@@ -22,7 +36,7 @@ const faqItems = [
   { question: 'Is it beginner-friendly?', answer: 'Absolutely! Matt\'s Volleyball caters to players of all skill levels, including beginners. We have recreational divisions specifically designed for newer players.' },
   { question: 'How do I form a team?', answer: 'You can create your own team and invite friends, or sign up as an individual and we\'ll place you on a team. Either way, you\'ll have a great time.' },
   { question: 'Can I join multiple teams?', answer: 'Yes! You can join multiple teams across different league nights. We do our best to avoid scheduling conflicts when possible.' },
-  { question: 'What time are the games?', answer: 'Choose your weekly day. Monday, Tuesday, and Wednesday games start at 6:30, 7:30, or 8:30 PM. Thursday adds a 9:30 PM slot as well. You\'ll receive your specific game time before the season starts.' },
+  { question: 'What time are the games?', answer: 'Choose your weekly day. Games start at 6:30, 7:30, or 8:30 PM. You\'ll receive your specific game time before the season starts.' },
   { question: 'Is there an age requirement?', answer: 'Players must be at least 21 years old to participate in our leagues.' },
   { question: 'How much does it cost?', answer: '$65 per player for Monday, Tuesday, or Thursday, $55 per player for Wednesday, plus credit card processing fees. That covers the full regular season plus playoffs.' },
   { question: 'Are spectators allowed?', answer: 'Spectators are welcome and encouraged! Come out, grab some food and drinks, and enjoy the matches.' },
@@ -34,18 +48,18 @@ const faqItems = [
   <!-- Hero -->
   <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white pt-20 md:pt-28">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      {regStatus === 'open' && (
+      {heroRegStatus === 'open' && (
         <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-4 py-2 rounded-full font-bold text-sm mb-6">
           <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
           Registration Open
         </div>
       )}
-      {regStatus === 'coming-soon' && (
+      {heroRegStatus === 'coming-soon' && (
         <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-4 py-2 rounded-full font-bold text-sm mb-6">
           Coming Soon
         </div>
       )}
-      {regStatus === 'in-progress' && (
+      {heroRegStatus === 'in-progress' && (
         <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-4 py-2 rounded-full font-bold text-sm mb-6">
           <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
           Season In Progress
@@ -53,7 +67,7 @@ const faqItems = [
       )}
 
       <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">
-        {seasonLabel ? `${seasonLabel} Leagues` : 'Leagues'}
+        {heroSeasonLabel ? `${heroSeasonLabel} Leagues` : 'Leagues'}
       </h1>
 
       {seasonDates && (
@@ -62,35 +76,35 @@ const faqItems = [
         </p>
       )}
 
-      {regStatus === 'open' && (
+      {heroRegStatus === 'open' && (
         <p class="text-white/70 text-lg mb-8">
           Registration closes {formatDate(latestClose)}
         </p>
       )}
-      {regStatus === 'coming-soon' && (
+      {heroRegStatus === 'coming-soon' && (
         <p class="text-white/70 text-lg mb-8">
-          Registration opens {formatFullDate(earliestOpen)}
+          Registration opens {formatFullDate(heroEarliestOpen)}
         </p>
       )}
-      {regStatus === 'in-progress' && (
+      {heroRegStatus === 'in-progress' && (
         <p class="text-white/70 text-lg mb-8">
           {hasOpenRegistration
             ? (openRegDay ? `Games are underway — ${openRegDay} is still taking signups!` : 'Games are underway — registration is still open!')
             : 'Games are underway!'}
         </p>
       )}
-      {regStatus === 'closed' && seasonLabel && (
+      {heroRegStatus === 'closed' && heroSeasonLabel && (
         <p class="text-white/70 text-lg mb-8">
           Check back for next season
         </p>
       )}
-      {!seasonLabel && (
+      {!heroSeasonLabel && (
         <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto mb-8">
           Volleyball for grownups who don't take themselves too seriously.
         </p>
       )}
 
-      {regStatus === 'open' && (
+      {heroRegStatus === 'open' && (
         <a
           href={REG_PAGE}
           target="_blank"
@@ -100,7 +114,7 @@ const faqItems = [
           Register Now
         </a>
       )}
-      {regStatus !== 'open' && hasOpenRegistration && (
+      {heroRegStatus !== 'open' && hasOpenRegistration && (
         <a
           href={openRegUrl}
           target={openRegIsExternal ? '_blank' : undefined}
@@ -145,14 +159,14 @@ const faqItems = [
           details={[
             '6 regular season games over 7 weeks plus a division-specific playoff night',
             '1 game weekly plus 1 bye week',
-            'Game times: 6:30, 7:30, or 8:30 PM (no 9:30 games)',
+            'Game times: 6:30, 7:30, or 8:30 PM',
             'Form your own team or join as individual',
             'All skill levels welcome',
           ]}
         />
         <LeagueCard
           day="Wednesday"
-          format="4v4 Shuffle"
+          format="Shuffle"
           price="$55"
           description="Social focus with volleyball secondary. Individual sign-ups with weekly team redrafts. Meet new people every week!"
           link={{ href: '/leagues/shuffle/', label: 'Learn how shuffle works →' }}
@@ -175,9 +189,9 @@ const faqItems = [
           registrationKnown={registrationKnown}
           regEntries={regByDay['thursday']}
           details={[
-            '7 regular season games plus a division-specific playoff night',
-            '1 game per week for 7 weeks (no bye week)',
-            'Game times: 6:30, 7:30, 8:30, or 9:30 PM',
+            '6 regular season games over 7 weeks plus a division-specific playoff night',
+            '1 game weekly plus 1 bye week',
+            'Game times: 6:30, 7:30, or 8:30 PM',
             'Form your own team or join as individual',
             'All skill levels welcome',
           ]}

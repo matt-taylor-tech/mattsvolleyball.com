@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import ChampionCard from '../components/ChampionCard.astro';
 import { getChampions } from '../lib/champions';
 import { getRegistrationData, formatDate, formatFullDate } from '../lib/registration';
-import { UPCOMING_DIVISIONS, UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_PLAYER_CAPS_BY_DIVISION, UPCOMING_SEASON_ID, NEXT_NEXT_SEASON_LABEL, ACTIVE_SEASON_LABEL } from '../lib/seasonConfig';
+import { UPCOMING_DIVISIONS, UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_PLAYER_CAPS_BY_DIVISION, UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, NEXT_NEXT_SEASON_LABEL, ACTIVE_SEASON_LABEL } from '../lib/seasonConfig';
 import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart } from 'lucide-astro';
 
 const champions = await getChampions();
@@ -26,13 +26,25 @@ const homeDayCounts = {
 function isPlayerCap(divId: string) {
   return divId in UPCOMING_PLAYER_CAPS_BY_DIVISION;
 }
-// For hero section: treat Summer I as in-progress (regular registration closed).
-// Late-open leagues (e.g. Wednesday shuffle) still surface a Sign Up CTA via
-// hasOpenRegistration below.
-const heroRegStatus: 'open' | 'coming-soon' | 'in-progress' | 'closed' = 'in-progress';
-// Once TeamLinkt removes all registration forms mid-season, seasonLabel comes
-// back empty — keep the in-progress hero on the configured active season.
-const heroSeasonLabel = seasonLabel || ACTIVE_SEASON_LABEL;
+// Hero priority:
+//  1. Live TeamLinkt data present (seasonLabel set) -> follow the upcoming
+//     season's real registration status (coming-soon -> open -> in-progress).
+//  2. No live data yet, but an open date is announced and still in the future
+//     -> show a config-driven "coming soon" for the upcoming season.
+//  3. Otherwise -> show the active season as in-progress.
+// This lets us announce a season before TeamLinkt publishes its forms, then hand
+// off to live data automatically once they go public (no manual revert needed).
+const now = new Date();
+const announcedOpenDate = UPCOMING_REG_OPEN_DATETIME
+  ? new Date(UPCOMING_REG_OPEN_DATETIME.replace(' ', 'T'))
+  : null;
+const showComingSoon = !seasonLabel && announcedOpenDate !== null && now < announcedOpenDate;
+
+const heroRegStatus: 'open' | 'coming-soon' | 'in-progress' | 'closed' =
+  seasonLabel ? regStatus : showComingSoon ? 'coming-soon' : 'in-progress';
+const heroSeasonLabel = seasonLabel || (showComingSoon ? UPCOMING_SEASON_LABEL : ACTIVE_SEASON_LABEL);
+// Open date shown in the hero: live value when available, else the announced date.
+const heroEarliestOpen = seasonLabel ? earliestOpen : showComingSoon ? UPCOMING_REG_OPEN_DATETIME : earliestOpen;
 const heroPromoText = hasOpenRegistration
   ? (openRegDay
       ? `${openRegDay} is still taking signups — jump in!`
@@ -40,7 +52,7 @@ const heroPromoText = hasOpenRegistration
   : heroRegStatus === 'open' && heroSeasonLabel
   ? `${heroSeasonLabel} registration is open now.`
   : heroRegStatus === 'coming-soon' && heroSeasonLabel
-    ? `${heroSeasonLabel} registration opens ${formatFullDate(earliestOpen)}.`
+    ? `${heroSeasonLabel} registration opens ${formatFullDate(heroEarliestOpen)}.`
     : heroRegStatus === 'in-progress' && heroSeasonLabel
       ? `Schedules are live. Check the matchups and join the action.`
       : 'League updates land here first.';
@@ -120,7 +132,7 @@ const heroDatesText = seasonDates
               class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-8 py-4 rounded-lg font-bold text-lg pointer-events-none opacity-75"
               data-cta-type="register-now"
             >
-              Registration Opens {formatFullDate(earliestOpen)}
+              Registration Opens {formatFullDate(heroEarliestOpen)}
             </a>
             <a href="/leagues/" class="btn-secondary text-xl py-4 px-10" data-cta-type="view-leagues">
               View Leagues
@@ -253,7 +265,7 @@ const heroDatesText = seasonDates
           </div>
           <h3 class="font-display font-bold text-xl text-ocean-600 mb-2">Thursday</h3>
           <p class="text-ocean-600/70 text-sm leading-relaxed">
-            4v4 leagues with competitive and recreational divisions. No byes, full 7-game regular season, and separate playoff nights by division.
+            4v4 leagues with competitive and recreational divisions. Each division has its own playoff night.
           </p>
           {homeDayCounts.Thu.map((div) => (
             <p
@@ -676,6 +688,7 @@ const heroDatesText = seasonDates
         target="_blank"
         rel="noopener noreferrer"
         class="btn-primary text-xl py-4 px-12"
+        data-cta-type="register-now"
       >
         Register Now
       </a>

@@ -644,9 +644,6 @@ const playoffDays = [...new Set(ALL_DIVISIONS.filter(d => d.hasPlayoffs).map(d =
       const upcomingChecks = await Promise.all(divisionIds.map(hasUpcomingGames));
       seasonComplete = upcomingChecks.every((hasGames) => !hasGames);
 
-      // TODO: remove this bypass after testing
-      seasonComplete = true;
-
       if (!seasonComplete) {
         showState('not-ready');
         return;
