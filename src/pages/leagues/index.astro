@@ -3,7 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import LeagueCard from '../../components/LeagueCard.astro';
 import FAQAccordion from '../../components/FAQAccordion.astro';
 import { getRegistrationData, formatDate, formatFullDate, getDayFromName } from '../../lib/registration';
-import { UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME } from '../../lib/seasonConfig';
+import { UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL } from '../../lib/seasonConfig';
 import type { RegCard } from '../../lib/registration';
 
 const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose, regCards, hasOpenRegistration, openRegUrl, openRegIsExternal, openRegDay, registrationKnown } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
@@ -83,7 +83,7 @@ const faqItems = [
       )}
       {heroRegStatus === 'coming-soon' && (
         <p class="text-white/70 text-lg mb-8">
-          Registration opens {formatFullDate(heroEarliestOpen)}
+          Registration opens {formatFullDate(heroEarliestOpen)}{UPCOMING_SEASON_START_LABEL ? ` · Season starts ${UPCOMING_SEASON_START_LABEL}` : ''}
         </p>
       )}
       {heroRegStatus === 'in-progress' && (

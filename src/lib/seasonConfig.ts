@@ -53,6 +53,11 @@ export const UPCOMING_SEASON_LABEL = NEXT_SEASON.label;
 // Format: 'YYYY-MM-DD HH:MM:SS' (local time).
 export const UPCOMING_REG_OPEN_DATETIME = '2026-07-06 00:00:00';
 
+// Human-readable start of the upcoming season, shown alongside the coming-soon
+// announcement. Free-form (e.g. "the week of July 27") since the exact first-game
+// date may not be fixed yet. Set to '' to hide.
+export const UPCOMING_SEASON_START_LABEL = 'the week of July 27';
+
 // ── Future Seasons (for promotional display when current closes) ──────────────
 export const NEXT_NEXT_SEASON_LABEL = NEXT_NEXT_SEASON.label;
 export const FUTURE_SEASON_LABEL = FUTURE_SEASON.label;

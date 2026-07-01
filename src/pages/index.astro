@@ -3,7 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import ChampionCard from '../components/ChampionCard.astro';
 import { getChampions } from '../lib/champions';
 import { getRegistrationData, formatDate, formatFullDate } from '../lib/registration';
-import { UPCOMING_DIVISIONS, UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_PLAYER_CAPS_BY_DIVISION, UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, NEXT_NEXT_SEASON_LABEL, ACTIVE_SEASON_LABEL } from '../lib/seasonConfig';
+import { UPCOMING_DIVISIONS, UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_PLAYER_CAPS_BY_DIVISION, UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL, NEXT_NEXT_SEASON_LABEL, ACTIVE_SEASON_LABEL } from '../lib/seasonConfig';
 import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart } from 'lucide-astro';
 
 const champions = await getChampions();
@@ -58,7 +58,7 @@ const heroPromoText = hasOpenRegistration
       : 'League updates land here first.';
 const heroDatesText = seasonDates
   ? `${seasonDates.start} – ${seasonDates.end}${heroRegStatus === 'open' ? ` · Registration closes ${formatDate(latestClose)}` : ''}`
-  : '';
+  : (showComingSoon && UPCOMING_SEASON_START_LABEL ? `Season starts ${UPCOMING_SEASON_START_LABEL}` : '');
 ---
 
 <Layout title="Matt's Volleyball | Coed Sand Volleyball in Lake Norman">
