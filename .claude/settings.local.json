@@ -41,7 +41,8 @@
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
-      "Bash(kill 91491 91509)"
+      "Bash(kill 91491 91509)",
+      "Bash(node -e ' *)"
     ]
   }
 }

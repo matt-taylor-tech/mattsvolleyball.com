@@ -95,7 +95,7 @@ function getDivisionLabel(name: string, groupName: string): string {
   const remainder = groupTokens.filter((token, idx) => {
     if (idx >= nameTokens.length) return true;
     return token.toLowerCase() !== nameTokens[idx];
-  }).join(' ').trim();
+  }).join(' ').trim().replace(/^[-\s]+/, '');
 
   return remainder || name;
 }
