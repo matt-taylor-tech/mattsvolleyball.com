@@ -40,7 +40,7 @@ export const onRequestGet: PagesFunction = async () => {
         // Look for season date range pattern like "March 17, 2026 to May 14, 2026"
         // or "Mar 17 - May 14, 2026" in the page
         const dateMatch = detailHtml.match(
-          /(\w+ \d{1,2},?\s*\d{4})\s*(?:to|-|–|—)\s*(\w+ \d{1,2},?\s*\d{4})/
+          /(\w+ \d{1,2},?\s*\d{4})\s*(?:to|-|–|-)\s*(\w+ \d{1,2},?\s*\d{4})/
         );
         if (dateMatch) {
           seasonDates = { start: dateMatch[1].trim(), end: dateMatch[2].trim() };

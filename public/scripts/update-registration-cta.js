@@ -191,7 +191,7 @@ async function updateRegistrationCTA() {
     // Update header CTA button if it exists
     const headerCTA = document.querySelector('[data-header-cta]');
     if (headerCTA) {
-      // Show "Sign Up" whenever registration is open — including a late-open
+      // Show "Sign Up" whenever registration is open - including a late-open
       // league during an in-progress season (hasOpenRegistration).
       if (regStatus === 'open' || hasOpenRegistration) {
         const external = regStatus === 'open' || openRegIsExternal;

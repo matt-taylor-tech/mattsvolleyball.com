@@ -279,7 +279,7 @@ import {
     }
   }
 
-  // Tab clicks — now instant, no API call
+  // Tab clicks - now instant, no API call
   document.querySelectorAll<HTMLButtonElement>('#division-tabs .tab-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('#division-tabs .tab-btn').forEach((b) => b.classList.remove('active'));
@@ -296,6 +296,6 @@ import {
     filterAndRender();
   });
 
-  // Single load on page init — all filtering is local after this
+  // Single load on page init - all filtering is local after this
   loadScores();
 </script>

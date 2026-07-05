@@ -33,7 +33,7 @@ export interface RegistrationData {
   earliestOpen: string;
   latestClose: string;
   regCards: RegCard[];
-  // True whenever at least one division is accepting signups right now — even
+  // True whenever at least one division is accepting signups right now - even
   // if the season is already 'in-progress'. Lets the site keep showing a
   // registration CTA for late-open leagues (e.g. Wednesday shuffle).
   hasOpenRegistration: boolean;
@@ -44,7 +44,7 @@ export interface RegistrationData {
   openRegIsExternal: boolean;
   // Day name when exactly one division is open (e.g. "Wednesday"), else ''.
   openRegDay: string;
-  // True when TeamLinkt was reached and parsed successfully — even with zero
+  // True when TeamLinkt was reached and parsed successfully - even with zero
   // forms listed (registration genuinely closed). False only on fetch/parse
   // failure, where callers should avoid asserting a closed state.
   registrationKnown: boolean;

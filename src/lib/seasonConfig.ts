@@ -154,12 +154,12 @@ export const STANDINGS_API_URL = `${API_BASE}/getStandings/${ORG_ID}/${ACTIVE_SE
 export const UPCOMING_TEAMS_API_URL = `${API_BASE}/getTeams/${ORG_ID}/${UPCOMING_SEASON_ID}`;
 
 // Max teams per division for the upcoming season. Keyed by division id.
-// Wednesday uses a player cap instead — see UPCOMING_PLAYER_CAPS_BY_DIVISION.
+// Wednesday uses a player cap instead - see UPCOMING_PLAYER_CAPS_BY_DIVISION.
 export const UPCOMING_MAX_TEAMS_BY_DIVISION: Record<string, number> = {
   '305895': 12, // Mon 3v3 Coed
   '305891': 8,  // Tue Competitive
   '305890': 6,  // Tue Recreational
-  '305892': 8,  // Thu Competitive (reduced from 10 — dropped the 9:30 slot)
+  '305892': 8,  // Thu Competitive (reduced from 10 - dropped the 9:30 slot)
   '305893': 6,  // Thu Recreational
 };
 

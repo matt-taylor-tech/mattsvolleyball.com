@@ -175,7 +175,7 @@ import {
 
   function formatColumnValue(entry: StandingEntry, column: StandingColumnMeta): string {
     const raw = entry[column.column_type];
-    if (raw === null || raw === undefined || raw === '') return '—';
+    if (raw === null || raw === undefined || raw === '') return '-';
     if (column.column_type === 'win_percent' && typeof raw === 'number') {
       return raw.toFixed(3);
     }

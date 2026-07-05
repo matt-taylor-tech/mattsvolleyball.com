@@ -79,16 +79,16 @@ Season start/end dates are scraped from the TeamLinkt registration detail page (
 ### Season transitions
 
 - When you open registration for the **next** season on TeamLinkt (e.g., Summer while Spring is still playing), the site automatically switches to promoting the new season because it always picks the newest season.
-- No manual content changes are needed — just manage registration windows in TeamLinkt and the site updates on the next build.
+- No manual content changes are needed - just manage registration windows in TeamLinkt and the site updates on the next build.
 
 ### Where `regStatus` is used
 
-- `src/pages/index.astro` — Hero heading, subtitle, and CTA buttons
-- `src/pages/leagues/index.astro` — Hero badge, subtitle, and register button
-- `src/pages/leagues/shuffle.astro` — Bottom CTA section
-- `src/components/Header.astro` — Nav button (Sign Up vs View Leagues)
-- `src/components/Footer.astro` — Quick links (Register Now vs View Leagues)
-- `src/layouts/Layout.astro` — Fetches data once and passes to Header/Footer
+- `src/pages/index.astro` - Hero heading, subtitle, and CTA buttons
+- `src/pages/leagues/index.astro` - Hero badge, subtitle, and register button
+- `src/pages/leagues/shuffle.astro` - Bottom CTA section
+- `src/components/Header.astro` - Nav button (Sign Up vs View Leagues)
+- `src/components/Footer.astro` - Quick links (Register Now vs View Leagues)
+- `src/layouts/Layout.astro` - Fetches data once and passes to Header/Footer
 
 ## Content Collections
 

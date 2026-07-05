@@ -394,7 +394,7 @@ import {
     });
   }
 
-  // Day filter clicks — instant, no API call
+  // Day filter clicks - instant, no API call
   document.querySelectorAll<HTMLButtonElement>('#day-tabs .tab-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       setActiveDay(btn.dataset.day || 'all');
@@ -404,7 +404,7 @@ import {
     });
   });
 
-  // Division tab clicks — instant, no API call
+  // Division tab clicks - instant, no API call
   document.querySelectorAll<HTMLButtonElement>('#division-tabs .tab-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const div = btn.dataset.division || 'all';

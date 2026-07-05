@@ -76,7 +76,7 @@ function parseChampionKey(key: string): Champion | null {
 
 /**
  * Read the committed fallback list as a last-resort source of truth.
- * Populated by `node scripts/sync-champions-cache.mjs` after R2 uploads —
+ * Populated by `node scripts/sync-champions-cache.mjs` after R2 uploads -
  * commit the resulting JSON so a transient R2 outage at build time can't
  * produce an empty Champions page.
  */
@@ -103,7 +103,7 @@ export async function getChampions(): Promise<Champion[]> {
 
   if (!accountId || !accessKeyId || !secretAccessKey || !bucket) {
     const fallback = readFallback();
-    console.warn(`[champions] R2 credentials not configured — using fallback (${fallback.length} champions).`);
+    console.warn(`[champions] R2 credentials not configured - using fallback (${fallback.length} champions).`);
     return fallback;
   }
 
@@ -116,7 +116,7 @@ export async function getChampions(): Promise<Champion[]> {
     });
   } catch (err) {
     const fallback = readFallback();
-    console.error(`[champions] Failed to create S3 client — using fallback (${fallback.length} champions):`, err);
+    console.error(`[champions] Failed to create S3 client - using fallback (${fallback.length} champions):`, err);
     return fallback;
   }
 
@@ -145,16 +145,16 @@ export async function getChampions(): Promise<Champion[]> {
     } while (continuationToken);
   } catch (err) {
     const fallback = readFallback();
-    console.error(`[champions] R2 listing failed — using fallback (${fallback.length} champions):`, err);
+    console.error(`[champions] R2 listing failed - using fallback (${fallback.length} champions):`, err);
     return fallback;
   }
 
-  // R2 listed successfully but came back empty. Treat that as a hiccup —
+  // R2 listed successfully but came back empty. Treat that as a hiccup -
   // an unexpected empty bucket should never silently wipe the Champions page.
   if (champions.length === 0) {
     const fallback = readFallback();
     if (fallback.length > 0) {
-      console.warn(`[champions] R2 returned 0 results — using fallback (${fallback.length} champions).`);
+      console.warn(`[champions] R2 returned 0 results - using fallback (${fallback.length} champions).`);
       return fallback;
     }
   }

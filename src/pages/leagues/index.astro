@@ -22,6 +22,8 @@ const showComingSoon = !seasonLabel && announcedOpenDate !== null && now < annou
 const heroRegStatus = seasonLabel ? regStatus : showComingSoon ? 'coming-soon' : regStatus;
 const heroSeasonLabel = seasonLabel || (showComingSoon ? UPCOMING_SEASON_LABEL : '');
 const heroEarliestOpen = seasonLabel ? earliestOpen : showComingSoon ? UPCOMING_REG_OPEN_DATETIME : earliestOpen;
+const heroRegisterUrl = hasOpenRegistration && openRegIsExternal ? openRegUrl : REG_PAGE;
+const heroRegisterTarget = openRegIsExternal ? '_blank' : undefined;
 
 // Group registration entries by day for the league cards
 const regByDay: Record<string, RegCard[]> = {};
@@ -89,7 +91,7 @@ const faqItems = [
       {heroRegStatus === 'in-progress' && (
         <p class="text-white/70 text-lg mb-8">
           {hasOpenRegistration
-            ? (openRegDay ? `Games are underway — ${openRegDay} is still taking signups!` : 'Games are underway — registration is still open!')
+            ? (openRegDay ? `Games are underway - ${openRegDay} is still taking signups!` : 'Games are underway - registration is still open!')
             : 'Games are underway!'}
         </p>
       )}
@@ -106,8 +108,8 @@ const faqItems = [
 
       {heroRegStatus === 'open' && (
         <a
-          href={REG_PAGE}
-          target="_blank"
+          href={heroRegisterUrl}
+          target={heroRegisterTarget}
           rel="noopener noreferrer"
           class="btn-primary text-lg"
         >
@@ -218,8 +220,8 @@ const faqItems = [
         Sign up now and join the best sand volleyball community in Lake Norman.
       </p>
       <a
-        href={REG_PAGE}
-        target="_blank"
+        href={heroRegisterUrl}
+        target={heroRegisterTarget}
         rel="noopener noreferrer"
         class="btn-primary text-xl"
       >

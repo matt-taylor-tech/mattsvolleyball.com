@@ -5,6 +5,25 @@
     season starts the week of July 27, registration closes July 19,
     $65/player Mon/Tue/Thu, $55/player Wednesday.
 
+  SUBJECT + PREVIEW STRATEGY (set these in Brevo; the <title> tag mirrors the subject)
+    - Subject carries the "what + where": name sand volleyball and Saeed's Bar & Grill
+      up front. Don't lead with just "Summer Redux registration is open" - the season
+      label alone doesn't tell a past registrant what the email is or where it's played.
+    - Preview COMPLEMENTS the subject, never repeats it. If the subject says what/where,
+      the preview adds the details: divisions (Mon 3v3, Tue/Thu 4v4, Wed Shuffle) and the
+      registration deadline. Keep it under ~90 chars so it doesn't get cut off in inbox.
+    - Spelling: it's "Grill" (no e), matching the body copy.
+
+  Email subject ideas:
+    - Sand volleyball at Saeed's Bar & Grill - registration is open
+    - Summer Redux sand volleyball leagues at Saeed's: sign up by July 19
+    - All sand volleyball forms are live at Saeed's Bar & Grill
+
+  Preview text ideas (pair with a subject above; don't echo it):
+    - All forms live for [SEASON] sand leagues at Saeed's. Mon 3v3, Tue/Thu 4v4, Wed Shuffle - closes [DATE].
+    - Divisions for every night at Saeed's Bar & Grill in Cornelius - closes [DATE].
+    - 7 weeks plus playoffs on the sand at Saeed's Bar & Grill - sign up by [DATE].
+
   For the next season, search-and-replace the season label, dates, and
   prices (see src/lib/seasonConfig.ts, UPCOMING_SEASON_LABEL).
 
@@ -22,7 +41,7 @@
     <meta name="x-apple-disable-message-reformatting" />
     <meta name="color-scheme" content="light" />
     <meta name="supported-color-schemes" content="light" />
-    <title>Summer Redux 2026 Registration is Open</title>
+    <title>Sand volleyball at Saeed's - registration is open</title>
     <style>
       :root {
         color-scheme: light;
@@ -46,7 +65,7 @@
   <body style="margin:0;padding:0;background-color:#F0EEEA;font-family:'Helvetica Neue',Arial,sans-serif;color:#363133;-webkit-text-size-adjust:100%;">
     <!-- Preheader (hidden, shows in inbox preview) -->
     <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;font-size:1px;line-height:1px;color:#F0EEEA;">
-      Summer Redux 2026 sign-ups are open — sand volleyball at Saeed's Bar &amp; Grill in Cornelius. Mon 3v3, Tue/Thu 4v4, Wed Shuffle.
+      Mon 3v3, Tue/Thu 4v4, Wed Shuffle - every division open. Register by July 19.
     </div>
 
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F0EEEA;">
@@ -76,13 +95,16 @@
                 <p style="margin:0 0 16px 0;font-size:16px;line-height:1.55;color:#363133;">
                   Summer isn't over yet. <strong>Summer Redux 2026</strong> kicks off <strong>the week of July 27</strong>, and registration closes <strong>July 19</strong> (or sooner once a division fills).
                 </p>
+                <p style="margin:0 0 16px 0;font-size:16px;line-height:1.55;color:#363133;">
+                  All registration forms are open now for Monday, Tuesday, Wednesday, and Thursday play - sign up while spots are available.
+                </p>
 
                 <!-- Highlight callout -->
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 20px 0;">
                   <tr>
                     <td style="background-color:#F7F6F3;border-left:4px solid #BB4430;padding:14px 16px;border-radius:0 4px 4px 0;">
                       <p style="margin:0;font-size:15px;line-height:1.5;color:#363133;">
-                        Pick the night that fits your schedule and skill level. Games at <strong>6:30, 7:30, or 8:30 PM</strong> on the sand courts at <strong>Saeed's Bar &amp; Grill, Cornelius, NC</strong>. All gear and refs included.
+                        Pick the night that fits your schedule and skill level. Games at <strong>6:30, 7:30, or 8:30 PM</strong> on the sand courts at <strong>Saeed's Bar &amp; Grill, Cornelius, NC</strong>.
                       </p>
                     </td>
                   </tr>
@@ -109,6 +131,9 @@
                 <h2 style="margin:0 0 14px 0;font-family:'Helvetica Neue',Arial,sans-serif;font-weight:800;font-size:20px;line-height:1.2;color:#363133;">
                   Choose your night
                 </h2>
+                <p style="margin:0 0 16px 0;font-size:15px;line-height:1.5;color:#4B5563;">
+                  Every division is open for registration: Monday 3v3, Tuesday 4v4, Wednesday Shuffle, and Thursday 4v4.
+                </p>
               </td>
             </tr>
 
@@ -118,7 +143,7 @@
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #E8E6E1;border-radius:6px;">
                   <tr>
                     <td style="padding:16px 18px;">
-                      <p style="margin:0 0 4px 0;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:#BB4430;font-weight:700;">Monday · 3v3</p>
+                      <p style="margin:0 0 4px 0;font-size:16px;letter-spacing:1.5px;text-transform:uppercase;color:#BB4430;font-weight:700;">Monday · 3v3</p>
                       <h3 style="margin:0 0 6px 0;font-size:18px;font-weight:700;color:#363133;">3v3 Coed</h3>
                       <p style="margin:0;font-size:14px;line-height:1.5;color:#4B5563;">
                         Back after its debut season. Faster pace, smaller teams, more touches per player. Great for sharper hitters and anyone wanting more reps.
@@ -138,7 +163,7 @@
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #E8E6E1;border-radius:6px;">
                   <tr>
                     <td style="padding:16px 18px;">
-                      <p style="margin:0 0 4px 0;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:#BB4430;font-weight:700;">Tuesday · 4v4</p>
+                      <p style="margin:0 0 4px 0;font-size:16px;letter-spacing:1.5px;text-transform:uppercase;color:#BB4430;font-weight:700;">Tuesday · 4v4</p>
                       <h3 style="margin:0 0 6px 0;font-size:18px;font-weight:700;color:#363133;">Competitive &amp; Recreational</h3>
                       <p style="margin:0;font-size:14px;line-height:1.5;color:#4B5563;">
                         Two skill tiers so you play teams at your level. Bring a full roster or sign up as a free agent.
@@ -158,7 +183,7 @@
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #E8E6E1;border-radius:6px;">
                   <tr>
                     <td style="padding:16px 18px;">
-                      <p style="margin:0 0 4px 0;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:#BB4430;font-weight:700;">Wednesday · Shuffle</p>
+                      <p style="margin:0 0 4px 0;font-size:16px;letter-spacing:1.5px;text-transform:uppercase;color:#BB4430;font-weight:700;">Wednesday · Shuffle</p>
                       <h3 style="margin:0 0 6px 0;font-size:18px;font-weight:700;color:#363133;">Shuffle (One Big Happy Team)</h3>
                       <p style="margin:0;font-size:14px;line-height:1.5;color:#4B5563;">
                         Solo sign-up, mixed teams every week. The most social night of the week. Show up, get placed, play. Runs 3v3 or 4v4 depending on the night's turnout.
@@ -178,7 +203,7 @@
                 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #E8E6E1;border-radius:6px;">
                   <tr>
                     <td style="padding:16px 18px;">
-                      <p style="margin:0 0 4px 0;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;color:#BB4430;font-weight:700;">Thursday · 4v4</p>
+                      <p style="margin:0 0 4px 0;font-size:16px;letter-spacing:1.5px;text-transform:uppercase;color:#BB4430;font-weight:700;">Thursday · 4v4</p>
                       <h3 style="margin:0 0 6px 0;font-size:18px;font-weight:700;color:#363133;">Competitive &amp; Recreational</h3>
                       <p style="margin:0;font-size:14px;line-height:1.5;color:#4B5563;">
                         Same two-tier setup as Tuesday. The Thursday rec division usually has the most spots open late.

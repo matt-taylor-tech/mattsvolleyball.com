@@ -45,10 +45,10 @@ const heroRegStatus: 'open' | 'coming-soon' | 'in-progress' | 'closed' =
 const heroSeasonLabel = seasonLabel || (showComingSoon ? UPCOMING_SEASON_LABEL : ACTIVE_SEASON_LABEL);
 // Open date shown in the hero: live value when available, else the announced date.
 const heroEarliestOpen = seasonLabel ? earliestOpen : showComingSoon ? UPCOMING_REG_OPEN_DATETIME : earliestOpen;
+const heroRegisterUrl = REG_PAGE;
+const heroRegisterTarget = '_blank';
 const heroPromoText = hasOpenRegistration
-  ? (openRegDay
-      ? `${openRegDay} is still taking signups — jump in!`
-      : `Registration is still open — sign up today!`)
+  ? 'Registration closes July 19 · Sign up while all forms are open.'
   : heroRegStatus === 'open' && heroSeasonLabel
   ? `${heroSeasonLabel} registration is open now.`
   : heroRegStatus === 'coming-soon' && heroSeasonLabel
@@ -56,8 +56,8 @@ const heroPromoText = hasOpenRegistration
     : heroRegStatus === 'in-progress' && heroSeasonLabel
       ? `Schedules are live. Check the matchups and join the action.`
       : 'League updates land here first.';
-const heroDatesText = seasonDates
-  ? `${seasonDates.start} – ${seasonDates.end}${heroRegStatus === 'open' ? ` · Registration closes ${formatDate(latestClose)}` : ''}`
+const heroDatesText = seasonLabel
+  ? 'Season starts the week of July 27 · Runs for 7 weeks plus playoffs.'
   : (showComingSoon && UPCOMING_SEASON_START_LABEL ? `Season starts ${UPCOMING_SEASON_START_LABEL}` : '');
 ---
 
@@ -104,12 +104,12 @@ const heroDatesText = seasonDates
         {hasOpenRegistration ? (
           <Fragment>
             <a
-              href={openRegUrl}
-              target={openRegIsExternal ? '_blank' : undefined}
-              rel={openRegIsExternal ? 'noopener noreferrer' : undefined}
+              href={heroRegisterUrl}
+              target={heroRegisterTarget}
+              rel="noopener noreferrer"
               class="btn-primary text-xl py-4 px-10"
             >
-              {openRegDay ? `Sign Up for ${openRegDay}` : 'Sign Up'}
+              Register Now
             </a>
             <a href="/leagues/schedule/" class="btn-secondary text-xl py-4 px-10">
               View Schedule
@@ -117,8 +117,8 @@ const heroDatesText = seasonDates
           </Fragment>
         ) : heroRegStatus === 'open' ? (
           <a
-            href={REG_PAGE}
-            target="_blank"
+            href={heroRegisterUrl}
+            target={heroRegisterTarget}
             rel="noopener noreferrer"
             class="btn-primary text-xl py-4 px-10"
             data-cta-type="register-now"
