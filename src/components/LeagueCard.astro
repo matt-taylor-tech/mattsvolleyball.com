@@ -94,7 +94,7 @@ const gradientClass = dayColors[day] || 'from-ocean-500 to-ocean-600';
           return entry.isOpen ? (
             <div>
               <a href={entry.regUrl} target="_blank" rel="noopener noreferrer" class="btn-primary text-center w-full block">
-                Sign Up – {label}
+                Sign Up - {label}
               </a>
               <p class="text-xs text-ocean-600/70 text-center mt-1">
                 {entry.daysLeft} day{entry.daysLeft !== 1 ? 's' : ''} left · Closes {entry.closeDate}
@@ -109,12 +109,12 @@ const gradientClass = dayColors[day] || 'from-ocean-500 to-ocean-600';
             </div>
           ) : entry.isFuture ? (
             <div>
-              <span class="block text-center w-full py-2 rounded-lg bg-sand-200 text-ocean-600/70 font-semibold text-sm">{label} – Coming Soon</span>
+              <span class="block text-center w-full py-2 rounded-lg bg-sand-200 text-ocean-600/70 font-semibold text-sm">{label} - Coming Soon</span>
               <p class="text-xs text-ocean-600/70 text-center mt-1">Opens {entry.openDate}</p>
             </div>
           ) : (
             <div>
-              <span class="block text-center w-full py-2 rounded-lg bg-sand-200 text-ocean-600/70 font-semibold text-sm">{label} – Closed</span>
+              <span class="block text-center w-full py-2 rounded-lg bg-sand-200 text-ocean-600/70 font-semibold text-sm">{label} - Closed</span>
             </div>
           );
         })
