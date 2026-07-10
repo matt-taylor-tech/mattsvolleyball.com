@@ -87,7 +87,7 @@ import {
       <div id="schedule-container" class="space-y-4 sm:space-y-8 hidden"></div>
 
       <!-- Tailwind safelist for dynamically rendered classes -->
-      <span class="hidden card border-l-4 border-l-coral-500 border-l-emerald-500 border-l-violet-500 border-l-amber-400 bg-ocean-600 bg-coral-500 text-white px-2 py-0.5 rounded-full p-2 sm:p-5 p-2.5 flex flex-col sm:flex-row sm:hidden sm:inline-block sm:flex items-center sm:items-center sm:w-32 text-ocean-500 text-ocean-500/70 text-ocean-500/50 text-ocean-500/60 text-ocean-600 text-ocean-700 text-ocean-800 text-coral-500 text-xs text-sm font-display font-normal font-semibold font-bold text-lg min-w-0 truncate gap-2 gap-1.5 sm:gap-3 mb-1 mt-0.5 sm:mt-1 space-y-1.5 sm:space-y-3 space-y-4 sm:space-y-8 hover:text-ocean-500 hover:text-ocean-700"></span>
+      <span class="hidden card border-l-4 border-l-coral-500 border-l-emerald-500 border-l-violet-500 border-l-amber-400 bg-ocean-600 bg-coral-500 text-white px-2 py-0.5 rounded-full p-2 sm:p-5 p-2.5 flex flex-col sm:flex-row sm:hidden sm:inline-block sm:flex items-center sm:items-center sm:w-32 text-ocean-500 text-ocean-500/70 text-ocean-500/50 text-ocean-500/60 text-ocean-600 text-ocean-700 text-ocean-800 text-coral-500 text-xs text-sm font-display font-normal font-semibold font-bold text-lg min-w-0 truncate gap-2 gap-1.5 sm:gap-3 mb-1 mt-0.5 sm:mt-1 ml-1 space-y-1.5 sm:space-y-3 space-y-4 sm:space-y-8 hover:text-ocean-500 hover:text-ocean-700"></span>
 
     </div>
   </section>
@@ -107,6 +107,7 @@ import {
   import {
     DIVISION_IDS, DIVISIONS_BY_DAY, DAY_FOR_DIVISION, DIVISION_NAME,
     EVENTS_API, TEAMS_API_URL, ACTIVE_SEASON_ID,
+    PLAYOFFS_ACTIVE, PLAYOFF_ID,
   } from '../../lib/seasonConfig';
 
   const API_URL = EVENTS_API;
@@ -153,7 +154,10 @@ import {
     location: { name: string; url: string };
     timestamp: number;
     divisionId: string;
+    isPlayoff?: boolean;
   }
+
+  const teamIdToDivision = new Map<number, string>();
 
   async function fetchAllTeams(): Promise<void> {
     const results = await Promise.all(
@@ -162,13 +166,44 @@ import {
         body.set('group_ids[division]', id);
         body.set('season_id', ACTIVE_SEASON_ID);
         const res = await fetch(TEAMS_API_URL, { method: 'POST', body });
-        const teams: { name: string }[] = await res.json();
-        return { id, names: teams.map((t) => t.name) };
+        const teams: { id: number; name: string }[] = await res.json();
+        return { id, names: teams.map((t) => t.name), teamIds: teams.map((t) => t.id) };
       })
     );
-    for (const { id, names } of results) {
+    for (const { id, names, teamIds } of results) {
       teamsByDivision.set(id, names);
+      for (const tid of teamIds) teamIdToDivision.set(tid, id);
     }
+  }
+
+  async function fetchPlayoffGames(): Promise<GameEvent[]> {
+    if (!PLAYOFFS_ACTIVE || !PLAYOFF_ID) return [];
+    const body = new URLSearchParams();
+    body.set('start', '0');
+    body.set('length', '200');
+    body.set('status', 'upcoming');
+    body.set('schedule_type', 'playoffs');
+    body.set('playoff_id', PLAYOFF_ID);
+    const res = await fetch(API_URL, { method: 'POST', body });
+    const json = await res.json();
+    const startOfTodaySec = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000);
+    return (json.data || [])
+      .filter((row: Record<string, string | number>) => Number(row['6']) >= startOfTodaySec)
+      .map((row: Record<string, string | number>) => {
+        const homeId = Number(row.home_association_team_id);
+        const awayId = Number(row.away_assocation_team_id);
+        const divisionId = teamIdToDivision.get(homeId) || teamIdToDivision.get(awayId) || '';
+        return {
+          date: row['0'] as string,
+          time: row['1'] as string,
+          home: stripHtml(row['3'] as string),
+          away: stripHtml(row['4'] as string),
+          location: extractLocation(row['5'] as string),
+          timestamp: Number(row['6']),
+          divisionId,
+          isPlayoff: true,
+        };
+      });
   }
 
   function getByeTeams(date: string, games: GameEvent[]): string[] {
@@ -217,18 +252,24 @@ import {
   }
 
   async function fetchAllSchedule(): Promise<GameEvent[]> {
-    const results = await Promise.all(DIVISION_IDS.map(fetchDivision));
-    // Drop stale "upcoming" rows that are actually past games without scores entered.
     const startOfTodaySec = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000);
-    return results
-      .flat()
-      .filter((g) => g.timestamp >= startOfTodaySec)
-      .sort((a, b) => {
-        if (a.timestamp !== b.timestamp) return a.timestamp - b.timestamp;
-        const courtA = parseInt(a.location.name.match(/\d+/)?.[0] ?? '0', 10);
-        const courtB = parseInt(b.location.name.match(/\d+/)?.[0] ?? '0', 10);
-        return courtA - courtB;
-      });
+    const [regularResults, playoffGames] = await Promise.all([
+      Promise.all(DIVISION_IDS.map(fetchDivision)),
+      fetchPlayoffGames(),
+    ]);
+    const regular = regularResults.flat().filter((g) => g.timestamp >= startOfTodaySec);
+
+    // Deduplicate: if a game appears in both regular and playoff results (same
+    // timestamp + home team), keep the playoff copy (which carries isPlayoff=true).
+    const playoffKeys = new Set(playoffGames.map((g) => `${g.timestamp}:${g.home}`));
+    const deduped = regular.filter((g) => !playoffKeys.has(`${g.timestamp}:${g.home}`));
+
+    return [...deduped, ...playoffGames].sort((a, b) => {
+      if (a.timestamp !== b.timestamp) return a.timestamp - b.timestamp;
+      const courtA = parseInt(a.location.name.match(/\d+/)?.[0] ?? '0', 10);
+      const courtB = parseInt(b.location.name.match(/\d+/)?.[0] ?? '0', 10);
+      return courtA - courtB;
+    });
   }
 
   function groupByDate(games: GameEvent[]): Map<string, GameEvent[]> {
@@ -278,6 +319,9 @@ import {
               const stripeClass = divisionName.includes('3v3') ? 'border-l-violet-500'
                 : divisionName.toLowerCase().includes('rec') ? 'border-l-emerald-500'
                 : 'border-l-coral-500';
+              const playoffBadge = g.isPlayoff
+                ? `<span class="inline-block bg-coral-500 text-white text-xs font-bold px-2 py-0.5 rounded-full ml-1">PLAYOFFS</span>`
+                : '';
               return `
                 <div class="card border-l-4 ${stripeClass} p-2 sm:p-5">
                   <div class="flex items-center gap-1.5 text-xs text-ocean-500 mb-1 sm:hidden">
@@ -285,7 +329,7 @@ import {
                     <a href="${g.location.url}" target="_blank" rel="noopener noreferrer"
                        class="hover:text-ocean-700 transition-colors">${g.location.name.split(' - ')[0]}</a>
                     <span class="text-ocean-400">·</span>
-                    <span>${divisionName}</span>
+                    <span>${divisionName}</span>${playoffBadge}
                   </div>
                   <div class="flex items-center gap-2 sm:gap-3">
                     <span class="hidden sm:inline-block text-sm font-medium text-ocean-500 sm:w-32 shrink-0">${g.time.split(' - ')[0]}</span>
@@ -296,7 +340,7 @@ import {
                         <a href="/leagues/team/?name=${encodeURIComponent(g.away)}" class="truncate hover:text-ocean-500 transition-colors">${g.away}</a>
                       </div>
                       <div class="hidden sm:flex items-center gap-2 mt-1">
-                        <span class="text-sm text-ocean-600">${divisionName}</span>
+                        <span class="text-sm text-ocean-600">${divisionName}</span>${playoffBadge}
                         <span class="text-ocean-400">·</span>
                         <a href="${g.location.url}" target="_blank" rel="noopener noreferrer"
                            class="text-sm text-ocean-600 hover:text-ocean-700 transition-colors">
@@ -309,6 +353,9 @@ import {
               `;
             }).join('')}
             ${(() => {
+              // Skip bye display for days that are all playoff games
+              const allPlayoff = dateGames.every((g) => g.isPlayoff);
+              if (allPlayoff) return '';
               const byes = getByeTeams(date, dateGames);
               if (byes.length === 0) return '';
               return `
@@ -426,8 +473,13 @@ import {
     filterAndRender();
   });
 
-  // Fetch teams + schedule in parallel on init, then all filtering is local
-  const teamsReady = fetchAllTeams();
-  loadSchedule();
-  teamsReady.then(() => filterAndRender());
+  // Teams must load before playoff games (division mapping depends on team IDs).
+  // During playoffs, teams are loaded first; regular season runs both in parallel.
+  if (PLAYOFFS_ACTIVE) {
+    fetchAllTeams().then(() => loadSchedule());
+  } else {
+    const teamsReady = fetchAllTeams();
+    loadSchedule();
+    teamsReady.then(() => filterAndRender());
+  }
 </script>

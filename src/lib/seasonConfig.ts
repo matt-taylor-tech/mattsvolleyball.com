@@ -70,11 +70,12 @@ export interface DivisionConfig {
   label: string;      // full tab label ("Mon 3v3 Coed", "Tue Competitive" …)
   court: string;      // court assignment for playoffs page
   hasPlayoffs: boolean;
+  playoffTeamCount?: number; // how many seeds enter the bracket (default 6)
 }
 
 const CURRENT_DIVISIONS: DivisionConfig[] = [
   // ── Monday ───────────────────────────────────────────────────────────────
-  { id: '293497', name: '3v3 Coed',      day: 'Mon', label: 'Mon 3v3 Coed',      court: 'Court 1', hasPlayoffs: true  },
+  { id: '293497', name: '3v3 Coed',      day: 'Mon', label: 'Mon 3v3 Coed',      court: 'Court 1', hasPlayoffs: true,  playoffTeamCount: 5 },
   // ── Tuesday ──────────────────────────────────────────────────────────────
   { id: '280407', name: 'Competitive',  day: 'Tue', label: 'Tue Competitive',  court: 'Court 1', hasPlayoffs: true  },
   { id: '280406', name: 'Recreational', day: 'Tue', label: 'Tue Recreational', court: 'Court 2', hasPlayoffs: true  },
@@ -152,6 +153,15 @@ export const EVENTS_API    = `${API_BASE}/getAllEvents/${ORG_ID}`;
 export const TEAMS_API_URL = `${API_BASE}/getTeams/${ORG_ID}/${ACTIVE_SEASON_ID}`;
 export const STANDINGS_API_URL = `${API_BASE}/getStandings/${ORG_ID}/${ACTIVE_SEASON_ID}`;
 export const UPCOMING_TEAMS_API_URL = `${API_BASE}/getTeams/${ORG_ID}/${UPCOMING_SEASON_ID}`;
+
+// ── Playoffs ──────────────────────────────────────────────────────────────────
+// Set PLAYOFFS_ACTIVE = true once the regular season is complete and playoff
+// brackets have been created in TeamLinkt. This unlocks the playoff bracket view
+// and adds playoff games to the schedule.
+// PLAYOFF_ID is the TeamLinkt playoff bracket ID — find it in the "Playoffs"
+// schedule type dropdown on the TeamLinkt Schedule page.
+export const PLAYOFFS_ACTIVE = true;
+export const PLAYOFF_ID = '15272';
 
 // Max teams per division for the upcoming season. Keyed by division id.
 // Wednesday uses a player cap instead - see UPCOMING_PLAYER_CAPS_BY_DIVISION.

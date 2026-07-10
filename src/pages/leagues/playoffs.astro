@@ -475,9 +475,10 @@ const playoffDays = [...new Set(ALL_DIVISIONS.filter(d => d.hasPlayoffs).map(d =
     EVENTS_API as SCHEDULE_API,
     ACTIVE_SEASON_ID,
     DAY_FULL_LABEL as DAY_LABELS,
+    PLAYOFFS_ACTIVE,
   } from '../../lib/seasonConfig';
 
-  const PLAYOFF_TEAM_COUNT = 6;
+  const DEFAULT_PLAYOFF_TEAM_COUNT = 6;
   const PLAYOFF_TIME_SLOTS = ['6:30 PM', '7:15 PM', '8:00 PM', '8:45 PM', '9:30 PM'];
 
   // Only divisions with playoff brackets enabled
@@ -524,33 +525,73 @@ const playoffDays = [...new Set(ALL_DIVISIONS.filter(d => d.hasPlayoffs).map(d =
     return (json.data || []).length > 0;
   }
 
-  function buildBracketData(teams: BracketTeam[]) {
-    const [t1, t2, t3, t4, t5, t6] = teams;
-    const contestants: Record<string, { entryStatus: string; players: { title: string; nationality: string }[] }> = {};
-    teams.forEach((team) => {
-      contestants[`t${team.seed}`] = {
+  type Contestant = { entryStatus: string; players: { title: string; nationality: string }[] };
+
+  function makeContestants(teams: BracketTeam[]): Record<string, Contestant> {
+    const c: Record<string, Contestant> = {};
+    for (const team of teams) {
+      c[`t${team.seed}`] = {
         entryStatus: String(team.seed),
         players: [{ title: team.name, nationality: team.record }],
       };
-    });
+    }
+    return c;
+  }
 
+  // 4-team bracket: Semifinals → Finals
+  function buildBracketData4(teams: BracketTeam[]) {
+    const [t1, t2, t3, t4] = teams;
     return {
-      // 4 positions in round 0 so bracketry draws proper fan connectors (4→2→1)
+      rounds: [{ name: 'Semifinals' }, { name: 'Finals' }],
+      matches: [
+        { roundIndex: 0, order: 0, matchStatus: PLAYOFF_TIME_SLOTS[0], sides: [{ contestantId: `t${t1.seed}` }, { contestantId: `t${t4.seed}` }] },
+        { roundIndex: 0, order: 1, matchStatus: PLAYOFF_TIME_SLOTS[1], sides: [{ contestantId: `t${t2.seed}` }, { contestantId: `t${t3.seed}` }] },
+        { roundIndex: 1, order: 0, matchStatus: PLAYOFF_TIME_SLOTS[2] },
+      ],
+      contestants: makeContestants(teams),
+    };
+  }
+
+  // 6-team bracket: First Round (with 2 byes) → Semifinals → Finals
+  function buildBracketData6(teams: BracketTeam[]) {
+    const [t1, t2, t3, t4, t5, t6] = teams;
+    return {
       rounds: [{ name: 'First Round' }, { name: 'Semifinals' }, { name: 'Finals' }],
       matches: [
-        // Round 0: #1 bye top, QF pair (#4/#5), QF pair (#3/#6), #2 bye bottom
         { roundIndex: 0, order: 0, sides: [{ contestantId: `t${t1.seed}` }, { title: 'BYE' }] },
         { roundIndex: 0, order: 1, matchStatus: PLAYOFF_TIME_SLOTS[0], sides: [{ contestantId: `t${t4.seed}` }, { contestantId: `t${t5.seed}` }] },
         { roundIndex: 0, order: 2, matchStatus: PLAYOFF_TIME_SLOTS[1], sides: [{ contestantId: `t${t3.seed}` }, { contestantId: `t${t6.seed}` }] },
         { roundIndex: 0, order: 3, sides: [{ contestantId: `t${t2.seed}` }, { title: 'BYE' }] },
-        // Semifinals: bracketry pairs (order0+order1)→SF0, (order2+order3)→SF1
         { roundIndex: 1, order: 0, matchStatus: PLAYOFF_TIME_SLOTS[2], sides: [{ contestantId: `t${t1.seed}` }, {}] },
         { roundIndex: 1, order: 1, matchStatus: PLAYOFF_TIME_SLOTS[3], sides: [{}, { contestantId: `t${t2.seed}` }] },
-        // Finals
         { roundIndex: 2, order: 0, matchStatus: PLAYOFF_TIME_SLOTS[4] },
       ],
-      contestants,
+      contestants: makeContestants(teams),
     };
+  }
+
+  // 5-team bracket: #1 bye, QF: #4 vs #5 and #3 vs ... → SF → Finals
+  function buildBracketData5(teams: BracketTeam[]) {
+    const [t1, t2, t3, t4, t5] = teams;
+    return {
+      rounds: [{ name: 'First Round' }, { name: 'Semifinals' }, { name: 'Finals' }],
+      matches: [
+        { roundIndex: 0, order: 0, sides: [{ contestantId: `t${t1.seed}` }, { title: 'BYE' }] },
+        { roundIndex: 0, order: 1, matchStatus: PLAYOFF_TIME_SLOTS[0], sides: [{ contestantId: `t${t4.seed}` }, { contestantId: `t${t5.seed}` }] },
+        { roundIndex: 0, order: 2, matchStatus: PLAYOFF_TIME_SLOTS[1], sides: [{ contestantId: `t${t2.seed}` }, { contestantId: `t${t3.seed}` }] },
+        { roundIndex: 0, order: 3, sides: [{}] },
+        { roundIndex: 1, order: 0, matchStatus: PLAYOFF_TIME_SLOTS[2], sides: [{ contestantId: `t${t1.seed}` }, {}] },
+        { roundIndex: 1, order: 1, matchStatus: PLAYOFF_TIME_SLOTS[3], sides: [{}, {}] },
+        { roundIndex: 2, order: 0, matchStatus: PLAYOFF_TIME_SLOTS[4] },
+      ],
+      contestants: makeContestants(teams),
+    };
+  }
+
+  function buildBracketData(teams: BracketTeam[]) {
+    if (teams.length <= 4) return buildBracketData4(teams);
+    if (teams.length === 5) return buildBracketData5(teams);
+    return buildBracketData6(teams);
   }
 
   function renderPage() {
@@ -640,13 +681,17 @@ const playoffDays = [...new Set(ALL_DIVISIONS.filter(d => d.hasPlayoffs).map(d =
     showState('loading');
 
     try {
-      const divisionIds = DIVISIONS.map((d) => d.id);
-      const upcomingChecks = await Promise.all(divisionIds.map(hasUpcomingGames));
-      seasonComplete = upcomingChecks.every((hasGames) => !hasGames);
+      if (!PLAYOFFS_ACTIVE) {
+        const divisionIds = DIVISIONS.map((d) => d.id);
+        const upcomingChecks = await Promise.all(divisionIds.map(hasUpcomingGames));
+        seasonComplete = upcomingChecks.every((hasGames) => !hasGames);
 
-      if (!seasonComplete) {
-        showState('not-ready');
-        return;
+        if (!seasonComplete) {
+          showState('not-ready');
+          return;
+        }
+      } else {
+        seasonComplete = true;
       }
 
       const standingsResults = await Promise.all(
@@ -658,7 +703,8 @@ const playoffDays = [...new Set(ALL_DIVISIONS.filter(d => d.hasPlayoffs).map(d =
 
       for (const { config, standings } of standingsResults) {
         if (standings.length > 0) {
-          const teams: BracketTeam[] = standings.slice(0, PLAYOFF_TEAM_COUNT).map((s, i) => ({
+          const teamCount = config.playoffTeamCount ?? DEFAULT_PLAYOFF_TEAM_COUNT;
+          const teams: BracketTeam[] = standings.slice(0, Math.min(teamCount, standings.length)).map((s, i) => ({
             seed: i + 1,
             name: s.Team.name,
             record: `${s.total_wins}-${s.total_losses}${s.total_ties > 0 ? `-${s.total_ties}` : ''}`,

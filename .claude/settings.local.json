@@ -45,7 +45,24 @@
       "Bash(node -e ' *)",
       "Bash(npm run *)",
       "Skill(artifact-design)",
-      "Skill(artifact-design:*)"
+      "Skill(artifact-design:*)",
+      "Bash(curl -Ls \"https://app.mattsvolleyball.com/mattsvolleyball/Schedule\")",
+      "Bash(curl -Ls \"https://app.mattsvolleyball.com/mattsvolleyball/Schedule\" -G --data-urlencode \"data[season_id]=52672\")",
+      "Bash(curl -Ls -X POST \"https://app.mattsvolleyball.com/mattsvolleyball/Schedule\" --data \"data[season_id]=52672\")",
+      "Bash(curl -Ls -X POST https://app.mattsvolleyball.com/leagues/getAllEvents/10757 --data 'start=0&length=100&status=upcoming&filters[293497]=293497')",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d, indent=2\\)\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('total:', d.get\\('recordsTotal'\\)\\); print\\(json.dumps\\(d.get\\('data', []\\)[:3], indent=2\\)\\)\")",
+      "Bash(python3 -c ' *)",
+      "Bash(python3 *)",
+      "Bash(node_modules\\\\.bin\\\\astro check *)",
+      "PowerShell(node_modules\\\\.bin\\\\astro check 2>&1 | Select-Object -Last 20)",
+      "PowerShell(npm run *)",
+      "Bash(./node_modules/.bin/astro build *)",
+      "Bash(curl -s -I \"https://app.mattsvolleyball.com/mattsvolleyball/Schedule\")"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "supabase-mv"
+  ]
 }
