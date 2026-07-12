@@ -1,12 +1,12 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { Shuffle as ShuffleIcon, Layers, BookOpen, Sparkles, Dices, Users, Scale, TrendingUp, Check, ArrowRight, MapPin } from 'lucide-astro';
+import { Shuffle as ShuffleIcon, Layers, BookOpen, Sparkles, Dices, Users, Scale, TrendingUp, Check, ArrowRight, MapPin, Gift } from 'lucide-astro';
 import { getRegistrationData } from '../../lib/registration';
 
 const { regStatus } = await getRegistrationData();
 ---
 
-<Layout title="Shuffle League | Matt's Volleyball" description="Learn about the Wednesday shuffle league format at Matt's Volleyball. Teams are re-drafted weekly with the Level Up handicap system.">
+<Layout title="Shuffle League | Matt's Volleyball" description="Learn about the Wednesday shuffle league format at Matt's Volleyball. Teams are re-drafted weekly with the Level Up handicap system, plus free prize raffles every night.">
   <!-- Hero -->
   <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white pt-20 md:pt-28">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -77,9 +77,22 @@ const { regStatus } = await getRegistrationData();
             <span class="w-10 h-10 bg-ocean-100 rounded-full flex items-center justify-center text-ocean-600 font-display font-bold shrink-0">4</span>
             <div>
               <h3 class="font-display font-bold text-lg text-ocean-600 mb-1">Hang out</h3>
-              <p class="text-ocean-700 text-sm leading-relaxed">Grab a drink, meet new people, stick around after games. It's a social league - the volleyball is just the excuse to get together.</p>
+              <p class="text-ocean-700 text-sm leading-relaxed">Grab a drink, meet new people, stick around after games. It's a social league - the volleyball is just the excuse to get together. Staying also keeps you in the running for the prize raffle.</p>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Prize Raffle -->
+      <div class="mb-16">
+        <h2 class="section-heading mb-6"><Gift class="w-6 h-6 inline-block mr-2 -mt-1 text-ocean-500" />Prize Raffle</h2>
+        <div class="text-ocean-700 leading-relaxed space-y-4">
+          <p>
+            Every shuffle night includes a free prize raffle. There are no tickets to buy - checking in is your entry.
+          </p>
+          <p>
+            Drawings happen between games throughout the night, with winners announced on the TV displays. To win you have to be checked in and still at the courts, so stick around. Each player can win once per night, which spreads the prizes around.
+          </p>
         </div>
       </div>
 
