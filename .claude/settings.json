@@ -145,7 +145,22 @@
       "Bash(grep -niIB2 -A6 \"raffle\\\\|RaffleWinnerDisplay\\\\|isWinnerBannerVisible\" src/app/tv/\\\\[slug\\\\]/client.tsx)",
       "Bash(grep -niIB2 -A5 \"raffle\\\\|RaffleWinnerDisplay\" src/app/dash/\\\\[slug\\\\]/client.tsx)",
       "Bash(git add *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(git stash *)",
+      "Bash(gh pr create --title 'Raffle: season-fair draws — favor players who haven'\\\\''t won yet' --body ' *)",
+      "Bash(gh issue *)",
+      "Bash(git pull *)",
+      "Bash(gh pr create --title 'Add annotated .env.example documenting environment variables' --body ' *)",
+      "Bash(gh pr create --title 'Dedupe quick wins: shared timeToMs, phase-start helper, single getStatusProps/PlayerRoster' --body ' *)",
+      "mcp__supabase-mv__execute_sql",
+      "mcp__supabase-mv__get_advisors",
+      "Bash(python3 -c \"import json;print\\(json.load\\(open\\('.vscode/mcp.json'\\)\\)['servers']['supabase']['env']['SUPABASE_ACCESS_TOKEN']\\)\")",
+      "Bash(curl -s -X POST https://api.supabase.com/v1/projects/enbnplqyjzewairxgcxe/database/query -H 'Authorization: Bearer __TRACKED_VAR__' -H 'Content-Type: application/json' -d '{\"query\":\"SELECT tablename, policyname, cmd, qual, with_check FROM pg_policies WHERE schemaname = '\\\\''public'\\\\'' AND tablename IN \\('\\\\''members'\\\\'','\\\\''tournament_rosters'\\\\'','\\\\''payments'\\\\'','\\\\''user_profiles'\\\\'','\\\\''user_roles'\\\\'','\\\\''administrators'\\\\''\\) ORDER BY tablename, cmd, policyname;\"}')",
+      "Bash(curl -s https://api.supabase.com/v1/projects/enbnplqyjzewairxgcxe/advisors/security -H 'Authorization: Bearer __CMDSUB_OUTPUT__')",
+      "Bash(curl -s -X POST https://api.supabase.com/v1/projects/enbnplqyjzewairxgcxe/database/query -H 'Authorization: Bearer __CMDSUB_OUTPUT__' -H 'Content-Type: application/json' -d '{\"query\":\"SELECT pg_get_functiondef\\(oid\\) FROM pg_proc WHERE proname = '\\\\''tournament_rosters_bulk_status'\\\\'';\"}')",
+      "Bash(python3 -c \"import json,sys; print\\(json.load\\(sys.stdin\\)[0]['pg_get_functiondef']\\)\")",
+      "Bash(gh repo *)",
+      "Bash(gh issue comment 80 --body ' *)"
     ]
   }
 }
