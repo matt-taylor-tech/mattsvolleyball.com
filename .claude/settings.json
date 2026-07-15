@@ -253,7 +253,8 @@
       "Bash(node scripts/post-daily-schedule.mjs --dry-run --date=2026-07-20)",
       "Bash(node scripts/post-missing-scores.mjs --dry-run --date=2026-07-13)",
       "Bash(node scripts/post-results.mjs --dry-run)",
-      "Bash(node scripts/post-missing-scores.mjs --dry-run --date=2026-07-08)"
+      "Bash(node scripts/post-missing-scores.mjs --dry-run --date=2026-07-08)",
+      "Bash(gh issue create --repo matt-taylor-tech/mattsvolleyball.com --label enhancement --title 'Handle missing playoff scores differently in nudges and recaps' --body ' *)"
     ]
   }
 }
