@@ -17,6 +17,10 @@ on:
         description: 'Print the messages instead of posting'
         type: boolean
         default: false
+      test:
+        description: 'Post to the Bot Test Group instead of real chats'
+        type: boolean
+        default: false
 
 jobs:
   post:
@@ -32,11 +36,9 @@ jobs:
           GROUPME_BOT_ID: ${{ secrets.GROUPME_BOT_ID }}
           GROUPME_BOT_ID_TEST: ${{ secrets.GROUPME_BOT_ID_TEST }}
         run: |
-          # SHAKEDOWN: recaps are pinned to the Bot Test Group until validated
-          # against real Summer Redux data. Remove the hardcoded --test below
-          # to go live in the night topics.
-          ARGS="--test"
+          ARGS=""
           if [ -n "${{ inputs.day }}" ]; then ARGS="$ARGS --day=${{ inputs.day }}"; fi
           if [ -n "${{ inputs.date }}" ]; then ARGS="$ARGS --date=${{ inputs.date }}"; fi
           if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          if [ "${{ inputs.test }}" = "true" ]; then ARGS="$ARGS --test"; fi
           node scripts/post-results.mjs $ARGS

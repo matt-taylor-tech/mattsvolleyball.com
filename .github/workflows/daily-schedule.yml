@@ -42,12 +42,10 @@ jobs:
           GROUPME_BOT_ID: ${{ secrets.GROUPME_BOT_ID }}
           GROUPME_BOT_ID_TEST: ${{ secrets.GROUPME_BOT_ID_TEST }}
         run: |
-          # SHAKEDOWN: nudges are pinned to the Bot Test Group until validated
-          # against real Summer Redux scores. Remove the hardcoded --test below
-          # to go live in the real night topics.
-          ARGS="--test"
+          ARGS=""
           if [ -n "${{ inputs.results_date }}" ]; then ARGS="$ARGS --date=${{ inputs.results_date }}"; fi
           if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          if [ "${{ inputs.test }}" = "true" ]; then ARGS="$ARGS --test"; fi
           node scripts/post-missing-scores.mjs $ARGS
       - name: Post schedule
         # Runs even if the nudge failed; the schedule post is independent.
