@@ -323,7 +323,25 @@ async function uploadImage(token, buffer) {
   const json = await res.json();
   const url = json?.payload?.url;
   if (!url) throw new Error('GroupMe image upload returned no URL');
+  await waitForImageReady(url);
   return url;
+}
+
+/**
+ * The image service generates the mobile-sized variants (.preview/.large)
+ * asynchronously after upload. A message posted before they exist renders on
+ * web (which falls back to the original) but stays permanently imageless in
+ * the mobile apps. Wait for the .preview variant plus a short settle delay.
+ */
+async function waitForImageReady(url, timeoutMs = 30000) {
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const res = await fetch(`${url}.preview`, { method: 'HEAD' });
+    if (res.ok) return;
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+  }
+  throw new Error(`Image variants still not ready after ${timeoutMs}ms: ${url}`);
 }
 
 /**
