@@ -36,22 +36,7 @@ jobs:
         run: npm ci
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
-      - name: Post schedule
-        env:
-          # Access token posts into the night's topic; bot ID is the
-          # main-chat fallback (bots can't post to topics).
-          GROUPME_TOKEN: ${{ secrets.GROUPME_TOKEN }}
-          GROUPME_BOT_ID: ${{ secrets.GROUPME_BOT_ID }}
-          GROUPME_BOT_ID_TEST: ${{ secrets.GROUPME_BOT_ID_TEST }}
-        run: |
-          ARGS=""
-          if [ -n "${{ inputs.date }}" ]; then ARGS="$ARGS --date=${{ inputs.date }}"; fi
-          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
-          if [ "${{ inputs.test }}" = "true" ]; then ARGS="$ARGS --test"; fi
-          node scripts/post-daily-schedule.mjs $ARGS
       - name: Nudge about missing scores
-        # Runs even if the schedule post failed; the nudge is independent.
-        if: ${{ !cancelled() }}
         env:
           GROUPME_TOKEN: ${{ secrets.GROUPME_TOKEN }}
           GROUPME_BOT_ID: ${{ secrets.GROUPME_BOT_ID }}
@@ -64,3 +49,18 @@ jobs:
           if [ -n "${{ inputs.results_date }}" ]; then ARGS="$ARGS --date=${{ inputs.results_date }}"; fi
           if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
           node scripts/post-missing-scores.mjs $ARGS
+      - name: Post schedule
+        # Runs even if the nudge failed; the schedule post is independent.
+        if: ${{ !cancelled() }}
+        env:
+          # Access token posts into the night's topic; bot ID is the
+          # main-chat fallback (bots can't post to topics).
+          GROUPME_TOKEN: ${{ secrets.GROUPME_TOKEN }}
+          GROUPME_BOT_ID: ${{ secrets.GROUPME_BOT_ID }}
+          GROUPME_BOT_ID_TEST: ${{ secrets.GROUPME_BOT_ID_TEST }}
+        run: |
+          ARGS=""
+          if [ -n "${{ inputs.date }}" ]; then ARGS="$ARGS --date=${{ inputs.date }}"; fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          if [ "${{ inputs.test }}" = "true" ]; then ARGS="$ARGS --test"; fi
+          node scripts/post-daily-schedule.mjs $ARGS

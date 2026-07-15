@@ -28,6 +28,11 @@ export const CONVERSATION_IDS = {
 // event here. It has no topics, so all nights collapse to the group itself.
 export const TEST_CONVERSATION_ID = '115965602';
 
+// Nights excluded from ALL automated posts. Monday 3v3 was canceled for
+// Summer Redux (not enough players); the site config intentionally still
+// lists it, so the exclusion lives here in the automation layer only.
+const DISABLED_DAYS = new Set(['Mon']);
+
 // ── Config parsing (mirrors check-teamlinkt-config.mjs) ──────────────────────
 
 function extractSingleId(source, varName) {
@@ -59,12 +64,13 @@ export async function loadConfig() {
   const playoffsActive = /export const PLAYOFFS_ACTIVE = true/.test(source) && !hasRolledOver;
   const playoffId = source.match(/export const PLAYOFF_ID = '([^']*)'/)?.[1] ?? '';
 
-  const divisions = hasRolledOver ? upcomingDivisions : currentDivisions;
+  const allDivisions = hasRolledOver ? upcomingDivisions : currentDivisions;
   const seasonId = hasRolledOver ? nextSeasonId : currentSeasonId;
-  if (!seasonId || divisions.length === 0) {
+  if (!seasonId || allDivisions.length === 0) {
     throw new Error('Unable to parse season/divisions from src/lib/seasonConfig.ts');
   }
 
+  const divisions = allDivisions.filter((d) => !DISABLED_DAYS.has(d.day));
   return { seasonId, divisions, playoffsActive, playoffId };
 }
 
