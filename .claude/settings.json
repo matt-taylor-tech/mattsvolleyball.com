@@ -252,7 +252,8 @@
       "Bash(GROUPME_TOKEN=__CMDSUB_OUTPUT__ node scripts/post-missing-scores.mjs --test --date=2026-07-14)",
       "Bash(node scripts/post-daily-schedule.mjs --dry-run --date=2026-07-20)",
       "Bash(node scripts/post-missing-scores.mjs --dry-run --date=2026-07-13)",
-      "Bash(node scripts/post-results.mjs --dry-run)"
+      "Bash(node scripts/post-results.mjs --dry-run)",
+      "Bash(node scripts/post-missing-scores.mjs --dry-run --date=2026-07-08)"
     ]
   }
 }
