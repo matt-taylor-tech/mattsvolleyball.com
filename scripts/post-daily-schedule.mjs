@@ -17,6 +17,8 @@
 // Args: --dry-run           save the screenshot locally and print the caption
 //       --date=YYYY-MM-DD   override "today" (interpreted as an ET calendar date)
 //       --text              skip the screenshot and use the text format (for testing)
+//       --test              route all posts/events to the Bot Test Group
+//                           (bot fallback uses GROUPME_BOT_ID_TEST)
 //
 // Exits 0 (silently, no post) on non-league days and days with no games.
 // Exits 1 on config, fetch, capture, or GroupMe errors so the Actions run shows red.
@@ -50,6 +52,10 @@ const CONVERSATION_IDS = {
   Wed: '115951034', // standalone "Wednesday Shuffle | Matt's Volleyball" group
   Thu: '115954793', // topic
 };
+
+// "Bot Test Group" for development (issue #18): --test routes every post and
+// event here. It has no topics, so all nights collapse to the group itself.
+const TEST_CONVERSATION_ID = '115965602';
 
 // Days that get a calendar event (for RSVPs) instead of a schedule image.
 // Shuffle night has one big roster, so there are no matchups worth posting;
@@ -413,6 +419,7 @@ async function postAsBot(botId, text, imageUrl) {
 async function main() {
   const dryRun = process.argv.includes('--dry-run');
   const forceText = process.argv.includes('--text');
+  const testMode = process.argv.includes('--test');
   const dateArg = process.argv.find((a) => a.startsWith('--date='))?.slice('--date='.length);
 
   if (dateArg && !/^\d{4}-\d{2}-\d{2}$/.test(dateArg)) {
@@ -436,6 +443,11 @@ async function main() {
     return;
   }
 
+  const conversationId = testMode ? TEST_CONVERSATION_ID : CONVERSATION_IDS[dayKey];
+  const target = testMode ? 'TEST group' : `${dayKey} topic`;
+  // Unique guids in test mode so rapid repeat runs don't hit the 1-minute dedup.
+  const guidBase = testMode ? `mv-test-${dateKey}-${Date.now()}` : `mv-schedule-${dateKey}`;
+
   // Event days (Wednesday Shuffle) get an RSVP calendar event, not an image.
   const eventCfg = EVENT_DAYS[dayKey];
   if (eventCfg) {
@@ -445,20 +457,19 @@ async function main() {
     const endAt = `${dateKey}T${eventCfg.endTime}:00${offset}`;
 
     if (dryRun) {
-      console.log(`[dry-run] Would create event "${name}" (${startAt} to ${endAt}) in the ${dayKey} topic.`);
+      console.log(`[dry-run] Would create event "${name}" (${startAt} to ${endAt}) in the ${target}.`);
       console.log(`[dry-run] Description: ${eventCfg.description} | Location: ${eventCfg.location.name} | Reminders: ${eventCfg.reminders.join(', ')}s before`);
       return;
     }
 
     const token = process.env.GROUPME_TOKEN;
     if (!token) throw new Error('Missing env var GROUPME_TOKEN');
-    const topicId = CONVERSATION_IDS[dayKey];
-    if (!topicId) throw new Error(`No topic mapped for ${dayKey}`);
+    if (!conversationId) throw new Error(`No conversation mapped for ${dayKey}`);
 
-    const created = await createTopicEvent(token, topicId, name, eventCfg, startAt, endAt);
+    const created = await createTopicEvent(token, conversationId, name, eventCfg, startAt, endAt);
     console.log(created
-      ? `Created event "${name}" in the ${dayKey} topic.`
-      : `Event "${name}" already exists in the ${dayKey} topic; skipped.`);
+      ? `Created event "${name}" in the ${target}.`
+      : `Event "${name}" already exists in the ${target}; skipped.`);
     return;
   }
 
@@ -496,20 +507,20 @@ async function main() {
   if (!token) throw new Error('Missing env var GROUPME_TOKEN');
 
   const imageUrl = image ? await uploadImage(token, image) : null;
-  const topicId = CONVERSATION_IDS[dayKey];
+  const fallbackBotId = testMode ? process.env.GROUPME_BOT_ID_TEST : process.env.GROUPME_BOT_ID;
 
-  if (topicId) {
+  if (conversationId) {
     for (const [i, message] of messages.entries()) {
-      await postToTopic(token, topicId, message, i === 0 ? imageUrl : null, `mv-schedule-${dateKey}-${i}`);
+      await postToTopic(token, conversationId, message, i === 0 ? imageUrl : null, `${guidBase}-${i}`);
     }
-    console.log(`Posted ${image ? 'schedule image' : `${messages.length} text message(s)`} to the ${dayKey} topic for ${dateKey} (${games.length} games).`);
-  } else if (process.env.GROUPME_BOT_ID) {
+    console.log(`Posted ${image ? 'schedule image' : `${messages.length} text message(s)`} to the ${target} for ${dateKey} (${games.length} games).`);
+  } else if (fallbackBotId) {
     for (const [i, message] of messages.entries()) {
-      await postAsBot(process.env.GROUPME_BOT_ID, message, i === 0 ? imageUrl : null);
+      await postAsBot(fallbackBotId, message, i === 0 ? imageUrl : null);
     }
     console.log(`Posted to the main chat for ${dateKey} (${games.length} games).`);
   } else {
-    throw new Error(`No topic mapped for ${dayKey} and no GROUPME_BOT_ID fallback set`);
+    throw new Error(`No conversation mapped for ${dayKey} and no bot fallback set`);
   }
 }
 
