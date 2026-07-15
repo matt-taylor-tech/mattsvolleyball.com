@@ -2,12 +2,17 @@ name: Post daily schedule to GroupMe
 
 on:
   schedule:
-    # 13:00 UTC = 9 AM EDT / 8 AM EST, Mon-Thu (league nights)
-    - cron: '0 13 * * 1-4'
+    # 13:00 UTC = 9 AM EDT / 8 AM EST. Mon-Thu posts that night's schedule;
+    # Tue-Fri posts the previous night's results. Both scripts exit quietly
+    # on days that don't apply.
+    - cron: '0 13 * * 1-5'
   workflow_dispatch:
     inputs:
       date:
-        description: 'Override date (YYYY-MM-DD, ET)'
+        description: 'Schedule date override (YYYY-MM-DD, ET)'
+        required: false
+      results_date:
+        description: 'Results game-night override (YYYY-MM-DD, ET; default yesterday)'
         required: false
       dry_run:
         description: 'Print the message instead of posting'
@@ -44,3 +49,16 @@ jobs:
           if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
           if [ "${{ inputs.test }}" = "true" ]; then ARGS="$ARGS --test"; fi
           node scripts/post-daily-schedule.mjs $ARGS
+      - name: Post previous night's results
+        # Runs even if the schedule post failed; results are independent.
+        if: ${{ !cancelled() }}
+        env:
+          GROUPME_TOKEN: ${{ secrets.GROUPME_TOKEN }}
+          GROUPME_BOT_ID: ${{ secrets.GROUPME_BOT_ID }}
+          GROUPME_BOT_ID_TEST: ${{ secrets.GROUPME_BOT_ID_TEST }}
+        run: |
+          ARGS=""
+          if [ -n "${{ inputs.results_date }}" ]; then ARGS="$ARGS --date=${{ inputs.results_date }}"; fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          if [ "${{ inputs.test }}" = "true" ]; then ARGS="$ARGS --test"; fi
+          node scripts/post-results.mjs $ARGS

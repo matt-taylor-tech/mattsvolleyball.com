@@ -9,6 +9,7 @@
     "astro": "astro",
     "check:teamlinkt": "node scripts/check-teamlinkt-config.mjs",
     "post:schedule": "node scripts/post-daily-schedule.mjs",
+    "post:results": "node scripts/post-results.mjs",
     "sync:champions": "node scripts/sync-champions-cache.mjs"
   },
   "dependencies": {
