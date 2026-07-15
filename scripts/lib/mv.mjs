@@ -35,9 +35,9 @@ const DISABLED_DAYS = new Set(['Mon']);
 
 // Days that get a calendar event (for RSVPs) instead of a schedule image.
 // Shuffle night has one big roster, so there are no matchups worth posting;
-// the event's Going list is the useful signal. Times are ET wall clock,
-// reminders are seconds before start, minPlayers drives the afternoon
-// RSVP check (shuffle needs ~8 to run well).
+// the event's Going list is the useful signal (RSVPs are optional; players
+// can just show up, so the count is a forecast, not a commitment). Times are
+// ET wall clock, reminders are seconds before start.
 export const EVENT_DAYS = {
   Wed: {
     title: 'Wednesday Shuffle',           // becomes "Wednesday Shuffle - Jul 29"
@@ -46,9 +46,12 @@ export const EVENT_DAYS = {
     description: 'RSVP or show up by 6:30',
     location: { name: "Saeed's Bar & Grill", lat: 35.483712, lng: -80.868313 },
     reminders: [900], // 15 minutes before
-    minPlayers: 8,
   },
 };
+
+// Main league group ("Matt's Volleyball"): announcements that concern
+// everyone, e.g. registration alerts.
+export const MAIN_GROUP_ID = '115950918';
 
 // ── Config parsing (mirrors check-teamlinkt-config.mjs) ──────────────────────
 
@@ -97,6 +100,35 @@ export async function loadConfig() {
 
   const divisions = allDivisions.filter((d) => !DISABLED_DAYS.has(d.day));
   return { seasonId, divisions, playoffsActive, playoffId };
+}
+
+/**
+ * Registration-facing config for the UPCOMING season, regardless of rollover:
+ * divisions (minus disabled days), season id/label, and the two cap maps.
+ */
+export async function loadUpcomingConfig() {
+  const source = await readFile(SEASON_CONFIG_PATH, 'utf8');
+
+  const seasonId = extractSingleId(source, 'NEXT_SEASON');
+  const seasonLabel = source.match(/const NEXT_SEASON = \{[\s\S]*?label: '([^']+)'/)?.[1] ?? '';
+  const divisions = extractDivisions(source, 'UPCOMING_DIVISIONS')
+    .filter((d) => !DISABLED_DAYS.has(d.day));
+  if (!seasonId || divisions.length === 0) {
+    throw new Error('Unable to parse upcoming season/divisions from src/lib/seasonConfig.ts');
+  }
+
+  const parseCapMap = (varName) => {
+    const block = source.match(new RegExp(`export const ${varName}[^{]*\\{([\\s\\S]*?)\\};`))?.[1] ?? '';
+    return Object.fromEntries([...block.matchAll(/'(\d+)':\s*(\d+)/g)].map((m) => [m[1], Number(m[2])]));
+  };
+
+  return {
+    seasonId,
+    seasonLabel,
+    divisions,
+    maxTeams: parseCapMap('UPCOMING_MAX_TEAMS_BY_DIVISION'),
+    playerCaps: parseCapMap('UPCOMING_PLAYER_CAPS_BY_DIVISION'),
+  };
 }
 
 // ── Date helpers (all ET-aware) ───────────────────────────────────────────────

@@ -1,0 +1,37 @@
+name: Registration alerts
+
+on:
+  schedule:
+    # 15:00 UTC = 11 AM EDT / 10 AM EST, daily. Alerts fire at most once per
+    # (division, spots-remaining) value; quiet days post nothing.
+    - cron: '0 15 * * *'
+  workflow_dispatch:
+    inputs:
+      report:
+        description: 'Also post a full registration status report'
+        type: boolean
+        default: false
+      dry_run:
+        description: 'Print instead of posting'
+        type: boolean
+        default: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check registration counts
+        env:
+          GROUPME_TOKEN: ${{ secrets.GROUPME_TOKEN }}
+        run: |
+          # SHAKEDOWN: alerts are pinned to the Bot Test Group while Matt
+          # evaluates them. Remove the hardcoded --test below to post real
+          # alerts to the main league group.
+          ARGS="--test"
+          if [ "${{ inputs.report }}" = "true" ]; then ARGS="$ARGS --report"; fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          node scripts/post-registration-alerts.mjs $ARGS

@@ -76,15 +76,14 @@ async function main() {
     throw new Error(`Event "${eventName}" not found in the ${target}`);
   }
 
+  // RSVPs are optional (players can just show up), so this is a headcount
+  // forecast ping rather than a "can we play" threshold.
   const going = event.going_count ?? (event.going || []).length;
-  const short = eventCfg.minPlayers - going;
-  const text = short > 0
-    ? `🏐 Shuffle check-in: ${going} in so far for tonight. We need at least ${eventCfg.minPlayers}, so RSVP on the event or just show up by 6:30!`
-    : `🏐 Shuffle check-in: ${going} in for tonight, we're on! RSVP on the event if you haven't yet.`;
+  const text = `🏐 Shuffle tonight! ${going} RSVP'd so far. Tap Going on the event so we know how many to expect, or just show up by 6:30.`;
   const message = `${text}\n🤖 Auto-posted by Matt's bot`;
 
   if (dryRun) {
-    console.log(`[dry-run] "${eventName}" going_count=${going} (min ${eventCfg.minPlayers}). Would post to the ${target}:\n\n${message}`);
+    console.log(`[dry-run] "${eventName}" going_count=${going}. Would post to the ${target}:\n\n${message}`);
     return;
   }
 
