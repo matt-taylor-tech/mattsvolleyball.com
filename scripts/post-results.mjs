@@ -82,6 +82,7 @@ function resultLine(game) {
 
   const homeWon = game.homeWins > game.awayWins;
   const [winner, loser] = homeWon ? [game.home, game.away] : [game.away, game.home];
+  const setsWon = homeWon ? `${game.homeWins}-${game.awayWins}` : `${game.awayWins}-${game.homeWins}`;
   const setScores = (game.sets || [])
     .map((s) => (homeWon ? `${s.home}-${s.away}` : `${s.away}-${s.home}`))
     .join(', ');
@@ -89,16 +90,16 @@ function resultLine(game) {
   if (game.homeWins === game.awayWins) {
     return `${game.home} ${game.homeWins}-${game.awayWins} ${game.away}${setScores ? ` (${setScores})` : ''}`;
   }
-  return `${boldSans(winner)} d. ${loser}${setScores ? ` (${setScores})` : ''}`;
+  return `${boldSans(winner)} d. ${loser} ${setsWon}${setScores ? ` (${setScores})` : ''}`;
 }
 
-function standingsSection(divisionName, standings) {
+function standingsSection(standings) {
   const lines = standings.map((s) => `${s.rank}. ${s.name} ${s.wins}-${s.losses} · ${s.points} pts`);
-  return `📊 ${boldSans(divisionName)} standings\n━━━━━━━━━━━━━\n${lines.join('\n')}`;
+  return `📊 Standings\n━━━━━━━━━━━━━\n${lines.join('\n')}`;
 }
 
-function resultsSection(divisionName, games) {
-  return `🏆 ${boldSans(divisionName)} results\n━━━━━━━━━━━━━\n${games.map(resultLine).join('\n')}`;
+function resultsSection(games) {
+  return `🏆 Results\n━━━━━━━━━━━━━\n${games.map(resultLine).join('\n')}`;
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -123,18 +124,26 @@ async function main() {
     return;
   }
 
-  const sections = [];
+  // One self-contained message per division: its results, then its standings.
+  const footer = `🤖 Auto-posted by Matt's bot`;
+  const messages = [];
+  let gameCount = 0;
   let scoredCount = 0;
   for (const division of nightDivisions) {
     const games = await fetchResults(division.id, dateKey);
     if (games.length === 0) continue;
+    gameCount += games.length;
     scoredCount += games.filter((g) => g.homeWins !== null).length;
-    sections.push(resultsSection(division.name, games));
+
+    const sections = [resultsSection(games)];
     const standings = await fetchStandings(division.id, config.seasonId);
-    if (standings.length > 0) sections.push(standingsSection(division.name, standings));
+    if (standings.length > 0) sections.push(standingsSection(standings));
+
+    const header = `🏐 ${boldSans(division.name)} - ${dateLabelFor(dateKey)}`;
+    messages.push(...packMessages(header, sections, footer));
   }
 
-  if (sections.length === 0) {
+  if (gameCount === 0) {
     console.log(`No games on ${dateKey}: nothing to post.`);
     return;
   }
@@ -142,10 +151,6 @@ async function main() {
     console.log(`Games on ${dateKey} have no submitted scores yet: nothing to post.`);
     return;
   }
-
-  const header = `🏐 Last night's results - ${dateLabelFor(dateKey)}`;
-  const footer = `🤖 Auto-posted by Matt's bot`;
-  const messages = packMessages(header, sections, footer);
 
   if (dryRun) {
     console.log(`[dry-run] Would post ${messages.length} message(s) for ${dayKey} ${dateKey}:\n`);
