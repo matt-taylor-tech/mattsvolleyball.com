@@ -1,18 +1,22 @@
-name: Registration alerts
+name: Registration status
 
 on:
   schedule:
-    # 15:00 UTC = 11 AM EDT / 10 AM EST, daily. Alerts fire at most once per
-    # (division, spots-remaining) value; quiet days post nothing.
+    # 15:00 UTC = 11 AM EDT / 10 AM EST, daily. Posts only while a
+    # registration window is open AND the counts changed since last post.
     - cron: '0 15 * * *'
   workflow_dispatch:
     inputs:
-      report:
-        description: 'Also post a full registration status report'
+      force:
+        description: 'Skip the registration-window gate'
         type: boolean
         default: false
       dry_run:
         description: 'Print instead of posting'
+        type: boolean
+        default: false
+      test:
+        description: 'Post to the Bot Test Group instead of the main group'
         type: boolean
         default: false
 
@@ -24,14 +28,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Check registration counts
+      - name: Post registration status
         env:
           GROUPME_TOKEN: ${{ secrets.GROUPME_TOKEN }}
         run: |
-          # SHAKEDOWN: alerts are pinned to the Bot Test Group while Matt
-          # evaluates them. Remove the hardcoded --test below to post real
-          # alerts to the main league group.
-          ARGS="--test"
-          if [ "${{ inputs.report }}" = "true" ]; then ARGS="$ARGS --report"; fi
+          ARGS=""
+          if [ "${{ inputs.force }}" = "true" ]; then ARGS="$ARGS --force"; fi
           if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
-          node scripts/post-registration-alerts.mjs $ARGS
+          if [ "${{ inputs.test }}" = "true" ]; then ARGS="$ARGS --test"; fi
+          node scripts/post-registration-status.mjs $ARGS

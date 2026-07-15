@@ -12,7 +12,7 @@
     "post:results": "node scripts/post-results.mjs",
     "post:missing": "node scripts/post-missing-scores.mjs",
     "check:rsvp": "node scripts/check-shuffle-rsvp.mjs",
-    "check:registration": "node scripts/post-registration-alerts.mjs",
+    "check:registration": "node scripts/post-registration-status.mjs",
     "sync:champions": "node scripts/sync-champions-cache.mjs"
   },
   "dependencies": {
