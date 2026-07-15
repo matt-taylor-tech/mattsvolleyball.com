@@ -33,6 +33,23 @@ export const TEST_CONVERSATION_ID = '115965602';
 // lists it, so the exclusion lives here in the automation layer only.
 const DISABLED_DAYS = new Set(['Mon']);
 
+// Days that get a calendar event (for RSVPs) instead of a schedule image.
+// Shuffle night has one big roster, so there are no matchups worth posting;
+// the event's Going list is the useful signal. Times are ET wall clock,
+// reminders are seconds before start, minPlayers drives the afternoon
+// RSVP check (shuffle needs ~8 to run well).
+export const EVENT_DAYS = {
+  Wed: {
+    title: 'Wednesday Shuffle',           // becomes "Wednesday Shuffle - Jul 29"
+    startTime: '18:45',
+    endTime: '20:45',
+    description: 'RSVP or show up by 6:30',
+    location: { name: "Saeed's Bar & Grill", lat: 35.483712, lng: -80.868313 },
+    reminders: [900], // 15 minutes before
+    minPlayers: 8,
+  },
+};
+
 // ── Config parsing (mirrors check-teamlinkt-config.mjs) ──────────────────────
 
 function extractSingleId(source, varName) {
@@ -320,16 +337,24 @@ export async function postAsBot(botId, text, imageUrl) {
  * needed. Skips creation if a live (not soft-deleted) event with the same
  * name exists.
  */
-export async function createTopicEvent(token, topicId, name, cfg, startAt, endAt) {
-  const listRes = await fetch(
+/** Live (not soft-deleted) calendar events in a conversation. */
+export async function listTopicEvents(token, topicId) {
+  const res = await fetch(
     `https://api.groupme.com/v3/conversations/${topicId}/events/list?limit=50`,
     { headers: { 'X-Access-Token': token } },
   );
-  if (listRes.ok) {
-    const existing = (await listRes.json())?.response?.events ?? [];
-    if (existing.some((e) => e.name === name && !e.deleted_at)) {
+  if (!res.ok) throw new Error(`GroupMe event list failed: HTTP ${res.status}`);
+  return ((await res.json())?.response?.events ?? []).filter((e) => !e.deleted_at);
+}
+
+export async function createTopicEvent(token, topicId, name, cfg, startAt, endAt) {
+  try {
+    const existing = await listTopicEvents(token, topicId);
+    if (existing.some((e) => e.name === name)) {
       return false; // already created (deletes are soft; deleted_at marks them)
     }
+  } catch {
+    // If the list is unavailable, fall through and attempt creation anyway.
   }
 
   const res = await fetch(`https://api.groupme.com/v3/conversations/${topicId}/events/create`, {

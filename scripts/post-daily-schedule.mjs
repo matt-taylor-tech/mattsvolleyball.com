@@ -28,28 +28,13 @@ import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import {
-  EVENTS_API, TIME_ZONE, CONVERSATION_IDS, TEST_CONVERSATION_ID,
+  EVENTS_API, TIME_ZONE, CONVERSATION_IDS, TEST_CONVERSATION_ID, EVENT_DAYS,
   loadConfig, etDateKey, dayKeyFor, dateLabelFor, shortDateLabelFor,
   etOffsetFor, utcNoonFor, postForm, cellText, boldSans, PLACEHOLDER_TEAMS,
   packMessages, uploadImage, postToTopic, postAsBot, createTopicEvent,
 } from './lib/mv.mjs';
 
 const SCHEDULE_URL = 'https://mattsvolleyball.com/leagues/schedule';
-
-// Days that get a calendar event (for RSVPs) instead of a schedule image.
-// Shuffle night has one big roster, so there are no matchups worth posting;
-// the event's Going list is the useful signal. Times are ET wall clock,
-// reminders are seconds before start.
-const EVENT_DAYS = {
-  Wed: {
-    title: 'Wednesday Shuffle',           // becomes "Wednesday Shuffle - Jul 29"
-    startTime: '18:45',
-    endTime: '20:45',
-    description: 'RSVP or show up by 6:30',
-    location: { name: "Saeed's Bar & Grill", lat: 35.483712, lng: -80.868313 },
-    reminders: [900], // 15 minutes before
-  },
-};
 
 // ── TeamLinkt fetching ────────────────────────────────────────────────────────
 
