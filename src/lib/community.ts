@@ -11,11 +11,6 @@ export const GROUPME_MAIN_URL = 'https://groupme.com/join_group/115950918/jG3kZJ
 // the main group's announcement-only Wednesday topic points people to it.
 export const GROUPME_WED_URL = 'https://groupme.com/join_group/115951034/98TIP2On';
 
-// Legacy WhatsApp group, shown alongside GroupMe during the transition.
-// TODO: remove this and its links (footer, home, contact) after the season
-// concludes and the "we've moved to GroupMe" announcement goes out.
-export const WHATSAPP_LEGACY_URL = 'https://chat.whatsapp.com/BQmVIkBv1bc7AN7KZlzxjU?mode=r_c';
-
 // GroupMe brand blue, used for buttons/tiles that link to GroupMe.
 export const GROUPME_BRAND_COLOR = '#00AFF0';
 

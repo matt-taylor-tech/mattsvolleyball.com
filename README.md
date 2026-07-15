@@ -158,4 +158,4 @@ Update the form `action` URL there if you switch Formspree projects.
 - [Schedule/Teams/Standings/Scores](https://app.teamlinkt.com)
 - [Facebook](https://www.facebook.com/groups/mattsvolleyball/)
 - [Instagram](https://instagram.com/mattsvolleyball/)
-- [WhatsApp](https://chat.whatsapp.com/BQmVIkBv1bc7AN7KZlzxjU)
+- [GroupMe](https://groupme.com/join_group/115950918/jG3kZJ04)
