@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { GROUPME_MAIN_URL, GROUPME_ICON_PATH, WHATSAPP_LEGACY_URL } from '../lib/community';
 ---
 
 <Layout title="Contact | Matt's Volleyball" description="Get in touch with Matt's Volleyball. Whether it's about registration or general inquiries, we're here to help!">
@@ -140,7 +141,18 @@ import Layout from '../layouts/Layout.astro';
                 <span class="font-medium">Instagram</span>
               </a>
               <a
-                href="https://chat.whatsapp.com/BQmVIkBv1bc7AN7KZlzxjU?mode=r_c"
+                href={GROUPME_MAIN_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="flex items-center gap-3 text-ocean-700 hover:text-ocean-500 transition-colors group"
+              >
+                <div class="w-10 h-10 bg-[#00AFF0]/10 group-hover:bg-[#00AFF0]/20 rounded-lg flex items-center justify-center transition-colors">
+                  <svg class="w-5 h-5 text-[#00AFF0]" fill="currentColor" viewBox="0 0 24 24"><path d={GROUPME_ICON_PATH} /></svg>
+                </div>
+                <span class="font-medium">GroupMe Chat</span>
+              </a>
+              <a
+                href={WHATSAPP_LEGACY_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 class="flex items-center gap-3 text-ocean-700 hover:text-ocean-500 transition-colors group"

@@ -12,6 +12,9 @@ node_modules/
 .env.production
 .env.local
 
+# local secrets (GroupMe access token for topic discovery/testing)
+.groupme.local.json
+
 # editor
 .vscode/
 *.swp

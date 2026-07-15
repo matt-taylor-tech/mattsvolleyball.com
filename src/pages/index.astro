@@ -5,6 +5,7 @@ import { getChampions } from '../lib/champions';
 import { getRegistrationData, formatDate, formatFullDate } from '../lib/registration';
 import { UPCOMING_DIVISIONS, UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_PLAYER_CAPS_BY_DIVISION, UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL, NEXT_NEXT_SEASON_LABEL, ACTIVE_SEASON_LABEL } from '../lib/seasonConfig';
 import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart } from 'lucide-astro';
+import { GROUPME_MAIN_URL, GROUPME_ICON_PATH, WHATSAPP_LEGACY_URL } from '../lib/community';
 
 const champions = await getChampions();
 const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose, hasOpenRegistration, openRegUrl, openRegIsExternal, openRegDay } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
@@ -662,7 +663,16 @@ const heroDatesText = seasonLabel
           Instagram
         </a>
         <a
-          href="https://chat.whatsapp.com/BQmVIkBv1bc7AN7KZlzxjU?mode=r_c"
+          href={GROUPME_MAIN_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center gap-3 bg-[#00AFF0] hover:bg-[#0092C8] text-white px-6 py-3 rounded-xl font-semibold transition-colors"
+        >
+          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d={GROUPME_ICON_PATH} /></svg>
+          GroupMe
+        </a>
+        <a
+          href={WHATSAPP_LEGACY_URL}
           target="_blank"
           rel="noopener noreferrer"
           class="flex items-center gap-3 bg-[#25D366] hover:bg-[#1DA851] text-white px-6 py-3 rounded-xl font-semibold transition-colors"
