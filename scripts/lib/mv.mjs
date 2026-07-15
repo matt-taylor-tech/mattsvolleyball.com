@@ -136,6 +136,64 @@ export function cellText(html) {
   return html.replace(/<[^>]*>/g, '').trim();
 }
 
+/** Trailing "(N)" games-won marker in a scored game's team cell. */
+function winsIn(cellHtml) {
+  const m = (cellHtml || '').match(/\((\d+)\)<\/span>\s*$/);
+  return m ? Number(m[1]) : null;
+}
+
+/** Set scores embedded as a showVolleyballSetScores([...]) call in the game cell. */
+function setsIn(cellHtml) {
+  const m = (cellHtml || '').match(/showVolleyballSetScores\((\[[^\]]*\])/);
+  if (!m) return null;
+  try {
+    return JSON.parse(m[1]); // [{name, home, away}, ...]
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * A division's played games on a date, with submitted scores where present:
+ * [{home, away, homeWins, awayWins, sets, timestamp}]. homeWins/awayWins are
+ * null when no score was submitted.
+ */
+export async function fetchResults(divisionId, dateKey) {
+  const json = await postForm(EVENTS_API, {
+    start: '0', length: '100', status: 'past',
+    type: 'scores', show_games_only: '1',
+    [`filters[${divisionId}]`]: divisionId,
+  });
+  return (json.data || [])
+    .filter((row) => etDateKey(new Date(Number(row['6']) * 1000)) === dateKey)
+    .map((row) => ({
+      home: cellText(row['3']),
+      away: cellText(row['4']),
+      homeWins: winsIn(row['3']),
+      awayWins: winsIn(row['4']),
+      sets: setsIn(row['2']),
+      timestamp: Number(row['6']),
+    }))
+    .sort((a, b) => a.timestamp - b.timestamp);
+}
+
+/** Division standings: [{rank, name, wins, losses, points}] sorted by rank. */
+export async function fetchStandings(divisionId, seasonId) {
+  const json = await postForm(`${API_BASE}/getStandings/${ORG_ID}/${seasonId}`, {
+    'group_ids[division]': divisionId,
+    season_id: seasonId,
+  });
+  return (json.standings || [])
+    .map((s) => ({
+      rank: s.ranking,
+      name: s.Team?.name || cellText(s.team_name),
+      wins: s.total_wins,
+      losses: s.total_losses,
+      points: s.total_points,
+    }))
+    .sort((a, b) => a.rank - b.rank);
+}
+
 // ── Text formatting ───────────────────────────────────────────────────────────
 
 const BOLD_DIGITS = [...'𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵'];

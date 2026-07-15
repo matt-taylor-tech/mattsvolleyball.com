@@ -10,6 +10,7 @@
     "check:teamlinkt": "node scripts/check-teamlinkt-config.mjs",
     "post:schedule": "node scripts/post-daily-schedule.mjs",
     "post:results": "node scripts/post-results.mjs",
+    "post:missing": "node scripts/post-missing-scores.mjs",
     "sync:champions": "node scripts/sync-champions-cache.mjs"
   },
   "dependencies": {

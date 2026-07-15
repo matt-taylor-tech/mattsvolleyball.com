@@ -1,0 +1,42 @@
+name: Post weekly recap to GroupMe
+
+on:
+  schedule:
+    # 16:00 UTC = noon EDT / 11 AM EST, Mondays. Each night's topic gets
+    # "what happened last week": results + standings per division.
+    - cron: '0 16 * * 1'
+  workflow_dispatch:
+    inputs:
+      day:
+        description: 'Single night only (Mon/Tue/Wed/Thu; default all)'
+        required: false
+      date:
+        description: 'Game night override (YYYY-MM-DD, ET)'
+        required: false
+      dry_run:
+        description: 'Print the messages instead of posting'
+        type: boolean
+        default: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Post weekly recap
+        env:
+          GROUPME_TOKEN: ${{ secrets.GROUPME_TOKEN }}
+          GROUPME_BOT_ID: ${{ secrets.GROUPME_BOT_ID }}
+          GROUPME_BOT_ID_TEST: ${{ secrets.GROUPME_BOT_ID_TEST }}
+        run: |
+          # SHAKEDOWN: recaps are pinned to the Bot Test Group until validated
+          # against real Summer Redux data. Remove the hardcoded --test below
+          # to go live in the night topics.
+          ARGS="--test"
+          if [ -n "${{ inputs.day }}" ]; then ARGS="$ARGS --day=${{ inputs.day }}"; fi
+          if [ -n "${{ inputs.date }}" ]; then ARGS="$ARGS --date=${{ inputs.date }}"; fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          node scripts/post-results.mjs $ARGS
