@@ -1,0 +1,40 @@
+name: Post daily schedule to GroupMe
+
+on:
+  schedule:
+    # 13:00 UTC = 9 AM EDT / 8 AM EST, Mon-Thu (league nights)
+    - cron: '0 13 * * 1-4'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Override date (YYYY-MM-DD, ET)'
+        required: false
+      dry_run:
+        description: 'Print the message instead of posting'
+        type: boolean
+        default: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+      - name: Post schedule
+        env:
+          # Access token posts into the night's topic; bot ID is the
+          # main-chat fallback (bots can't post to topics).
+          GROUPME_TOKEN: ${{ secrets.GROUPME_TOKEN }}
+          GROUPME_BOT_ID: ${{ secrets.GROUPME_BOT_ID }}
+        run: |
+          ARGS=""
+          if [ -n "${{ inputs.date }}" ]; then ARGS="$ARGS --date=${{ inputs.date }}"; fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          node scripts/post-daily-schedule.mjs $ARGS
