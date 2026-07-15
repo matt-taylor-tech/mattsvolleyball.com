@@ -215,7 +215,10 @@
       "Bash(curl -sI \"https://i.groupme.com/960x700.png.2c6b3975e09d4d4591ad3450a1a28caa\")",
       "Bash(curl -s \"https://i.groupme.com/960x700.png.2c6b3975e09d4d4591ad3450a1a28caa\" -o /private/tmp/claude-501/-Users-suigeneris-Github-mattsvolleyball-com/40d02267-20ad-4b91-ac4f-ab40e3d2cd57/scratchpad/ci-upload.png)",
       "Bash(curl -s -H 'X-Access-Token: __CMDSUB_OUTPUT__' https://api.groupme.com/v3/groups/115954787/messages?limit=10)",
-      "Bash(curl -sI \"https://i.groupme.com/960x700.png.0a451511202b4ba7ae5896fd9cff37c8\")"
+      "Bash(curl -sI \"https://i.groupme.com/960x700.png.0a451511202b4ba7ae5896fd9cff37c8\")",
+      "Bash(curl -s -o /dev/null -w 'L \\(reused guid\\): %{http_code}\\\\n' -X POST -H 'Content-Type: application/json' -H 'X-Access-Token: __CMDSUB_OUTPUT__' -d '{\"message\":{\"source_guid\":\"mv-schedule-2026-07-14-0\",\"text\":\"test L\",\"attachments\":[{\"type\":\"image\",\"url\":\"__TRACKED_VAR__\"}]}}' https://api.groupme.com/v3/groups/115954787/messages)",
+      "Bash(curl -s -o /dev/null -w 'M \\(unique guid\\): %{http_code}\\\\n' -X POST -H 'Content-Type: application/json' -H 'X-Access-Token: __CMDSUB_OUTPUT__' -d '{\"message\":{\"source_guid\":\"mv-schedule-unique-8d1f42\",\"text\":\"test M\",\"attachments\":[{\"type\":\"image\",\"url\":\"__TRACKED_VAR__\"}]}}' https://api.groupme.com/v3/groups/115954787/messages)",
+      "Bash(curl -s -H 'X-Access-Token: __CMDSUB_OUTPUT__' https://api.groupme.com/v3/groups/115954787/messages?limit=30)"
     ]
   }
 }
