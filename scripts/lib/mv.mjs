@@ -44,8 +44,15 @@ function extractDivisions(source, varName) {
   const blockRe = new RegExp(`const\\s+${varName}:[^=]*=\\s*\\[([\\s\\S]*?)\\];`, 'm');
   const block = source.match(blockRe)?.[1] ?? '';
   return [...block.matchAll(
-    /\{\s*id:\s*'([0-9]+)',\s*name:\s*'([^']+)',\s*day:\s*'(\w+)'/g
-  )].map((m) => ({ id: m[1], name: m[2], day: m[3] }));
+    /\{\s*id:\s*'([0-9]+)',\s*name:\s*'([^']+)',\s*day:\s*'(\w+)',\s*label:\s*'[^']+',\s*court:\s*'[^']+',\s*hasPlayoffs:\s*(true|false)/g
+  )].map((m) => ({
+    id: m[1],
+    name: m[2],
+    day: m[3],
+    // hasPlayoffs doubles as "keeps score": shuffle-style divisions play one
+    // shared roster with no submitted scores or standings.
+    tracked: m[4] === 'true',
+  }));
 }
 
 /** Season/division config from src/lib/seasonConfig.ts, honoring the rollover date. */

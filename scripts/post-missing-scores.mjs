@@ -29,10 +29,11 @@ async function main() {
   const dayKey = dayKeyFor(dateKey);
 
   const config = await loadConfig();
-  const nightDivisions = config.divisions.filter((d) => d.day === dayKey);
+  // Untracked divisions (shuffle) never submit scores; don't nag about them.
+  const nightDivisions = config.divisions.filter((d) => d.day === dayKey && d.tracked);
 
   if (nightDivisions.length === 0) {
-    console.log(`No league night on ${dayKey} ${dateKey}: nothing to check.`);
+    console.log(`No score-tracked league night on ${dayKey} ${dateKey}: nothing to check.`);
     return;
   }
 

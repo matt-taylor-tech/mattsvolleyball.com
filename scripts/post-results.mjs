@@ -87,8 +87,9 @@ async function main() {
 
   for (const { day, dateKey } of nights) {
     // One self-contained message per division: last week's results + standings.
+    // Untracked divisions (shuffle) have neither, so they drop out naturally.
     const messages = [];
-    for (const division of config.divisions.filter((d) => d.day === day)) {
+    for (const division of config.divisions.filter((d) => d.day === day && d.tracked)) {
       const games = await fetchResults(division.id, dateKey);
       const standings = await fetchStandings(division.id, config.seasonId);
 
