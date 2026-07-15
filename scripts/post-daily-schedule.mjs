@@ -2,7 +2,8 @@
 //
 // Primary: screenshots today's section of the live schedule page with
 // Playwright, uploads it to GroupMe's image service, and posts it with a
-// short caption (bot notice + full-schedule link).
+// short caption (date + bot notice; deliberately no URLs, since GroupMe
+// link previews clutter image posts).
 // Fallback: if the screenshot fails, posts a text version instead: games
 // grouped by time, fake-bold (Unicode sans-bold) times and team names.
 //
@@ -228,7 +229,7 @@ function fallbackGameLine(game) {
 /** Variant-B style text: ⏰ bold time, heavy divider, bold team names. */
 function buildFallbackMessages(dateKey, games) {
   const header = `🏐 Tonight's schedule - ${dateLabelFor(dateKey)}`;
-  const footer = `📋 Full schedule: ${SCHEDULE_URL}\n🤖 Auto-posted by the Matt's bot`;
+  const footer = `🤖 Auto-posted by Matt's bot`; // no URL: avoids link previews
 
   const times = [...new Set(games.map((g) => g.time))];
   const sections = times.map((t) => {
@@ -443,9 +444,10 @@ async function main() {
     return;
   }
 
+  // No URLs in the caption: GroupMe renders a link preview next to the image
+  // on some clients, which looks cluttered.
   const caption = [
     `🏐 Tonight's schedule - ${dateLabelFor(dateKey)}`,
-    `📋 Full schedule: ${SCHEDULE_URL}`,
     `🤖 Auto-posted by Matt's bot`,
   ].join('\n');
 
