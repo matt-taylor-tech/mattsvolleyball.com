@@ -33,7 +33,7 @@ const FUTURE_SEASON = {
 
 // Auto-rollover trigger for live data pages.
 // Note: for static deployments this takes effect on the next build.
-export const ACTIVE_ROLLOVER_DATE = 'TBD'; // Update when Summer II is released
+export const ACTIVE_ROLLOVER_DATE = '2026-07-17 00:00:00'; // Summer I ends with the Thu 7/16 finals; Redux takes over Friday
 const now = new Date();
 const rolloverAt = new Date(ACTIVE_ROLLOVER_DATE);
 export const HAS_ACTIVE_ROLLED_OVER = !Number.isNaN(rolloverAt.getTime()) && now >= rolloverAt;
