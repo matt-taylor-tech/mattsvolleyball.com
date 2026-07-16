@@ -2,9 +2,10 @@ name: Registration status
 
 on:
   schedule:
-    # 15:00 UTC = 11 AM EDT / 10 AM EST, daily. Posts only while a
-    # registration window is open AND the counts changed since last post.
-    - cron: '0 15 * * *'
+    # 14:15 UTC = 10:15 AM EDT, daily; with GitHub cron lag this lands by
+    # ~11 AM. Posts only while a registration window is open AND the counts
+    # changed since last post.
+    - cron: '15 14 * * *'
   workflow_dispatch:
     inputs:
       force:

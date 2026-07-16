@@ -2,10 +2,11 @@ name: Post daily schedule to GroupMe
 
 on:
   schedule:
-    # 14:00 UTC = 10 AM EDT / 9 AM EST. Mon-Thu posts that night's schedule;
-    # Tue-Fri nudges about the previous night's missing scores. Both scripts
-    # exit quietly on days that don't apply.
-    - cron: '0 14 * * 1-5'
+    # 13:15 UTC = 9:15 AM EDT; GitHub cron fires up to ~45 min late, so this
+    # lands by ~10 AM. Mon-Thu posts that night's schedule; Tue-Fri nudges
+    # about the previous night's missing scores. Both scripts exit quietly on
+    # days that don't apply.
+    - cron: '15 13 * * 1-5'
   workflow_dispatch:
     inputs:
       date:

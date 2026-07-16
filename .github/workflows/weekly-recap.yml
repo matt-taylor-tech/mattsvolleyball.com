@@ -2,9 +2,10 @@ name: Post weekly recap to GroupMe
 
 on:
   schedule:
-    # 16:00 UTC = noon EDT / 11 AM EST, Mondays. Each night's topic gets
-    # "what happened last week": results + standings per division.
-    - cron: '0 16 * * 1'
+    # 15:15 UTC = 11:15 AM EDT, Mondays; with GitHub cron lag this lands by
+    # ~noon. Each night's topic gets "what happened last week": results +
+    # standings per division.
+    - cron: '15 15 * * 1'
   workflow_dispatch:
     inputs:
       day:

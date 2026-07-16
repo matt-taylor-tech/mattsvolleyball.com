@@ -2,9 +2,10 @@ name: Shuffle RSVP check
 
 on:
   schedule:
-    # 19:00 UTC = 3 PM EDT / 2 PM EST, Wednesdays. Reads the day's shuffle
-    # event RSVP count and posts a nudge or confirmation to the group.
-    - cron: '0 19 * * 3'
+    # 18:15 UTC = 2:15 PM EDT, Wednesdays; with GitHub cron lag this lands by
+    # ~3 PM. Reads the day's shuffle event RSVP count and posts a headcount
+    # ping to the group.
+    - cron: '15 18 * * 3'
   workflow_dispatch:
     inputs:
       date:

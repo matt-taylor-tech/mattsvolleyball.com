@@ -2,9 +2,11 @@ name: Game-day weather check
 
 on:
   schedule:
-    # 19:00 UTC = 3 PM EDT / 2 PM EST, Mon-Thu. Posts only when the NWS
-    # forecast shows rain or storms during the game window on a game day.
-    - cron: '0 19 * * 1-4'
+    # 18:15 UTC = 2:15 PM EDT, Mon-Thu; with GitHub cron lag this lands
+    # comfortably before the 4 PM rainout call the message references. Posts
+    # only when the NWS forecast shows rain or storms during the game window
+    # on a game day.
+    - cron: '15 18 * * 1-4'
   workflow_dispatch:
     inputs:
       date:
