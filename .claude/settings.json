@@ -266,7 +266,8 @@
       "Bash(git mv *)",
       "Bash(node --check scripts/post-registration-status.mjs)",
       "Bash(GROUPME_TOKEN=__CMDSUB_OUTPUT__ node scripts/post-registration-status.mjs --test --dry-run)",
-      "Bash(GROUPME_TOKEN=__CMDSUB_OUTPUT__ node scripts/post-registration-status.mjs --test)"
+      "Bash(GROUPME_TOKEN=__CMDSUB_OUTPUT__ node scripts/post-registration-status.mjs --test)",
+      "Bash(node /private/tmp/claude-501/-Users-suigeneris-Github-mattsvolleyball-com/40d02267-20ad-4b91-ac4f-ab40e3d2cd57/scratchpad/recap-sample.mjs)"
     ]
   }
 }
