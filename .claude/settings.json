@@ -254,7 +254,19 @@
       "Bash(node scripts/post-missing-scores.mjs --dry-run --date=2026-07-13)",
       "Bash(node scripts/post-results.mjs --dry-run)",
       "Bash(node scripts/post-missing-scores.mjs --dry-run --date=2026-07-08)",
-      "Bash(gh issue create --repo matt-taylor-tech/mattsvolleyball.com --label enhancement --title 'Handle missing playoff scores differently in nudges and recaps' --body ' *)"
+      "Bash(gh issue create --repo matt-taylor-tech/mattsvolleyball.com --label enhancement --title 'Handle missing playoff scores differently in nudges and recaps' --body ' *)",
+      "Bash(node --check scripts/check-shuffle-rsvp.mjs)",
+      "Bash(curl -s -X POST \"https://app.mattsvolleyball.com/leagues/getAllEvents/10757\" --data \"start=0&length=10&status=upcoming&filters[305894]=305894\")",
+      "Bash(curl -sL \"https://leagues.teamlinkt.com/Leagues/event/10757/3678530\" -o /private/tmp/claude-501/-Users-suigeneris-Github-mattsvolleyball-com/40d02267-20ad-4b91-ac4f-ab40e3d2cd57/scratchpad/tl-event.html -w \"%{http_code} %{size_download}\\\\n\")",
+      "Bash(node --check scripts/post-registration-alerts.mjs)",
+      "Bash(GROUPME_TOKEN=$\\(node -p \"require\\('/Users/suigeneris/Github/mattsvolleyball.com/.groupme.local.json'\\).access_token\"\\) node scripts/post-registration-alerts.mjs --test --dry-run --report)",
+      "Bash(GROUPME_TOKEN=__CMDSUB_OUTPUT__ node scripts/post-registration-alerts.mjs --test --report)",
+      "Bash(GROUPME_TOKEN=__CMDSUB_OUTPUT__ node scripts/post-registration-alerts.mjs --test)",
+      "Bash(curl -s \"https://app.teamlinkt.com/register/find/mattsvolleyball\" -H \"User-Agent: MattsVolleyball/1.0\")",
+      "Bash(git mv *)",
+      "Bash(node --check scripts/post-registration-status.mjs)",
+      "Bash(GROUPME_TOKEN=__CMDSUB_OUTPUT__ node scripts/post-registration-status.mjs --test --dry-run)",
+      "Bash(GROUPME_TOKEN=__CMDSUB_OUTPUT__ node scripts/post-registration-status.mjs --test)"
     ]
   }
 }
