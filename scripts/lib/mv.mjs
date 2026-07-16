@@ -240,6 +240,21 @@ export async function fetchResults(divisionId, dateKey) {
     .sort((a, b) => a.timestamp - b.timestamp);
 }
 
+/** True if any of the day's divisions has a TeamLinkt game on the date. */
+export async function hasGamesOn(config, dayKey, dateKey) {
+  for (const division of config.divisions.filter((d) => d.day === dayKey)) {
+    const json = await postForm(EVENTS_API, {
+      start: '0', length: '100', status: 'upcoming',
+      [`filters[${division.id}]`]: division.id,
+    });
+    const todays = (json.data || []).filter(
+      (row) => etDateKey(new Date(Number(row['6']) * 1000)) === dateKey,
+    );
+    if (todays.length > 0) return true;
+  }
+  return false;
+}
+
 /** Division standings: [{rank, name, wins, losses, points}] sorted by rank. */
 export async function fetchStandings(divisionId, seasonId) {
   const json = await postForm(`${API_BASE}/getStandings/${ORG_ID}/${seasonId}`, {

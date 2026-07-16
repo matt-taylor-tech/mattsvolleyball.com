@@ -14,24 +14,10 @@
 //       --force             skip the TeamLinkt game check (manual testing)
 
 import {
-  EVENTS_API, CONVERSATION_IDS, TEST_CONVERSATION_ID, EVENT_DAYS,
+  CONVERSATION_IDS, TEST_CONVERSATION_ID, EVENT_DAYS,
   loadConfig, etDateKey, dayKeyFor, shortDateLabelFor,
-  postForm, listTopicEvents, postToTopic, postAsBot,
+  hasGamesOn, listTopicEvents, postToTopic, postAsBot,
 } from './lib/mv.mjs';
-
-async function hasGameToday(config, dayKey, dateKey) {
-  for (const division of config.divisions.filter((d) => d.day === dayKey)) {
-    const json = await postForm(EVENTS_API, {
-      start: '0', length: '100', status: 'upcoming',
-      [`filters[${division.id}]`]: division.id,
-    });
-    const todays = (json.data || []).filter(
-      (row) => etDateKey(new Date(Number(row['6']) * 1000)) === dateKey,
-    );
-    if (todays.length > 0) return true;
-  }
-  return false;
-}
 
 async function main() {
   const dryRun = process.argv.includes('--dry-run');
@@ -57,7 +43,7 @@ async function main() {
     console.log(`No league night on ${dayKey} ${dateKey}: nothing to check.`);
     return;
   }
-  if (!force && !(await hasGameToday(config, dayKey, dateKey))) {
+  if (!force && !(await hasGamesOn(config, dayKey, dateKey))) {
     console.log(`No game on ${dateKey}: nothing to check.`);
     return;
   }

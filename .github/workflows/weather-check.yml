@@ -1,0 +1,37 @@
+name: Game-day weather check
+
+on:
+  schedule:
+    # 19:00 UTC = 3 PM EDT / 2 PM EST, Mon-Thu. Posts only when the NWS
+    # forecast shows rain or storms during the game window on a game day.
+    - cron: '0 19 * * 1-4'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Override date (YYYY-MM-DD, ET)'
+        required: false
+      dry_run:
+        description: 'Print instead of posting'
+        type: boolean
+        default: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check forecast
+        env:
+          GROUPME_TOKEN: ${{ secrets.GROUPME_TOKEN }}
+          GROUPME_BOT_ID_TEST: ${{ secrets.GROUPME_BOT_ID_TEST }}
+        run: |
+          # SHAKEDOWN: weather heads-ups are pinned to the Bot Test Group
+          # while Matt evaluates them. Remove the hardcoded --test below to
+          # post to the real night conversations.
+          ARGS="--test"
+          if [ -n "${{ inputs.date }}" ]; then ARGS="$ARGS --date=${{ inputs.date }}"; fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          node scripts/check-weather.mjs $ARGS
