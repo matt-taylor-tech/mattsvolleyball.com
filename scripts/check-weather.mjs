@@ -77,26 +77,33 @@ async function main() {
     return;
   }
 
-  const worst = window.reduce((a, b) =>
+  // Tiering mirrors the rainout policy (src/pages/rainout-info.astro):
+  // lightning and heavy rain are no-play conditions, so storm-tier forecasts
+  // warn of a possible cancellation; drizzle/moderate rain are play-through,
+  // so rain-tier posts are reassurance, not warnings. The call itself is
+  // made by Matt and posted in the chat by 4 PM.
+  const wettest = window.reduce((a, b) =>
     ((a.probabilityOfPrecipitation?.value ?? 0) >= (b.probabilityOfPrecipitation?.value ?? 0) ? a : b));
-  const maxPop = worst.probabilityOfPrecipitation?.value ?? 0;
-  const stormy = window.some((p) => /thunder|storm/i.test(p.shortForecast));
+  const maxPop = wettest.probabilityOfPrecipitation?.value ?? 0;
+  const stormPeriod = window.find((p) => /thunder|lightning|heavy/i.test(p.shortForecast));
 
   console.log(window.map((p) =>
     `${p.startTime.slice(11, 16)} ET: ${p.probabilityOfPrecipitation?.value ?? 0}% precip, ${p.temperature}${p.temperatureUnit}, ${p.shortForecast}`,
   ).join('\n'));
 
-  if (maxPop < popThreshold && !stormy) {
+  let text;
+  if (stormPeriod) {
+    // Storms matter at any probability; quote the storm period's forecast.
+    const stormPop = Math.max(maxPop, stormPeriod.probabilityOfPrecipitation?.value ?? 0);
+    text = `⛈️ Storm watch for tonight (${dateLabelFor(dateKey)}): up to ${stormPop}% chance, forecast says "${stormPeriod.shortForecast}". Lightning means we don't play, so a cancellation is possible. The call gets posted right here by 4 PM; captains, make sure your team sees it. Called games move to the end of the season schedule.`;
+  } else if (maxPop >= popThreshold) {
+    text = `🌧️ Rain in tonight's forecast (${dateLabelFor(dateKey)}): up to ${maxPop}%, "${wettest.shortForecast}". Heads up: we play through drizzle and moderate rain, so plan on games as usual unless you hear otherwise here by 4 PM.`;
+  } else {
     console.log(`Forecast is fine (max ${maxPop}% precip, no storms): nothing to post.`);
     return;
   }
 
-  const emoji = stormy ? '⛈️' : '🌧️';
-  const message = [
-    `${emoji} Weather heads-up for tonight (${dateLabelFor(dateKey)}): up to ${maxPop}% chance of rain around game time, forecast says "${worst.shortForecast}".`,
-    `Games are ON unless you hear otherwise here. Rainout policy details are on the site.`,
-    `🤖 Auto-posted by Matt's bot`,
-  ].join('\n');
+  const message = `${text}\n🤖 Auto-posted by Matt's bot`;
 
   if (dryRun) {
     console.log(`\n[dry-run] Would post:\n${message}`);

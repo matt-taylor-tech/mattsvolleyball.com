@@ -14,6 +14,10 @@ on:
         description: 'Print instead of posting'
         type: boolean
         default: false
+      test:
+        description: 'Post to the Bot Test Group instead of the night conversation'
+        type: boolean
+        default: false
 
 jobs:
   check:
@@ -28,10 +32,8 @@ jobs:
           GROUPME_TOKEN: ${{ secrets.GROUPME_TOKEN }}
           GROUPME_BOT_ID_TEST: ${{ secrets.GROUPME_BOT_ID_TEST }}
         run: |
-          # SHAKEDOWN: weather heads-ups are pinned to the Bot Test Group
-          # while Matt evaluates them. Remove the hardcoded --test below to
-          # post to the real night conversations.
-          ARGS="--test"
+          ARGS=""
           if [ -n "${{ inputs.date }}" ]; then ARGS="$ARGS --date=${{ inputs.date }}"; fi
           if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          if [ "${{ inputs.test }}" = "true" ]; then ARGS="$ARGS --test"; fi
           node scripts/check-weather.mjs $ARGS

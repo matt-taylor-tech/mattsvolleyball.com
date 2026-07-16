@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { Check, X, CircleCheck, CircleX } from 'lucide-astro';
+import { GROUPME_MAIN_URL } from '../lib/community';
 ---
 
 <Layout title="Rainout Info | Matt's Volleyball" description="Matt's Volleyball inclement weather and rainout policy. Learn when games are canceled and how they're rescheduled.">
@@ -23,7 +24,7 @@ import { Check, X, CircleCheck, CircleX } from 'lucide-astro';
       <!-- Main Policy -->
       <div class="bg-ocean-600/5 border-l-4 border-ocean-500 px-6 py-5 rounded-r-lg mb-12">
         <p class="text-ocean-800 text-lg font-semibold leading-relaxed">
-          Cancellations due to inclement weather will be decided and emailed to registered league players by 4:00 PM on game day.
+          Cancellations due to inclement weather will be decided and posted in the league GroupMe by 4:00 PM on game day. Captains, make sure your team sees the call.
         </p>
       </div>
 
@@ -83,7 +84,7 @@ import { Check, X, CircleCheck, CircleX } from 'lucide-astro';
 
       <div class="mt-12 bg-sand-100 rounded-2xl p-6 border border-sand-200 text-center">
         <p class="text-ocean-600/80 text-sm">
-          Check your email and the TeamLinkt app for real-time updates on game day.
+          Watch the <a href={GROUPME_MAIN_URL} target="_blank" rel="noopener noreferrer" class="text-ocean-600 font-semibold underline hover:text-ocean-500">GroupMe</a> for real-time updates on game day.
         </p>
       </div>
     </div>
