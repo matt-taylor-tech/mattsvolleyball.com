@@ -267,7 +267,13 @@
       "Bash(node --check scripts/post-registration-status.mjs)",
       "Bash(GROUPME_TOKEN=__CMDSUB_OUTPUT__ node scripts/post-registration-status.mjs --test --dry-run)",
       "Bash(GROUPME_TOKEN=__CMDSUB_OUTPUT__ node scripts/post-registration-status.mjs --test)",
-      "Bash(node /private/tmp/claude-501/-Users-suigeneris-Github-mattsvolleyball-com/40d02267-20ad-4b91-ac4f-ab40e3d2cd57/scratchpad/recap-sample.mjs)"
+      "Bash(node /private/tmp/claude-501/-Users-suigeneris-Github-mattsvolleyball-com/40d02267-20ad-4b91-ac4f-ab40e3d2cd57/scratchpad/recap-sample.mjs)",
+      "Bash(node --check scripts/check-weather.mjs)",
+      "Bash(GROUPME_TOKEN=__CMDSUB_OUTPUT__ node scripts/check-weather.mjs --dry-run --date=2026-07-16)",
+      "Bash(GROUPME_TOKEN=__CMDSUB_OUTPUT__ node scripts/check-weather.mjs --test --force --pop-threshold=0)",
+      "Bash(node scripts/check-weather.mjs --dry-run --date=2026-07-16 --force)",
+      "Bash(node scripts/check-weather.mjs --dry-run --force --pop-threshold=0)",
+      "Bash(GROUPME_TOKEN=__TRACKED_VAR__ node scripts/check-weather.mjs --test --force --pop-threshold=0)"
     ]
   }
 }
