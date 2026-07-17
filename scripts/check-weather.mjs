@@ -27,7 +27,11 @@ const NWS_UA = 'mattsvolleyball.com weather bot (matt@mattsvolleyball.com)';
 
 // Game window, ET wall-clock hours (first serves 6:30, last games end ~9:30).
 const WINDOW_HOURS = [18, 19, 20, 21];
-const DEFAULT_POP_THRESHOLD = 50; // percent chance of precipitation
+const DEFAULT_POP_THRESHOLD = 50; // percent chance of precipitation (rain tier)
+// Storm keywords trump the rain threshold, but a NC summer "slight chance of
+// thunderstorms" (~15-20%) is background noise; require this much probability
+// before a storm watch posts, so the warnings stay meaningful.
+const STORM_POP_FLOOR = 30;
 
 async function nws(url) {
   const res = await fetch(url, { headers: { 'User-Agent': NWS_UA } });
@@ -85,7 +89,9 @@ async function main() {
   const wettest = window.reduce((a, b) =>
     ((a.probabilityOfPrecipitation?.value ?? 0) >= (b.probabilityOfPrecipitation?.value ?? 0) ? a : b));
   const maxPop = wettest.probabilityOfPrecipitation?.value ?? 0;
-  const stormPeriod = window.find((p) => /thunder|lightning|heavy/i.test(p.shortForecast));
+  const stormPeriod = window.find((p) =>
+    /thunder|lightning|heavy/i.test(p.shortForecast)
+    && (p.probabilityOfPrecipitation?.value ?? 0) >= STORM_POP_FLOOR);
 
   console.log(window.map((p) =>
     `${p.startTime.slice(11, 16)} ET: ${p.probabilityOfPrecipitation?.value ?? 0}% precip, ${p.temperature}${p.temperatureUnit}, ${p.shortForecast}`,
