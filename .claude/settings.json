@@ -274,7 +274,9 @@
       "Bash(node scripts/check-weather.mjs --dry-run --date=2026-07-16 --force)",
       "Bash(node scripts/check-weather.mjs --dry-run --force --pop-threshold=0)",
       "Bash(GROUPME_TOKEN=__TRACKED_VAR__ node scripts/check-weather.mjs --test --force --pop-threshold=0)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code} %{content_type} %{size_download}\" https://r2.afterhoursds.com/mattsvolleyball/favicon.ico)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code} %{content_type} %{size_download}\" https://r2.afterhoursds.com/mattsvolleyball/favicon.ico)",
+      "Bash(GROUPME_TOKEN=$\\(node -p \"require\\('/Users/suigeneris/Github/mattsvolleyball.com/.groupme.local.json'\\).access_token\"\\) node scripts/post-registration-status.mjs --test --dry-run)",
+      "Bash(gh issue create --repo matt-taylor-tech/mattsvolleyball.com --label enhancement --title 'Two-way GroupMe bot via Cloudflare Worker callback' --body ' *)"
     ]
   }
 }
