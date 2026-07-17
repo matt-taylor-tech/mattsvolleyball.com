@@ -160,8 +160,8 @@ export const UPCOMING_TEAMS_API_URL = `${API_BASE}/getTeams/${ORG_ID}/${UPCOMING
 // and adds playoff games to the schedule.
 // PLAYOFF_ID is the TeamLinkt playoff bracket ID — find it in the "Playoffs"
 // schedule type dropdown on the TeamLinkt Schedule page.
-export const PLAYOFFS_ACTIVE = true;
-export const PLAYOFF_ID = '15272';
+export const PLAYOFFS_ACTIVE = false; // Summer I closed; set true when Redux playoffs are built
+export const PLAYOFF_ID = '15272'; // stale (Summer I bracket); update when Redux playoffs exist
 
 // Max teams per division for the upcoming season. Keyed by division id.
 // Wednesday uses a player cap instead - see UPCOMING_PLAYER_CAPS_BY_DIVISION.

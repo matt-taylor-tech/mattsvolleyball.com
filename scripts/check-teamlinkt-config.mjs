@@ -62,6 +62,13 @@ async function main() {
     process.exit(1);
   }
 
+  // After the rollover date the old CURRENT season is typically closed in
+  // TeamLinkt and drops out of the public dropdowns; that's expected, so its
+  // checks downgrade to warnings.
+  const rolloverDate = source.match(/export const ACTIVE_ROLLOVER_DATE = '([^']*)'/)?.[1] ?? '';
+  const rolloverAt = new Date(rolloverDate);
+  const hasRolledOver = !Number.isNaN(rolloverAt.getTime()) && new Date() >= rolloverAt;
+
   const orgId = '10757';
   const appBase = 'https://app.mattsvolleyball.com/leagues';
   const scheduleUrl = 'https://app.mattsvolleyball.com/mattsvolleyball/Schedule';
@@ -73,7 +80,12 @@ async function main() {
   const issues = [];
 
   if (!seasonOptions.includes(currentSeasonId)) {
-    issues.push(`Current season ${currentSeasonId} not found in TeamLinkt season dropdown`);
+    const msg = `Current season ${currentSeasonId} not found in TeamLinkt season dropdown`;
+    if (hasRolledOver) {
+      console.warn(`Warning: ${msg} (closed after rollover; expected)`);
+    } else {
+      issues.push(msg);
+    }
   }
   if (!seasonOptions.includes(nextSeasonId)) {
     issues.push(`Upcoming season ${nextSeasonId} not found in TeamLinkt season dropdown`);
