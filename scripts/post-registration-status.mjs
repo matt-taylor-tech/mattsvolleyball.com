@@ -78,14 +78,15 @@ async function fetchPlayerCount(seasonId, divisionId) {
   return total;
 }
 
+/** source_guids of recent messages, newest first. */
 async function recentGuids(token, conversationId) {
   const res = await fetch(
     `https://api.groupme.com/v3/groups/${conversationId}/messages?limit=100`,
     { headers: { 'X-Access-Token': token } },
   );
-  if (!res.ok) return new Set(); // fresh conversation; treat as no history
+  if (!res.ok) return []; // fresh conversation; treat as no history
   const messages = (await res.json())?.response?.messages ?? [];
-  return new Set(messages.map((m) => m.source_guid).filter(Boolean));
+  return messages.map((m) => m.source_guid).filter(Boolean);
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -105,7 +106,7 @@ async function main() {
   if (!token) throw new Error('Missing env var GROUPME_TOKEN');
 
   const lines = [];
-  const snapshot = [];
+  const divisionsChecked = []; // {label, count, cap} in stable config order
   for (const division of config.divisions) {
     const label = `${division.day} ${division.name}`;
     const playerCap = config.playerCaps[division.id];
@@ -125,7 +126,7 @@ async function main() {
     const remaining = Math.max(0, cap - count);
     const status = remaining === 0 ? 'FULL' : `${remaining} left`;
     lines.push(`${label}: ${count}/${cap} ${unit} (${status})`);
-    snapshot.push(count);
+    divisionsChecked.push({ id: division.id, label, count, cap });
   }
 
   if (lines.length === 0) {
@@ -136,30 +137,65 @@ async function main() {
 
   const conversationId = testMode ? TEST_CONVERSATION_ID : MAIN_GROUP_ID;
   const target = testMode ? 'TEST group' : 'main group';
+  const snapshot = divisionsChecked.map((d) => d.count);
   const guid = `mv-regstatus-${snapshot.join('-')}`;
 
-  const seen = await recentGuids(token, conversationId);
+  const guids = await recentGuids(token, conversationId);
+  const seen = new Set(guids);
+  const toPost = []; // {guid, message}
+
+  // Spot-opened alerts: a division that was at/over cap in the last posted
+  // digest and now has room again means someone dropped. Announce it; those
+  // spots refill fastest when people hear quickly.
+  const lastSnapshot = guids
+    .find((g) => g.startsWith('mv-regstatus-'))
+    ?.slice('mv-regstatus-'.length).split('-').map(Number);
+  if (lastSnapshot && lastSnapshot.length === divisionsChecked.length) {
+    for (const [i, division] of divisionsChecked.entries()) {
+      if (lastSnapshot[i] >= division.cap && division.count < division.cap) {
+        const spotGuid = `mv-spotopen-${division.id}-${division.count}`;
+        if (seen.has(spotGuid)) continue;
+        toPost.push({
+          guid: spotGuid,
+          message: [
+            `🏐 A spot just opened up in ${division.label} for ${config.seasonLabel}! First come, first served.`,
+            `Register: ${REGISTER_PAGE}`,
+            `🤖 Auto-posted by Matt's bot`,
+          ].join('\n'),
+        });
+      }
+    }
+  }
+
   if (seen.has(guid)) {
-    console.log('Counts unchanged since the last post: nothing to post.');
+    console.log('Counts unchanged since the last digest.');
+  } else {
+    toPost.push({
+      guid,
+      message: [
+        `🏐 ${config.seasonLabel} registration status`,
+        '━━━━━━━━━━━━━',
+        lines.join('\n'),
+        '',
+        `Register: ${REGISTER_PAGE}`,
+        `🤖 Auto-posted by Matt's bot`,
+      ].join('\n'),
+    });
+  }
+
+  if (toPost.length === 0) {
+    console.log('Nothing to post.');
     return;
   }
 
-  const message = [
-    `🏐 ${config.seasonLabel} registration status`,
-    '━━━━━━━━━━━━━',
-    lines.join('\n'),
-    '',
-    `Register: ${REGISTER_PAGE}`,
-    `🤖 Auto-posted by Matt's bot`,
-  ].join('\n');
-
-  if (dryRun) {
-    console.log(`[dry-run] Would post to the ${target} (guid ${guid}):\n\n${message}`);
-    return;
+  for (const post of toPost) {
+    if (dryRun) {
+      console.log(`[dry-run] Would post to the ${target} (guid ${post.guid}):\n\n${post.message}\n`);
+    } else {
+      await postToTopic(token, conversationId, post.message, null, post.guid);
+      console.log(`Posted to the ${target} (${post.guid}).`);
+    }
   }
-
-  await postToTopic(token, conversationId, message, null, guid);
-  console.log(`Posted registration status to the ${target}.`);
 }
 
 main().catch((err) => {
