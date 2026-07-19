@@ -282,7 +282,13 @@
       "Bash(curl -s https://mattsvolleyball.com/sitemap-0.xml)",
       "Bash(curl -s -A \"mattsvolleyball-seo-check\" \"https://nominatim.openstreetmap.org/search?format=json&limit=2&q=20832+Catawba+Ave,+Cornelius,+NC+28031\")",
       "Bash(curl -s -A \"mattsvolleyball-seo-check\" \"https://nominatim.openstreetmap.org/search?format=json&limit=2&q=Blythe+Landing+Park,+Huntersville,+NC\")",
-      "Bash(curl -s -H 'X-Access-Token: __TRACKED_VAR__' https://api.groupme.com/v3/groups/115965602/messages?limit=40)"
+      "Bash(curl -s -H 'X-Access-Token: __TRACKED_VAR__' https://api.groupme.com/v3/groups/115965602/messages?limit=40)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d, indent=1\\)[:600]\\)\")",
+      "Bash(python3 -c \"import json; print\\(json.load\\(open\\('/Users/suigeneris/Github/VolleyballEngine/.vscode/mcp.json'\\)\\)['servers']['supabase']['env']['SUPABASE_ACCESS_TOKEN']\\)\")",
+      "Bash(curl -s -X POST https://api.supabase.com/v1/projects/enbnplqyjzewairxgcxe/database/query -H 'Authorization: Bearer __CMDSUB_OUTPUT__' -H 'Content-Type: application/json' -d '{\"query\": \"select jsonb_array_length\\(handicaps\\) as n from default_handicaps; select h->>'\\\\''level'\\\\'' as level, h->>'\\\\''text'\\\\'' as text from default_handicaps, jsonb_array_elements\\(handicaps\\) h limit 12;\"}')",
+      "Bash(curl -s -X POST https://api.supabase.com/v1/projects/enbnplqyjzewairxgcxe/database/query -H 'Authorization: Bearer __CMDSUB_OUTPUT__' -H 'Content-Type: application/json' -d '{\"query\": \"select id, left\\(handicaps::text, 800\\) as preview from default_handicaps limit 2;\"}')",
+      "Bash(gh issue create --repo matt-taylor-tech/mattsvolleyball.com --label enhancement --title 'Random engagement posts: keep the group laughing between game nights' --body ' *)",
+      "Bash(GROUPME_TOKEN=$\\(node -p \"require\\('/Users/suigeneris/Github/mattsvolleyball.com/.groupme.local.json'\\).access_token\"\\) node scripts/post-registration-status.mjs --dry-run)"
     ]
   }
 }
