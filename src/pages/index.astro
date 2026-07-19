@@ -4,7 +4,7 @@ import ChampionCard from '../components/ChampionCard.astro';
 import { getChampions } from '../lib/champions';
 import { getRegistrationData, formatDate, formatFullDate } from '../lib/registration';
 import { UPCOMING_DIVISIONS, UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_PLAYER_CAPS_BY_DIVISION, UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL, NEXT_NEXT_SEASON_LABEL, ACTIVE_SEASON_LABEL } from '../lib/seasonConfig';
-import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart } from 'lucide-astro';
+import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart, Volleyball } from 'lucide-astro';
 import { GROUPME_MAIN_URL, GROUPME_ICON_PATH } from '../lib/community';
 
 const champions = await getChampions();
@@ -65,9 +65,22 @@ const heroDatesText = seasonLabel
 <Layout title="Matt's Volleyball | Coed Sand Volleyball in Lake Norman">
   <!-- Hero -->
   <section class="relative overflow-hidden bg-gradient-to-br from-ocean-600 via-ocean-700 to-ocean-800 text-white" data-hero-no-update>
-    <div class="absolute inset-0 opacity-10">
+    <div class="absolute inset-0 opacity-10" aria-hidden="true">
       <div class="absolute top-20 left-10 w-72 h-72 bg-coral-500 rounded-full blur-3xl"></div>
-      <div class="absolute bottom-10 right-10 w-96 h-96 bg-sand-400 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-6 right-10 w-96 h-96 bg-sand-400 rounded-full blur-3xl"></div>
+      <!-- Net band framing the headline: top/bottom tape lines with mesh between -->
+      <svg class="absolute top-14 md:top-20 left-0 w-full h-56 md:h-60">
+        <defs>
+          <pattern id="hero-net" width="36" height="36" patternUnits="userSpaceOnUse">
+            <path d="M36 0H0V36" fill="none" stroke="white" stroke-width="1.5" />
+          </pattern>
+        </defs>
+        <rect x="0" y="0" width="100%" height="7" fill="white" />
+        <rect x="0" y="7" width="100%" height="100%" fill="url(#hero-net)" />
+        <line x1="0" y1="100%" x2="100%" y2="100%" stroke="white" stroke-width="14" />
+      </svg>
+      <!-- Ball clearing the top tape -->
+      <Volleyball class="absolute -right-5 top-4 w-24 h-24 md:right-24 md:top-8 md:w-32 md:h-32 text-white rotate-12" stroke-width={1.25} />
     </div>
     <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-12 md:pt-28 md:pb-16 text-center">
       <p class="text-coral-400 font-bold text-sm md:text-base uppercase tracking-widest mb-4">
