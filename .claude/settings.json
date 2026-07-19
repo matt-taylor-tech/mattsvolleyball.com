@@ -288,7 +288,11 @@
       "Bash(curl -s -X POST https://api.supabase.com/v1/projects/enbnplqyjzewairxgcxe/database/query -H 'Authorization: Bearer __CMDSUB_OUTPUT__' -H 'Content-Type: application/json' -d '{\"query\": \"select jsonb_array_length\\(handicaps\\) as n from default_handicaps; select h->>'\\\\''level'\\\\'' as level, h->>'\\\\''text'\\\\'' as text from default_handicaps, jsonb_array_elements\\(handicaps\\) h limit 12;\"}')",
       "Bash(curl -s -X POST https://api.supabase.com/v1/projects/enbnplqyjzewairxgcxe/database/query -H 'Authorization: Bearer __CMDSUB_OUTPUT__' -H 'Content-Type: application/json' -d '{\"query\": \"select id, left\\(handicaps::text, 800\\) as preview from default_handicaps limit 2;\"}')",
       "Bash(gh issue create --repo matt-taylor-tech/mattsvolleyball.com --label enhancement --title 'Random engagement posts: keep the group laughing between game nights' --body ' *)",
-      "Bash(GROUPME_TOKEN=$\\(node -p \"require\\('/Users/suigeneris/Github/mattsvolleyball.com/.groupme.local.json'\\).access_token\"\\) node scripts/post-registration-status.mjs --dry-run)"
+      "Bash(GROUPME_TOKEN=$\\(node -p \"require\\('/Users/suigeneris/Github/mattsvolleyball.com/.groupme.local.json'\\).access_token\"\\) node scripts/post-registration-status.mjs --dry-run)",
+      "Bash(npx astro *)",
+      "Bash(disown)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:4321/)",
+      "Bash(node \"/private/tmp/claude-501/-Users-suigeneris-Github-mattsvolleyball-com/7eb79d93-3230-46b4-bc2e-27584bea6143/scratchpad/screenshot.mjs\")"
     ]
   }
 }
