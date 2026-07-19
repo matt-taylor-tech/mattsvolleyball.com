@@ -167,8 +167,18 @@ async function main() {
     }
   }
 
+  // Once the league is full and the FULL digest has posted, stay quiet even
+  // if raw counts drift (e.g. an over-cap add): the message would read the
+  // same. The next post is the spot-opened alert, when there's actual news.
+  const allFullNow = divisionsChecked.every((d) => d.count >= d.cap);
+  const allFullBefore = lastSnapshot
+    && lastSnapshot.length === divisionsChecked.length
+    && divisionsChecked.every((d, i) => lastSnapshot[i] >= d.cap);
+
   if (seen.has(guid)) {
     console.log('Counts unchanged since the last digest.');
+  } else if (allFullNow && allFullBefore) {
+    console.log('Still fully booked; FULL digest already posted.');
   } else {
     toPost.push({
       guid,
