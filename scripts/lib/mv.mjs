@@ -263,13 +263,14 @@ export async function fetchStandings(divisionId, seasonId) {
   });
   return (json.standings || [])
     .map((s) => ({
-      rank: s.ranking,
+      rank: s.ranking, // null until games have been played
       name: s.Team?.name || cellText(s.team_name),
       wins: s.total_wins,
       losses: s.total_losses,
       points: s.total_points,
     }))
-    .sort((a, b) => a.rank - b.rank);
+    .sort((a, b) => (a.rank ?? 999) - (b.rank ?? 999))
+    .map((s, i) => ({ ...s, rank: s.rank ?? i + 1 }));
 }
 
 // ── Text formatting ───────────────────────────────────────────────────────────

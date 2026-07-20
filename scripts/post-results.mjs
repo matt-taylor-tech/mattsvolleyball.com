@@ -91,12 +91,13 @@ async function main() {
     const messages = [];
     for (const division of config.divisions.filter((d) => d.day === day && d.tracked)) {
       const games = await fetchResults(division.id, dateKey);
-      const standings = await fetchStandings(division.id, config.seasonId);
+      // No games that night means nothing to recap: standings alone would be
+      // a 0-0 table pre-season (with null rankings) or a stale one off-week.
+      if (games.length === 0) continue;
 
-      const sections = [];
-      if (games.length > 0) sections.push(resultsSection(games));
+      const standings = await fetchStandings(division.id, config.seasonId);
+      const sections = [resultsSection(games)];
       if (standings.length >= 2) sections.push(standingsSection(standings));
-      if (sections.length === 0) continue;
 
       const header = `🏐 ${boldSans(division.name)} - last week (${dateLabelFor(dateKey)})`;
       messages.push(...packMessages(header, sections, footer));
