@@ -20,11 +20,13 @@ import {
 // Captains-group topic per division. `live` values get filled in once the
 // real captains group is wired up; `test` values are the Bot Test Group's
 // mirror topics. Keyed by UPCOMING (Summer Redux) division ids.
+// Live topics are in "Matt's Volleyball Captains Chats" (group 116067407);
+// test topics are the Bot Test Group's mirrors.
 const CAPTAINS_TOPICS = {
-  '305891': { label: 'Tue Competitive', live: null, test: '116089944' }, // "Tuesday Comp Captains"
-  '305890': { label: 'Tue Recreational', live: null, test: '116089938' }, // "Tuesday Rec Captains"
-  '305892': { label: 'Thu Competitive', live: null, test: '116089929' }, // "Thursday Comp Captains"
-  '305893': { label: 'Thu Recreational', live: null, test: '116089959' }, // "Thursday Rec Captains"
+  '305891': { label: 'Tue Competitive', live: '116067429', test: '116089944' }, // Tuesday Comp Captains
+  '305890': { label: 'Tue Recreational', live: '116067421', test: '116089938' }, // Tuesday Rec Captains
+  '305892': { label: 'Thu Competitive', live: '116067453', test: '116089929' }, // Thursday Comp Captains
+  '305893': { label: 'Thu Recreational', live: '116067447', test: '116089959' }, // Thursday Rec Captains
 };
 
 async function main() {
