@@ -444,7 +444,7 @@ const heroDatesText = seasonLabel
 
       try {
         const { DIVISION_IDS, TEAMS_API_URL, DIVISIONS_BY_DAY, DIVISION_NAME, EVENTS_API, ACTIVE_SEASON_ID } = await import('../lib/seasonConfig');
-        const teamsByDivision = new Map<string, string[]>();
+        const teamsByDivision = new Map<string, { id: number; name: string }[]>();
 
         async function fetchAllTeams(): Promise<void> {
           const results = await Promise.allSettled(
@@ -453,14 +453,14 @@ const heroDatesText = seasonLabel
               body.set('group_ids[division]', id);
               body.set('season_id', ACTIVE_SEASON_ID);
               const res = await fetch(TEAMS_API_URL, { method: 'POST', body });
-              const teams: { name: string }[] = await res.json();
-              return { id, names: teams.map((t) => t.name) };
+              const teams: { id: number; name: string }[] = await res.json();
+              return { id, teams };
             })
           );
 
           for (const result of results) {
             if (result.status !== 'fulfilled') continue;
-            teamsByDivision.set(result.value.id, result.value.names);
+            teamsByDivision.set(result.value.id, result.value.teams.map((t) => ({ id: t.id, name: t.name })));
           }
         }
 
@@ -469,23 +469,32 @@ const heroDatesText = seasonLabel
           const divisionIds = DIVISIONS_BY_DAY[day];
           if (!divisionIds) return [];
 
-          const allTeams = new Set<string>();
+          const allTeams = new Map<number, string>();
           for (const id of divisionIds) {
             const teams = teamsByDivision.get(id);
-            if (teams) teams.forEach((t) => allTeams.add(t));
+            if (teams) teams.forEach((t) => allTeams.set(t.id, t.name));
           }
 
           if (allTeams.size === 0) return [];
 
-          const playingTeams = new Set<string>();
+          const playingIds = new Set<number>();
           for (const g of games) {
-            const home = stripHtml(g['3'] as string);
-            const away = stripHtml(g['4'] as string);
-            playingTeams.add(home);
-            playingTeams.add(away);
+            playingIds.add(Number(g.home_association_team_id));
+            playingIds.add(Number(g.away_assocation_team_id));
           }
 
-          return [...allTeams].filter((t) => !playingTeams.has(t)).sort();
+          // The teams endpoint and the schedule can disagree on a team's name
+          // (TeamLinkt keeps two name fields), so prefer the name shown in game rows.
+          const eventNameById = new Map<number, string>();
+          for (const g of allGames) {
+            eventNameById.set(Number(g.home_association_team_id), stripHtml(g['3'] as string));
+            eventNameById.set(Number(g.away_assocation_team_id), stripHtml(g['4'] as string));
+          }
+
+          return [...allTeams]
+            .filter(([id]) => !playingIds.has(id))
+            .map(([id, name]) => eventNameById.get(id) || name)
+            .sort();
         }
 
         const allGames: Array<Record<string, string | number> & { divisionId: string }> = [];

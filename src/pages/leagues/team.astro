@@ -101,7 +101,7 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
         const teams: { id: number; name: string; imageUrl: string; groups: string }[] = await res.json();
         const team = teamId
           ? teams.find((t) => t.id === Number(teamId))
-          : teams.find((t) => t.name === teamName);
+          : teams.find((t) => t.name.toLowerCase() === teamName.toLowerCase());
 
         if (team) {
           const logo = document.getElementById('team-logo') as HTMLImageElement;
