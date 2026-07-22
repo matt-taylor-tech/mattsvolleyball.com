@@ -292,7 +292,8 @@
       "Bash(npx astro *)",
       "Bash(disown)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:4321/)",
-      "Bash(node \"/private/tmp/claude-501/-Users-suigeneris-Github-mattsvolleyball-com/7eb79d93-3230-46b4-bc2e-27584bea6143/scratchpad/screenshot.mjs\")"
+      "Bash(node \"/private/tmp/claude-501/-Users-suigeneris-Github-mattsvolleyball-com/7eb79d93-3230-46b4-bc2e-27584bea6143/scratchpad/screenshot.mjs\")",
+      "Bash(gh pr *)"
     ]
   }
 }

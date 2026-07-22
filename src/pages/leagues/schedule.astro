@@ -130,8 +130,8 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
   let currentDay = 'all';
   let allGames: GameEvent[] = [];
   let searchQuery = '';
-  // Map of division ID → team names
-  const teamsByDivision = new Map<string, string[]>();
+  // Map of division ID → teams
+  const teamsByDivision = new Map<string, { id: number; name: string }[]>();
 
   function setSyncStamp(id: string) {
     const el = document.getElementById(id);
@@ -165,6 +165,8 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
     time: string;
     home: string;
     away: string;
+    homeId: number;
+    awayId: number;
     location: { name: string; url: string };
     timestamp: number;
     divisionId: string;
@@ -181,12 +183,12 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
         body.set('season_id', ACTIVE_SEASON_ID);
         const res = await fetch(TEAMS_API_URL, { method: 'POST', body });
         const teams: { id: number; name: string }[] = await res.json();
-        return { id, names: teams.map((t) => t.name), teamIds: teams.map((t) => t.id) };
+        return { id, teams };
       })
     );
-    for (const { id, names, teamIds } of results) {
-      teamsByDivision.set(id, names);
-      for (const tid of teamIds) teamIdToDivision.set(tid, id);
+    for (const { id, teams } of results) {
+      teamsByDivision.set(id, teams.map((t) => ({ id: t.id, name: t.name })));
+      for (const t of teams) teamIdToDivision.set(t.id, id);
     }
   }
 
@@ -212,6 +214,8 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
           time: row['1'] as string,
           home: stripHtml(row['3'] as string),
           away: stripHtml(row['4'] as string),
+          homeId,
+          awayId,
           location: extractLocation(row['5'] as string),
           timestamp: Number(row['6']),
           divisionId,
@@ -229,19 +233,30 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
       ? divisionIds.filter((id) => id === currentDivision)
       : divisionIds;
 
-    const allTeams = new Set<string>();
+    const allTeams = new Map<number, string>();
     for (const id of divisionsToCheck) {
       const teams = teamsByDivision.get(id);
-      if (teams) teams.forEach((t) => allTeams.add(t));
+      if (teams) teams.forEach((t) => allTeams.set(t.id, t.name));
     }
 
-    const playingTeams = new Set<string>();
+    const playingIds = new Set<number>();
     for (const g of games) {
-      playingTeams.add(g.home);
-      playingTeams.add(g.away);
+      playingIds.add(g.homeId);
+      playingIds.add(g.awayId);
     }
 
-    return [...allTeams].filter((t) => !playingTeams.has(t)).sort();
+    // The teams endpoint and the schedule can disagree on a team's name
+    // (TeamLinkt keeps two name fields), so prefer the name shown in game rows.
+    const eventNameById = new Map<number, string>();
+    for (const g of allGames) {
+      if (g.home) eventNameById.set(g.homeId, g.home);
+      if (g.away) eventNameById.set(g.awayId, g.away);
+    }
+
+    return [...allTeams]
+      .filter(([id]) => !playingIds.has(id))
+      .map(([id, name]) => eventNameById.get(id) || name)
+      .sort();
   }
 
   async function fetchDivision(divisionId: string): Promise<GameEvent[]> {
@@ -259,6 +274,8 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
       time: row['1'] as string,
       home: stripHtml(row['3'] as string),
       away: stripHtml(row['4'] as string),
+      homeId: Number(row.home_association_team_id),
+      awayId: Number(row.away_assocation_team_id),
       location: extractLocation(row['5'] as string),
       timestamp: row['6'] as number,
       divisionId,
