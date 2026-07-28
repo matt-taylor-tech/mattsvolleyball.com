@@ -85,7 +85,7 @@ async function main() {
   // lightning and heavy rain are no-play conditions, so storm-tier forecasts
   // warn of a possible cancellation; drizzle/moderate rain are play-through,
   // so rain-tier posts are reassurance, not warnings. The call itself is
-  // made by Matt and posted in the chat by 4 PM.
+  // made by Matt and posted in the chat by 5 PM.
   const wettest = window.reduce((a, b) =>
     ((a.probabilityOfPrecipitation?.value ?? 0) >= (b.probabilityOfPrecipitation?.value ?? 0) ? a : b));
   const maxPop = wettest.probabilityOfPrecipitation?.value ?? 0;
@@ -101,9 +101,9 @@ async function main() {
   if (stormPeriod) {
     // Storms matter at any probability; quote the storm period's forecast.
     const stormPop = Math.max(maxPop, stormPeriod.probabilityOfPrecipitation?.value ?? 0);
-    text = `⛈️ Storm watch for tonight (${dateLabelFor(dateKey)}): up to ${stormPop}% chance, forecast says "${stormPeriod.shortForecast}". Lightning means we don't play, so a cancellation is possible. The call gets posted right here by 4 PM; captains, make sure your team sees it. Called games move to the end of the season schedule.`;
+    text = `⛈️ Storm watch for tonight (${dateLabelFor(dateKey)}): up to ${stormPop}% chance, forecast says "${stormPeriod.shortForecast}". Lightning means we don't play, so a cancellation is possible. The call gets posted right here by 5 PM; captains, make sure your team sees it. Called games move to the end of the season schedule.`;
   } else if (maxPop >= popThreshold) {
-    text = `🌧️ Rain in tonight's forecast (${dateLabelFor(dateKey)}): up to ${maxPop}%, "${wettest.shortForecast}". Heads up: we play through drizzle and moderate rain, so plan on games as usual unless you hear otherwise here by 4 PM.`;
+    text = `🌧️ Rain in tonight's forecast (${dateLabelFor(dateKey)}): up to ${maxPop}%, "${wettest.shortForecast}". Heads up: we play through drizzle and moderate rain, so plan on games as usual unless you hear otherwise here by 5 PM.`;
   } else {
     console.log(`Forecast is fine (max ${maxPop}% precip, no storms): nothing to post.`);
     return;
