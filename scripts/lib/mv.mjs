@@ -41,8 +41,8 @@ const DISABLED_DAYS = new Set(['Mon']);
 export const EVENT_DAYS = {
   Wed: {
     title: 'Wednesday Shuffle',           // becomes "Wednesday Shuffle - Jul 29"
-    startTime: '18:45',
-    endTime: '20:45',
+    startTime: '18:30',
+    endTime: '20:30',
     description: 'RSVP or show up by 6:30',
     location: { name: "Saeed's Bar & Grill", lat: 35.483712, lng: -80.868313 },
     reminders: [900], // 15 minutes before
