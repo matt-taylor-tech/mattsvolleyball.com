@@ -1,0 +1,8 @@
+[mcp_servers.supabase-mv]
+command = "npx"
+args = [
+    "-y",
+    "@supabase/mcp-server-supabase@latest",
+    "--project-ref=enbnplqyjzewairxgcxe",
+]
+env_vars = ["SUPABASE_ACCESS_TOKEN"]
