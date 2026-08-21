@@ -9,7 +9,6 @@ import {
   UPCOMING_SEASON_LABEL,
   REGISTRATION_PAGE_URL,
 } from '../../lib/seasonConfig';
-import { GROUPME_MAIN_URL } from '../../lib/community';
 ---
 
 <Layout title="Schedule | Matt's Volleyball" description="View the upcoming schedule for all Matt's Volleyball leagues.">
@@ -44,19 +43,6 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
           </a>
         </div>
         <p id="schedule-sync" class="mt-2 text-xs text-ocean-600/80">Data fetched from TeamLinkt when this page loads.</p>
-      </div>
-
-      <!-- GroupMe -->
-      <div class="mb-6 flex flex-wrap items-center gap-2 text-sm">
-        <span class="font-semibold text-ocean-700">Daily schedules are posted in the league GroupMe:</span>
-        <a
-          href={GROUPME_MAIN_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center rounded-full border border-sand-300 bg-white px-3 py-1 font-medium text-ocean-600 hover:border-ocean-500 hover:text-ocean-500 transition-colors"
-        >
-          Join the GroupMe
-        </a>
       </div>
 
       <!-- Day Filter -->
