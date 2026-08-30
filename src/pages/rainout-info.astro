@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { Check, X, CircleCheck, CircleX } from 'lucide-astro';
+import { GROUPME_MAIN_URL } from '../lib/community';
 ---
 
 <Layout title="Rainout Info | Matt's Volleyball" description="Matt's Volleyball inclement weather and rainout policy. Learn when games are canceled and how they're rescheduled.">
@@ -79,6 +80,12 @@ import { Check, X, CircleCheck, CircleX } from 'lucide-astro';
             </li>
           </ul>
         </div>
+      </div>
+
+      <div class="mt-12 bg-sand-100 rounded-2xl p-6 border border-sand-200 text-center">
+        <p class="text-ocean-600/80 text-sm">
+          Watch the <a href={GROUPME_MAIN_URL} target="_blank" rel="noopener noreferrer" class="text-ocean-600 font-semibold underline hover:text-ocean-500">GroupMe</a> for real-time updates on game day.
+        </p>
       </div>
     </div>
   </section>
