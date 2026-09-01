@@ -1,0 +1,30 @@
+---
+// "Next on the schedule" for the season being played right now. The list is
+// filled in by the widget script on the home page, which finds these elements
+// by id, so this component holds markup only.
+---
+
+  <section class="py-12 md:py-16 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="section-heading text-center mb-4">Upcoming Games</h2>
+      <p class="section-subheading text-center mb-8">Next on the schedule.</p>
+
+      <div id="upcoming-loading" class="text-center py-8">
+        <div class="inline-block w-8 h-8 border-4 border-sand-300 border-t-ocean-600 rounded-full animate-spin"></div>
+      </div>
+
+      <div id="upcoming-container" class="hidden"></div>
+
+      <div class="text-center mt-6">
+        <a href="/leagues/schedule/" class="inline-flex items-center gap-2 text-ocean-600 hover:text-ocean-700 font-semibold transition-colors">
+          View Full Schedule
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+
+      <!-- Tailwind safelist for dynamically rendered classes -->
+      <span class="hidden card border-l-4 border-l-coral-500 border-l-emerald-500 border-l-violet-500 border-l-amber-400 bg-ocean-600 bg-coral-500 text-white text-ocean-400 text-ocean-500 text-ocean-500/70 text-ocean-600 text-ocean-700 text-ocean-800 font-display font-normal font-medium font-semibold font-bold text-sm text-xs truncate sm:grid-cols-2 sm:col-span-2 gap-1.5 gap-2 mb-1 mt-1 px-2 py-0.5 p-2 rounded-full min-w-0 shrink-0 inline-block"></span>
+    </div>
+  </section>

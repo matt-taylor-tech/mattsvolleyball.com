@@ -1,0 +1,47 @@
+---
+// The three league nights, each with a live "spots left" counter.
+import SpotsCounter from './SpotsCounter.astro';
+---
+
+  <section class="py-12 md:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="section-heading text-center mb-12">Find Your Night</h2>
+      <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div class="text-center p-8 rounded-2xl bg-sand-50 border border-sand-200">
+          <div class="w-16 h-16 bg-coral-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-white font-display font-bold text-lg">Tu</span>
+          </div>
+          <h3 class="font-display font-bold text-xl text-ocean-600 mb-2">Tuesday</h3>
+          <p class="text-ocean-600/70 text-sm leading-relaxed">
+            4v4 leagues with competitive and recreational divisions. Each division has its own playoff night.
+          </p>
+          <SpotsCounter day="Tue" />
+        </div>
+
+        <div class="text-center p-8 rounded-2xl bg-sand-50 border border-sand-200">
+          <div class="w-16 h-16 bg-ocean-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-white font-display font-bold text-lg">We</span>
+          </div>
+          <h3 class="font-display font-bold text-xl text-ocean-600 mb-2">Wednesday</h3>
+          <p class="text-ocean-600/70 text-sm leading-relaxed">
+            Shuffle league. Teams are re-drafted each week so you'll meet everyone. Play our Level Up format where winning teams take on progressive handicaps, keeping every match competitive. Plus free prize raffles between games all night long.
+          </p>
+          <a href="/leagues/shuffle/" class="inline-block mt-3 text-sm font-semibold text-ocean-500 hover:text-ocean-700 transition-colors">
+            Learn how shuffle works &rarr;
+          </a>
+          <SpotsCounter day="Wed" />
+        </div>
+
+        <div class="text-center p-8 rounded-2xl bg-sand-50 border border-sand-200">
+          <div class="w-16 h-16 bg-sand-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <span class="text-white font-display font-bold text-lg">Th</span>
+          </div>
+          <h3 class="font-display font-bold text-xl text-ocean-600 mb-2">Thursday</h3>
+          <p class="text-ocean-600/70 text-sm leading-relaxed">
+            4v4 leagues with competitive and recreational divisions. Each division has its own playoff night.
+          </p>
+          <SpotsCounter day="Thu" />
+        </div>
+      </div>
+    </div>
+  </section>

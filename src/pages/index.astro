@@ -1,40 +1,29 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ChampionCard from '../components/ChampionCard.astro';
+import UpcomingGames from '../components/UpcomingGames.astro';
+import FindYourNight from '../components/FindYourNight.astro';
 import { getChampions } from '../lib/champions';
 import { getRegistrationData, formatDate, formatFullDate } from '../lib/registration';
-import { UPCOMING_DIVISIONS, UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_PLAYER_CAPS_BY_DIVISION, UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL, NEXT_NEXT_SEASON_LABEL, ACTIVE_SEASON_LABEL } from '../lib/seasonConfig';
+import { UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL, UPCOMING_REGULAR_SEASON_WEEKS, HAS_UPCOMING_SEASON_STARTED, NEXT_NEXT_SEASON_LABEL, ACTIVE_SEASON_LABEL } from '../lib/seasonConfig';
 import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart, Volleyball } from 'lucide-astro';
 import { GROUPME_MAIN_URL, GROUPME_ICON_PATH } from '../lib/community';
 
 const champions = await getChampions();
-const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose, hasOpenRegistration, openRegUrl, openRegIsExternal, openRegDay } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
+const { seasonLabel, regStatus, seasonDates, earliestOpen, hasOpenRegistration, openRegUrl, openRegIsExternal, openRegDay, openRegNextClose, openRegAllOpen, openRegCloseDatesDiffer } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
 const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
-function countedDivisionsFor(day: string) {
-  return UPCOMING_DIVISIONS.filter(
-    (d) => d.day === day && (
-      d.id in UPCOMING_MAX_TEAMS_BY_DIVISION ||
-      d.id in UPCOMING_PLAYER_CAPS_BY_DIVISION
-    )
-  );
-}
-const homeDayCounts = {
-  Mon: countedDivisionsFor('Mon'),
-  Tue: countedDivisionsFor('Tue'),
-  Wed: countedDivisionsFor('Wed'),
-  Thu: countedDivisionsFor('Thu'),
-};
-function isPlayerCap(divId: string) {
-  return divId in UPCOMING_PLAYER_CAPS_BY_DIVISION;
-}
 // Hero priority:
-//  1. Live TeamLinkt data present (seasonLabel set) -> follow the upcoming
+//  1. The upcoming season's first game day has arrived -> it is underway. This
+//     wins over live TeamLinkt data, which can still call the season 'open'
+//     while a late-open league (Wednesday shuffle) takes signups.
+//  2. Live TeamLinkt data present (seasonLabel set) -> follow the upcoming
 //     season's real registration status (coming-soon -> open -> in-progress).
-//  2. No live data yet, but an open date is announced and still in the future
+//  3. No live data yet, but an open date is announced and still in the future
 //     -> show a config-driven "coming soon" for the upcoming season.
-//  3. Otherwise -> show the active season as in-progress.
+//  4. Otherwise -> show the active season as in-progress.
 // This lets us announce a season before TeamLinkt publishes its forms, then hand
-// off to live data automatically once they go public (no manual revert needed).
+// off to live data automatically once the forms go public (no manual revert
+// needed), and finally flip to "underway" on the date the season starts.
 const now = new Date();
 const announcedOpenDate = UPCOMING_REG_OPEN_DATETIME
   ? new Date(UPCOMING_REG_OPEN_DATETIME.replace(' ', 'T'))
@@ -42,14 +31,29 @@ const announcedOpenDate = UPCOMING_REG_OPEN_DATETIME
 const showComingSoon = !seasonLabel && announcedOpenDate !== null && now < announcedOpenDate;
 
 const heroRegStatus: 'open' | 'coming-soon' | 'in-progress' | 'closed' =
-  seasonLabel ? regStatus : showComingSoon ? 'coming-soon' : 'in-progress';
-const heroSeasonLabel = seasonLabel || (showComingSoon ? UPCOMING_SEASON_LABEL : ACTIVE_SEASON_LABEL);
+  HAS_UPCOMING_SEASON_STARTED ? 'in-progress'
+  : seasonLabel ? regStatus
+  : showComingSoon ? 'coming-soon'
+  : 'in-progress';
+const heroSeasonLabel = HAS_UPCOMING_SEASON_STARTED
+  ? UPCOMING_SEASON_LABEL
+  : seasonLabel || (showComingSoon ? UPCOMING_SEASON_LABEL : ACTIVE_SEASON_LABEL);
 // Open date shown in the hero: live value when available, else the announced date.
 const heroEarliestOpen = seasonLabel ? earliestOpen : showComingSoon ? UPCOMING_REG_OPEN_DATETIME : earliestOpen;
 const heroRegisterUrl = REG_PAGE;
 const heroRegisterTarget = '_blank';
+// Close-date copy follows the forms that are open right now. Wednesday shuffle
+// stays open a few weeks into the season, so once the other nights close, the
+// line has to name Wednesday's deadline, not the Tuesday/Thursday one.
+const nextCloseText = openRegNextClose ? formatDate(openRegNextClose) : '';
 const heroPromoText = hasOpenRegistration
-  ? 'Registration closes July 19 · Sign up while all forms are open.'
+  ? (openRegAllOpen
+      ? (openRegCloseDatesDiffer
+          ? `Sign up now · First deadline ${nextCloseText}.`
+          : `Registration closes ${nextCloseText} · Sign up while all forms are open.`)
+      : openRegDay
+        ? `${openRegDay} registration is still open · Closes ${nextCloseText}.`
+        : `Some leagues are still open · Next deadline ${nextCloseText}.`)
   : heroRegStatus === 'open' && heroSeasonLabel
   ? `${heroSeasonLabel} registration is open now.`
   : heroRegStatus === 'coming-soon' && heroSeasonLabel
@@ -57,9 +61,14 @@ const heroPromoText = hasOpenRegistration
     : heroRegStatus === 'in-progress' && heroSeasonLabel
       ? `Schedules are live. Check the matchups and join the action.`
       : 'League updates land here first.';
-const heroDatesText = seasonLabel
-  ? 'Season starts the week of July 27 · Runs for 7 weeks plus playoffs.'
-  : (showComingSoon && UPCOMING_SEASON_START_LABEL ? `Season starts ${UPCOMING_SEASON_START_LABEL}` : '');
+const seasonDatesLine = UPCOMING_SEASON_START_LABEL
+  ? `Season starts ${UPCOMING_SEASON_START_LABEL} · Runs for ${UPCOMING_REGULAR_SEASON_WEEKS} weeks plus playoffs.`
+  : '';
+// Registration leads the page until the season's first game day.
+const registrationIsFocus = !HAS_UPCOMING_SEASON_STARTED;
+const heroDatesText = HAS_UPCOMING_SEASON_STARTED
+  ? ''
+  : (seasonLabel || showComingSoon ? seasonDatesLine : '');
 ---
 
 <Layout title="Matt's Volleyball | Coed Sand Volleyball in Lake Norman">
@@ -185,114 +194,21 @@ const heroDatesText = seasonLabel
     </div>
   </section>
 
-  <!-- Upcoming Games -->
-  <section class="py-12 md:py-16 bg-white">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="section-heading text-center mb-4">Upcoming Games</h2>
-      <p class="section-subheading text-center mb-8">Next on the schedule.</p>
-
-      <div id="upcoming-loading" class="text-center py-8">
-        <div class="inline-block w-8 h-8 border-4 border-sand-300 border-t-ocean-600 rounded-full animate-spin"></div>
-      </div>
-
-      <div id="upcoming-container" class="hidden"></div>
-
-      <div class="text-center mt-6">
-        <a href="/leagues/schedule/" class="inline-flex items-center gap-2 text-ocean-600 hover:text-ocean-700 font-semibold transition-colors">
-          View Full Schedule
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </a>
-      </div>
-
-      <!-- Tailwind safelist for dynamically rendered classes -->
-      <span class="hidden card border-l-4 border-l-coral-500 border-l-emerald-500 border-l-violet-500 border-l-amber-400 bg-ocean-600 bg-coral-500 text-white text-ocean-400 text-ocean-500 text-ocean-500/70 text-ocean-600 text-ocean-700 text-ocean-800 font-display font-normal font-medium font-semibold font-bold text-sm text-xs truncate sm:grid-cols-2 sm:col-span-2 gap-1.5 gap-2 mb-1 mt-1 px-2 py-0.5 p-2 rounded-full min-w-0 shrink-0 inline-block"></span>
-    </div>
-  </section>
-
-  <!-- Schedule -->
-  <section class="py-12 md:py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="section-heading text-center mb-12">Find Your Night</h2>
-      <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-8 max-w-6xl mx-auto">
-        <div class="text-center p-8 rounded-2xl bg-sand-50 border border-sand-200">
-          <div class="w-16 h-16 bg-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span class="text-white font-display font-bold text-lg">Mo</span>
-          </div>
-          <h3 class="font-display font-bold text-xl text-ocean-600 mb-2">Monday</h3>
-          <p class="text-ocean-600/70 text-sm leading-relaxed">
-            3v3 coed format with double-headers every night. More reps, more rallies, more fun.
-          </p>
-          {homeDayCounts.Mon.map((div) => (
-            <p
-              class="mt-3 text-sm text-ocean-700 opacity-60 italic min-h-[1.25rem]"
-              data-team-count-division={div.id}
-              data-count-unit={isPlayerCap(div.id) ? 'players' : 'teams'}
-              data-division-name={homeDayCounts.Mon.length > 1 ? div.name : null}
-            >Checking spots…</p>
-          ))}
-        </div>
-
-        <div class="text-center p-8 rounded-2xl bg-sand-50 border border-sand-200">
-          <div class="w-16 h-16 bg-coral-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span class="text-white font-display font-bold text-lg">Tu</span>
-          </div>
-          <h3 class="font-display font-bold text-xl text-ocean-600 mb-2">Tuesday</h3>
-          <p class="text-ocean-600/70 text-sm leading-relaxed">
-            4v4 leagues with competitive and recreational divisions. Each division has its own playoff night.
-          </p>
-          {homeDayCounts.Tue.map((div) => (
-            <p
-              class="mt-3 text-sm text-ocean-700 opacity-60 italic min-h-[1.25rem]"
-              data-team-count-division={div.id}
-              data-count-unit={isPlayerCap(div.id) ? 'players' : 'teams'}
-              data-division-name={homeDayCounts.Tue.length > 1 ? div.name : null}
-            >Checking spots…</p>
-          ))}
-        </div>
-
-        <div class="text-center p-8 rounded-2xl bg-sand-50 border border-sand-200">
-          <div class="w-16 h-16 bg-ocean-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span class="text-white font-display font-bold text-lg">We</span>
-          </div>
-          <h3 class="font-display font-bold text-xl text-ocean-600 mb-2">Wednesday</h3>
-          <p class="text-ocean-600/70 text-sm leading-relaxed">
-            Shuffle league. Teams are re-drafted each week so you'll meet everyone. Play our Level Up format where winning teams take on progressive handicaps, keeping every match competitive. Plus free prize raffles between games all night long.
-          </p>
-          <a href="/leagues/shuffle/" class="inline-block mt-3 text-sm font-semibold text-ocean-500 hover:text-ocean-700 transition-colors">
-            Learn how shuffle works &rarr;
-          </a>
-          {homeDayCounts.Wed.map((div) => (
-            <p
-              class="mt-3 text-sm text-ocean-700 opacity-60 italic min-h-[1.25rem]"
-              data-team-count-division={div.id}
-              data-count-unit={isPlayerCap(div.id) ? 'players' : 'teams'}
-              data-division-name={homeDayCounts.Wed.length > 1 ? div.name : null}
-            >Checking spots…</p>
-          ))}
-        </div>
-
-        <div class="text-center p-8 rounded-2xl bg-sand-50 border border-sand-200">
-          <div class="w-16 h-16 bg-sand-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span class="text-white font-display font-bold text-lg">Th</span>
-          </div>
-          <h3 class="font-display font-bold text-xl text-ocean-600 mb-2">Thursday</h3>
-          <p class="text-ocean-600/70 text-sm leading-relaxed">
-            4v4 leagues with competitive and recreational divisions. Each division has its own playoff night.
-          </p>
-          {homeDayCounts.Thu.map((div) => (
-            <p
-              class="mt-3 text-sm text-ocean-700 opacity-60 italic min-h-[1.25rem]"
-              data-team-count-division={div.id}
-              data-count-unit={isPlayerCap(div.id) ? 'players' : 'teams'}
-              data-division-name={homeDayCounts.Thu.length > 1 ? div.name : null}
-            >Checking spots…</p>
-          ))}
-        </div>
-      </div>
-    </div>
-  </section>
+  <!-- Before the season starts, signing up is the point, so the nights come
+       first. Once games are being played, the schedule is what people come back
+       for, so it moves above. Rendered in real order, not reordered with CSS, so
+       screen readers and keyboard users get the same order everyone else sees. -->
+  {registrationIsFocus ? (
+    <Fragment>
+      <FindYourNight />
+      <UpcomingGames />
+    </Fragment>
+  ) : (
+    <Fragment>
+      <UpcomingGames />
+      <FindYourNight />
+    </Fragment>
+  )}
 
   <!-- Why Play Here -->
   <section class="py-12 md:py-16 bg-white">
@@ -719,39 +635,7 @@ const heroDatesText = seasonLabel
   </section>
 
   <script>
-    import { fetchUpcomingTeamCountsByDivision, fetchUpcomingPlayerCountsByDivision } from '../lib/teamCounts';
-    import { UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_PLAYER_CAPS_BY_DIVISION } from '../lib/seasonConfig';
-
-    (async () => {
-      const slots = document.querySelectorAll<HTMLElement>('[data-team-count-division]');
-      if (slots.length === 0) return;
-      try {
-        const [teamCounts, playerCounts] = await Promise.all([
-          fetchUpcomingTeamCountsByDivision(),
-          fetchUpcomingPlayerCountsByDivision(),
-        ]);
-        slots.forEach((el) => {
-          const divId = el.dataset.teamCountDivision;
-          if (!divId) return;
-          const isPlayers = el.dataset.countUnit === 'players';
-          const max = isPlayers ? UPCOMING_PLAYER_CAPS_BY_DIVISION[divId] : UPCOMING_MAX_TEAMS_BY_DIVISION[divId];
-          if (!max) return;
-          const count = isPlayers ? (playerCounts[divId] ?? 0) : (teamCounts[divId] ?? 0);
-          const unit = isPlayers ? 'players' : 'teams';
-          const name = el.dataset.divisionName;
-          const prefix = name ? `${name}: ` : '';
-          const spotsLeft = Math.max(0, max - count);
-          const cappedMsg = isPlayers
-            ? `${prefix}All ${max} player spots taken`
-            : `${prefix}All teams set · Join an existing team or as a free agent`;
-          el.textContent = spotsLeft === 0
-            ? cappedMsg
-            : `${prefix}${count} of ${max} ${unit} · ${spotsLeft} spot${spotsLeft === 1 ? '' : 's'} left`;
-          el.classList.remove('italic', 'opacity-60');
-        });
-      } catch {
-        // Leave placeholders empty on failure.
-      }
-    })();
+    import { renderSpotCounters } from '../lib/spotsCounter';
+    renderSpotCounters();
   </script>
 </Layout>

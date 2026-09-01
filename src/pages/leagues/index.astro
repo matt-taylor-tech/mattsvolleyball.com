@@ -3,24 +3,29 @@ import Layout from '../../layouts/Layout.astro';
 import LeagueCard from '../../components/LeagueCard.astro';
 import FAQAccordion from '../../components/FAQAccordion.astro';
 import { getRegistrationData, formatDate, formatFullDate, getDayFromName } from '../../lib/registration';
-import { UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL } from '../../lib/seasonConfig';
+import { UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL, HAS_UPCOMING_SEASON_STARTED } from '../../lib/seasonConfig';
 import type { RegCard } from '../../lib/registration';
 
-const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose, regCards, hasOpenRegistration, openRegUrl, openRegIsExternal, openRegDay, registrationKnown } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
+const { seasonLabel, regStatus, seasonDates, earliestOpen, openRegNextClose, openRegCloseDatesDiffer, regCards, hasOpenRegistration, openRegUrl, openRegIsExternal, openRegDay, registrationKnown } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
 const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
 
-// Hero status, mirroring the homepage: follow live TeamLinkt data when the
-// upcoming season's forms are public; otherwise, if an open date is announced and
-// still in the future, show a config-driven "coming soon". Hands off to live data
-// automatically once the forms go public (no manual revert needed).
+// Hero status, mirroring the homepage: the season's first game day wins, then
+// live TeamLinkt data when the upcoming season's forms are public, then a
+// config-driven "coming soon" if an announced open date is still in the future.
+// Hands off to live data automatically once the forms go public (no manual
+// revert needed).
 const now = new Date();
 const announcedOpenDate = UPCOMING_REG_OPEN_DATETIME
   ? new Date(UPCOMING_REG_OPEN_DATETIME.replace(' ', 'T'))
   : null;
 const showComingSoon = !seasonLabel && announcedOpenDate !== null && now < announcedOpenDate;
 
-const heroRegStatus = seasonLabel ? regStatus : showComingSoon ? 'coming-soon' : regStatus;
-const heroSeasonLabel = seasonLabel || (showComingSoon ? UPCOMING_SEASON_LABEL : '');
+const heroRegStatus = HAS_UPCOMING_SEASON_STARTED
+  ? 'in-progress'
+  : seasonLabel ? regStatus : showComingSoon ? 'coming-soon' : regStatus;
+const heroSeasonLabel = HAS_UPCOMING_SEASON_STARTED
+  ? UPCOMING_SEASON_LABEL
+  : seasonLabel || (showComingSoon ? UPCOMING_SEASON_LABEL : '');
 const heroEarliestOpen = seasonLabel ? earliestOpen : showComingSoon ? UPCOMING_REG_OPEN_DATETIME : earliestOpen;
 const heroRegisterUrl = hasOpenRegistration && openRegIsExternal ? openRegUrl : REG_PAGE;
 const heroRegisterTarget = openRegIsExternal ? '_blank' : undefined;
@@ -40,7 +45,7 @@ const faqItems = [
   { question: 'Can I join multiple teams?', answer: 'Yes! You can join multiple teams across different league nights. We do our best to avoid scheduling conflicts when possible.' },
   { question: 'What time are the games?', answer: 'Choose your weekly day. Games start at 6:30, 7:30, or 8:30 PM. You\'ll receive your specific game time before the season starts.' },
   { question: 'Is there an age requirement?', answer: 'Players must be at least 21 years old to participate in our leagues.' },
-  { question: 'How much does it cost?', answer: '$65 per player for Monday, Tuesday, or Thursday, $55 per player for Wednesday, plus credit card processing fees. That covers the full regular season plus playoffs.' },
+  { question: 'How much does it cost?', answer: '$65 per player for Tuesday or Thursday, $55 per player for Wednesday, plus credit card processing fees. That covers the full regular season plus playoffs.' },
   { question: 'Are spectators allowed?', answer: 'Spectators are welcome and encouraged! Come out, grab some food and drinks, and enjoy the matches.' },
   { question: 'What happens with bad weather?', answer: 'We have an inclement weather / rainout policy. Check our rules page or your TeamLinkt app for updates on any schedule changes.' },
 ];
@@ -78,9 +83,11 @@ const faqItems = [
         </p>
       )}
 
-      {heroRegStatus === 'open' && (
+      {heroRegStatus === 'open' && openRegNextClose && (
         <p class="text-white/70 text-lg mb-8">
-          Registration closes {formatDate(latestClose)}
+          {openRegCloseDatesDiffer
+            ? `First deadline ${formatDate(openRegNextClose)} · Some leagues stay open longer`
+            : `Registration closes ${formatDate(openRegNextClose)}`}
         </p>
       )}
       {heroRegStatus === 'coming-soon' && (
@@ -135,21 +142,7 @@ const faqItems = [
   <!-- League Cards -->
   <section class="pb-16 md:pb-24">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-8">
-        <LeagueCard
-          day="Monday"
-          format="3v3 Coed"
-          price="$65"
-          description="3v3 coed format. Schedule, game times, and final format determined by registration. May run as double-header format."
-          registrationKnown={registrationKnown}
-          regEntries={regByDay['monday']}
-          details={[
-            '8 week season: 7 regular season weeks plus 1 playoff week',
-            'May run as double-header format depending on signups',
-            'Form your own team or join as individual',
-            'All skill levels welcome',
-          ]}
-        />
+      <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
         <LeagueCard
           day="Tuesday"
           format="4v4"
@@ -159,8 +152,8 @@ const faqItems = [
           registrationKnown={registrationKnown}
           regEntries={regByDay['tuesday']}
           details={[
-            '6 regular season games over 7 weeks plus a division-specific playoff night',
-            '1 game weekly plus 1 bye week',
+            '6 regular season games over 6 weeks plus a division-specific playoff night',
+            '1 game every week, no bye weeks',
             'Game times: 6:30, 7:30, or 8:30 PM',
             'Form your own team or join as individual',
             'All skill levels welcome',
@@ -178,7 +171,7 @@ const faqItems = [
           details={[
             'Individual sign-ups. Teams re-drafted each week',
             'Free prize raffles between games — checking in is your entry',
-            '7 weekly sessions plus playoffs',
+            '6 weekly sessions plus playoffs',
             'Approximately 2-hour sessions',
             'All skill levels welcome',
           ]}
@@ -192,8 +185,8 @@ const faqItems = [
           registrationKnown={registrationKnown}
           regEntries={regByDay['thursday']}
           details={[
-            '6 regular season games over 7 weeks plus a division-specific playoff night',
-            '1 game weekly plus 1 bye week',
+            '6 regular season games over 6 weeks plus a division-specific playoff night',
+            '1 game every week, no bye weeks',
             'Game times: 6:30, 7:30, or 8:30 PM',
             'Form your own team or join as individual',
             'All skill levels welcome',
@@ -232,39 +225,7 @@ const faqItems = [
   </section>
 
   <script>
-    import { fetchUpcomingTeamCountsByDivision, fetchUpcomingPlayerCountsByDivision } from '../../lib/teamCounts';
-    import { UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_PLAYER_CAPS_BY_DIVISION } from '../../lib/seasonConfig';
-
-    (async () => {
-      const slots = document.querySelectorAll<HTMLElement>('[data-team-count-division]');
-      if (slots.length === 0) return;
-      try {
-        const [teamCounts, playerCounts] = await Promise.all([
-          fetchUpcomingTeamCountsByDivision(),
-          fetchUpcomingPlayerCountsByDivision(),
-        ]);
-        slots.forEach((el) => {
-          const divId = el.dataset.teamCountDivision;
-          if (!divId) return;
-          const isPlayers = el.dataset.countUnit === 'players';
-          const max = isPlayers ? UPCOMING_PLAYER_CAPS_BY_DIVISION[divId] : UPCOMING_MAX_TEAMS_BY_DIVISION[divId];
-          if (!max) return;
-          const count = isPlayers ? (playerCounts[divId] ?? 0) : (teamCounts[divId] ?? 0);
-          const unit = isPlayers ? 'players' : 'teams';
-          const name = el.dataset.divisionName;
-          const prefix = name ? `${name}: ` : '';
-          const spotsLeft = Math.max(0, max - count);
-          const cappedMsg = isPlayers
-            ? `${prefix}All ${max} player spots taken`
-            : `${prefix}All teams set · Join an existing team or as a free agent`;
-          el.textContent = spotsLeft === 0
-            ? cappedMsg
-            : `${prefix}${count} of ${max} ${unit} · ${spotsLeft} spot${spotsLeft === 1 ? '' : 's'} left`;
-          el.classList.remove('italic', 'opacity-60');
-        });
-      } catch {
-        // Leave placeholders empty on failure.
-      }
-    })();
+    import { renderSpotCounters } from '../../lib/spotsCounter';
+    renderSpotCounters();
   </script>
 </Layout>

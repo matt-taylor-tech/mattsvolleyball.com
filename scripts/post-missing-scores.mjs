@@ -17,16 +17,22 @@ import {
   fetchResults, postToTopic,
 } from './lib/mv.mjs';
 
-// Captains-group topic per division. `live` values get filled in once the
-// real captains group is wired up; `test` values are the Bot Test Group's
-// mirror topics. Keyed by UPCOMING (Summer Redux) division ids.
-// Live topics are in "Matt's Volleyball Captains Chats" (group 116067407);
-// test topics are the Bot Test Group's mirrors.
+// Captains-group topic per division. `live` topics are in "Matt's Volleyball
+// Captains Chats" (group 116067407); `test` topics are the Bot Test Group's
+// mirrors. Keyed by division id, so this map needs the new ids every season.
+// Both the Summer Redux (3058xx) and Fall 2026 (3245xx) ids are listed, so the
+// nudges keep working through the Redux playoffs and into Fall.
 const CAPTAINS_TOPICS = {
+  // ── Summer Redux 2026 ──────────────────────────────────────────────────────
   '305891': { label: 'Tue Competitive', live: '116067429', test: '116089944' }, // Tuesday Comp Captains
   '305890': { label: 'Tue Recreational', live: '116067421', test: '116089938' }, // Tuesday Rec Captains
   '305892': { label: 'Thu Competitive', live: '116067453', test: '116089929' }, // Thursday Comp Captains
   '305893': { label: 'Thu Recreational', live: '116067447', test: '116089959' }, // Thursday Rec Captains
+  // ── Fall 2026 ─────────────────────────────────────────────────────────────
+  '324560': { label: 'Tue Competitive', live: '116067429', test: '116089944' }, // Tuesday Comp Captains
+  '324559': { label: 'Tue Recreational', live: '116067421', test: '116089938' }, // Tuesday Rec Captains
+  '324561': { label: 'Thu Competitive', live: '116067453', test: '116089929' }, // Thursday Comp Captains
+  '324562': { label: 'Thu Recreational', live: '116067447', test: '116089959' }, // Thursday Rec Captains
 };
 
 async function main() {

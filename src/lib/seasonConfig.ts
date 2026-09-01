@@ -2,8 +2,14 @@
 // This is the single place to update when transitioning between seasons.
 //
 // WHAT TO UPDATE when a new season starts:
-//   1. ACTIVE_SEASON_ID / ACTIVE_DIVISIONS for live stats pages
-//   2. UPCOMING_SEASON_ID / UPCOMING_DIVISIONS for registration-focused pages
+//   1. CURRENT_SEASON + CURRENT_DIVISIONS for live stats pages (move both, or
+//      the pages ask the new season for old division ids and come back empty)
+//   2. NEXT_SEASON + UPCOMING_DIVISIONS for registration-focused pages
+//   3. ACTIVE_ROLLOVER_DATE: when the live pages switch from current to next
+//   4. The announcement copy: UPCOMING_REG_OPEN_DATETIME,
+//      UPCOMING_SEASON_START_LABEL, UPCOMING_REGULAR_SEASON_WEEKS
+//   5. The caps at the bottom of this file
+// Then run `npm run check:teamlinkt`. teamlinkt.md has the full runbook.
 //
 // The leagues page registration cards pull live from TeamLinkt automatically
 // (src/lib/registration.ts). Only the schedule, standings, scores, teams,
@@ -12,18 +18,18 @@
 
 // ── Base seasons ──────────────────────────────────────────────────────────────
 const CURRENT_SEASON = {
-  id: '52672',
-  label: 'Summer I 2026',
-};
-
-const NEXT_SEASON = {
   id: '57274',
   label: 'Summer Redux 2026',
 };
 
-const NEXT_NEXT_SEASON = {
-  id: 'TBD', // Will update when Fall season is created in TeamLinkt
+const NEXT_SEASON = {
+  id: '60566',
   label: 'Fall 2026',
+};
+
+const NEXT_NEXT_SEASON = {
+  id: 'TBD', // Will update when the season after Fall is created in TeamLinkt
+  label: 'Next Season', // Generic on purpose: the name after Fall 2026 is not set
 };
 
 const FUTURE_SEASON = {
@@ -31,11 +37,39 @@ const FUTURE_SEASON = {
   label: 'TBD',
 };
 
-// Auto-rollover trigger for live data pages.
+// First game date for the upcoming season. This drives the switch from
+// registration-focused copy to "the season is underway", and it drives the
+// live-data rollover below. Format: 'YYYY-MM-DD HH:MM:SS' (local time).
+export const UPCOMING_SEASON_START_DATETIME = '2026-09-29 00:00:00';
+
+// Display override for the start date, for when the exact first-game date is
+// not fixed yet (e.g. 'the week of July 27'). Leave empty to show the real date.
+const UPCOMING_SEASON_START_LABEL_OVERRIDE = '';
+
+const upcomingStartAt = new Date(UPCOMING_SEASON_START_DATETIME.replace(' ', 'T'));
+const upcomingStartIsValid = !Number.isNaN(upcomingStartAt.getTime());
+
+/** Human-readable start of the upcoming season, e.g. "September 29". */
+export const UPCOMING_SEASON_START_LABEL = UPCOMING_SEASON_START_LABEL_OVERRIDE
+  || (upcomingStartIsValid
+    ? upcomingStartAt.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
+    : '');
+
+// True once the upcoming season's first game day has arrived. The site then
+// stops leading with registration and says the season is underway, even if a
+// late-open league (Wednesday shuffle) is still taking signups.
+export const HAS_UPCOMING_SEASON_STARTED = upcomingStartIsValid && new Date() >= upcomingStartAt;
+
+// Auto-rollover trigger for live data pages (schedule / teams / standings /
+// scores). It fires on the upcoming season's first game day, so the live pages
+// keep showing the current season until its last game, playoffs included. That
+// means there is no playoff end date to guess here.
+// Move this earlier if you want the new season's schedule visible sooner; keep
+// it after the current season's last playoff night either way.
 // Note: for static deployments this takes effect on the next build.
-export const ACTIVE_ROLLOVER_DATE = '2026-07-17 00:00:00'; // Summer I ends with the Thu 7/16 finals; Redux takes over Friday
+export const ACTIVE_ROLLOVER_DATE = UPCOMING_SEASON_START_DATETIME;
 const now = new Date();
-const rolloverAt = new Date(ACTIVE_ROLLOVER_DATE);
+const rolloverAt = new Date(ACTIVE_ROLLOVER_DATE.replace(' ', 'T'));
 export const HAS_ACTIVE_ROLLED_OVER = !Number.isNaN(rolloverAt.getTime()) && now >= rolloverAt;
 
 // ── Active Season (schedule / standings / scores / teams / playoffs) ─────────
@@ -51,12 +85,12 @@ export const UPCOMING_SEASON_LABEL = NEXT_SEASON.label;
 // Once the forms are public, live TeamLinkt data takes over automatically and
 // this becomes inert. Set to '' to disable the announcement.
 // Format: 'YYYY-MM-DD HH:MM:SS' (local time).
-export const UPCOMING_REG_OPEN_DATETIME = '2026-07-06 00:00:00';
+export const UPCOMING_REG_OPEN_DATETIME = '2026-09-04 00:00:00';
 
-// Human-readable start of the upcoming season, shown alongside the coming-soon
-// announcement. Free-form (e.g. "the week of July 27") since the exact first-game
-// date may not be fixed yet. Set to '' to hide.
-export const UPCOMING_SEASON_START_LABEL = 'the week of July 27';
+// Length of the upcoming regular season, in weeks, plus how playoffs run. Used
+// by promo copy on the home and leagues pages so the week count lives in one
+// place. Fall 2026: 6 game weeks, no bye, then a separate playoff week.
+export const UPCOMING_REGULAR_SEASON_WEEKS = 6;
 
 // ── Future Seasons (for promotional display when current closes) ──────────────
 export const NEXT_NEXT_SEASON_LABEL = NEXT_NEXT_SEASON.label;
@@ -74,30 +108,32 @@ export interface DivisionConfig {
 }
 
 const CURRENT_DIVISIONS: DivisionConfig[] = [
-  // ── Monday ───────────────────────────────────────────────────────────────
-  { id: '293497', name: '3v3 Coed',      day: 'Mon', label: 'Mon 3v3 Coed',      court: 'Court 1', hasPlayoffs: true,  playoffTeamCount: 5 },
-  // ── Tuesday ──────────────────────────────────────────────────────────────
-  { id: '280407', name: 'Competitive',  day: 'Tue', label: 'Tue Competitive',  court: 'Court 1', hasPlayoffs: true  },
-  { id: '280406', name: 'Recreational', day: 'Tue', label: 'Tue Recreational', court: 'Court 2', hasPlayoffs: true  },
-  // ── Wednesday ────────────────────────────────────────────────────────────
-  { id: '280410', name: 'Shuffle',      day: 'Wed', label: 'Wed Shuffle',       court: 'Court 1', hasPlayoffs: false },
-  // ── Thursday ─────────────────────────────────────────────────────────────
-  { id: '280408', name: 'Competitive',  day: 'Thu', label: 'Thu Competitive',  court: 'Court 1', hasPlayoffs: true  },
-  { id: '280409', name: 'Recreational', day: 'Thu', label: 'Thu Recreational', court: 'Court 2', hasPlayoffs: true  },
-];
-
-export const UPCOMING_DIVISIONS: DivisionConfig[] = [
+  // Summer Redux 2026. Monday 3v3 was canceled after signups came in short, but
+  // the division still exists in TeamLinkt, so it stays listed here.
   // ── Monday ───────────────────────────────────────────────────────────────
   { id: '305895', name: '3v3 Coed',      day: 'Mon', label: 'Mon 3v3 Coed',      court: 'Court 1', hasPlayoffs: true  },
   // ── Tuesday ──────────────────────────────────────────────────────────────
   { id: '305891', name: 'Competitive',  day: 'Tue', label: 'Tue Competitive',  court: 'Court 1', hasPlayoffs: true  },
   { id: '305890', name: 'Recreational', day: 'Tue', label: 'Tue Recreational', court: 'Court 2', hasPlayoffs: true  },
   // ── Wednesday ────────────────────────────────────────────────────────────
-  // Kept as just "Shuffle": may run 3v3 or 4v4 depending on nightly attendance.
   { id: '305894', name: 'Shuffle',      day: 'Wed', label: 'Wed Shuffle',       court: 'Court 1', hasPlayoffs: false },
   // ── Thursday ─────────────────────────────────────────────────────────────
   { id: '305892', name: 'Competitive',  day: 'Thu', label: 'Thu Competitive',  court: 'Court 1', hasPlayoffs: true  },
   { id: '305893', name: 'Recreational', day: 'Thu', label: 'Thu Recreational', court: 'Court 2', hasPlayoffs: true  },
+];
+
+export const UPCOMING_DIVISIONS: DivisionConfig[] = [
+  // Fall 2026. Monday 3v3 Coed does not run this season, so it is not listed
+  // here. TeamLinkt still holds a Monday division (324563) if it comes back.
+  // ── Tuesday ──────────────────────────────────────────────────────────────
+  { id: '324560', name: 'Competitive',  day: 'Tue', label: 'Tue Competitive',  court: 'Court 1', hasPlayoffs: true  },
+  { id: '324559', name: 'Recreational', day: 'Tue', label: 'Tue Recreational', court: 'Court 2', hasPlayoffs: true  },
+  // ── Wednesday ────────────────────────────────────────────────────────────
+  // Kept as just "Shuffle": may run 3v3 or 4v4 depending on nightly attendance.
+  { id: '324564', name: 'Shuffle',      day: 'Wed', label: 'Wed Shuffle',       court: 'Court 1', hasPlayoffs: false },
+  // ── Thursday ─────────────────────────────────────────────────────────────
+  { id: '324561', name: 'Competitive',  day: 'Thu', label: 'Thu Competitive',  court: 'Court 1', hasPlayoffs: true  },
+  { id: '324562', name: 'Recreational', day: 'Thu', label: 'Thu Recreational', court: 'Court 2', hasPlayoffs: true  },
 ];
 
 // Active aliases used by live stats pages (Schedule / Teams / Standings / Scores / Playoffs)
@@ -160,22 +196,28 @@ export const UPCOMING_TEAMS_API_URL = `${API_BASE}/getTeams/${ORG_ID}/${UPCOMING
 // and adds playoff games to the schedule.
 // PLAYOFF_ID is the TeamLinkt playoff bracket ID — find it in the "Playoffs"
 // schedule type dropdown on the TeamLinkt Schedule page.
-export const PLAYOFFS_ACTIVE = false; // Summer I closed; set true when Redux playoffs are built
-export const PLAYOFF_ID = '15272'; // stale (Summer I bracket); update when Redux playoffs exist
+export const PLAYOFFS_ACTIVE = false; // set true when Redux (then Fall) playoff brackets are built
+export const PLAYOFF_ID = ''; // set to the TeamLinkt bracket id when playoffs are built
 
-// Max teams per division for the upcoming season. Keyed by division id.
+// Max teams per NIGHT for the upcoming season, keyed by day. Fall 2026 caps
+// Tuesday and Thursday at 12 teams each. The split between the Recreational and
+// Competitive divisions is not fixed: it follows signups. So the cap and the
+// "spots left" counter work at the night level, and the site adds up the teams
+// in both of that night's divisions.
 // Wednesday uses a player cap instead - see UPCOMING_PLAYER_CAPS_BY_DIVISION.
-export const UPCOMING_MAX_TEAMS_BY_DIVISION: Record<string, number> = {
-  '305895': 12, // Mon 3v3 Coed
-  '305891': 8,  // Tue Competitive
-  '305890': 6,  // Tue Recreational
-  '305892': 8,  // Thu Competitive (reduced from 10 - dropped the 9:30 slot)
-  '305893': 6,  // Thu Recreational
+export const UPCOMING_MAX_TEAMS_BY_NIGHT: Record<string, number> = {
+  Tue: 12, // 6 games over 3 time slots on 2 courts
+  Thu: 12,
 };
+
+// Max teams for a single division, keyed by division id. Use this only when one
+// division has its own hard cap. Fall 2026 caps by night instead, so this is
+// empty. A night cap wins if both are set for the same division.
+export const UPCOMING_MAX_TEAMS_BY_DIVISION: Record<string, number> = {};
 
 // Max players per division for the upcoming season. Used for shuffle-style
 // leagues where individuals sign up to a single roster (One Big Happy Team)
 // rather than registering as teams.
 export const UPCOMING_PLAYER_CAPS_BY_DIVISION: Record<string, number> = {
-  '305894': 28, // Wed Shuffle: One Big Happy Team
+  '324564': 30, // Wed Shuffle: One Big Happy Team
 };

@@ -80,7 +80,24 @@ Season start/end dates are scraped from the TeamLinkt registration detail page (
 ### Season transitions
 
 - When you open registration for the **next** season on TeamLinkt (e.g., Summer while Spring is still playing), the site automatically switches to promoting the new season because it always picks the newest season.
-- No manual content changes are needed - just manage registration windows in TeamLinkt and the site updates on the next build.
+- Registration windows and close dates come from TeamLinkt, so no manual content changes are needed for those.
+- Before TeamLinkt publishes the forms there is nothing to scrape. For that window, `src/lib/seasonConfig.ts` carries the announcement: `UPCOMING_REG_OPEN_DATETIME`, `UPCOMING_SEASON_START_LABEL`, and `UPCOMING_REGULAR_SEASON_WEEKS`. Live data takes over on its own once the forms go public.
+- `UPCOMING_SEASON_START_DATETIME` is the new season's first game day. On that date the home and leagues pages switch from "registration" to "the season is underway", the home page moves the schedule above the league nights, and the live data pages roll over to the new season. Because the rollover waits for the new season's first game, the old season stays up through its own playoffs and there is no playoff end date to guess.
+- Season ids, division ids, and the roster caps do need a manual update each season. [teamlinkt.md](teamlinkt.md) is the runbook, and `npm run check:teamlinkt` validates the result.
+
+### Roster caps and the "spots left" counters
+
+The home and leagues pages show a live "X of Y teams · Z spots left" line under each night. `src/lib/spotsCounter.ts` fills these in from TeamLinkt in the browser, so a slow or failed call never blocks the page. `src/components/SpotsCounter.astro` renders the placeholders.
+
+Three cap shapes are supported, all in `src/lib/seasonConfig.ts`:
+
+| Cap | Meaning | Counter |
+| --- | --- | --- |
+| `UPCOMING_MAX_TEAMS_BY_NIGHT` | A whole night shares one team cap, and the split between that night's divisions follows signups | One line per night, adding up both divisions |
+| `UPCOMING_MAX_TEAMS_BY_DIVISION` | One division has its own team cap | One line per division |
+| `UPCOMING_PLAYER_CAPS_BY_DIVISION` | Shuffle-style leagues where individuals fill one roster | One line per division, counted in players |
+
+Fall 2026 caps Tuesday and Thursday by night (12 teams each) and Wednesday by players (30). The GroupMe registration digest (`npm run check:registration`) reads the same maps, so its report matches the site.
 
 ### Where `regStatus` is used
 
