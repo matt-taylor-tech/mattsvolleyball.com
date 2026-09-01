@@ -6,7 +6,7 @@ import { getRegistrationData, formatDate, formatFullDate, getDayFromName } from 
 import { UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL } from '../../lib/seasonConfig';
 import type { RegCard } from '../../lib/registration';
 
-const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose, regCards, hasOpenRegistration, openRegUrl, openRegIsExternal, openRegDay, registrationKnown } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
+const { seasonLabel, regStatus, seasonDates, earliestOpen, openRegNextClose, openRegCloseDatesDiffer, regCards, hasOpenRegistration, openRegUrl, openRegIsExternal, openRegDay, registrationKnown } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
 const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
 
 // Hero status, mirroring the homepage: follow live TeamLinkt data when the
@@ -78,9 +78,11 @@ const faqItems = [
         </p>
       )}
 
-      {heroRegStatus === 'open' && (
+      {heroRegStatus === 'open' && openRegNextClose && (
         <p class="text-white/70 text-lg mb-8">
-          Registration closes {formatDate(latestClose)}
+          {openRegCloseDatesDiffer
+            ? `First deadline ${formatDate(openRegNextClose)} · Some leagues stay open longer`
+            : `Registration closes ${formatDate(openRegNextClose)}`}
         </p>
       )}
       {heroRegStatus === 'coming-soon' && (

@@ -8,7 +8,7 @@ import { UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, 
 import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart, Volleyball } from 'lucide-astro';
 
 const champions = await getChampions();
-const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose, hasOpenRegistration, openRegUrl, openRegIsExternal, openRegDay } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
+const { seasonLabel, regStatus, seasonDates, earliestOpen, hasOpenRegistration, openRegUrl, openRegIsExternal, openRegDay, openRegNextClose, openRegAllOpen, openRegCloseDatesDiffer } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
 const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
 // Hero priority:
 //  1. Live TeamLinkt data present (seasonLabel set) -> follow the upcoming
@@ -31,10 +31,18 @@ const heroSeasonLabel = seasonLabel || (showComingSoon ? UPCOMING_SEASON_LABEL :
 const heroEarliestOpen = seasonLabel ? earliestOpen : showComingSoon ? UPCOMING_REG_OPEN_DATETIME : earliestOpen;
 const heroRegisterUrl = REG_PAGE;
 const heroRegisterTarget = '_blank';
+// Close-date copy follows the forms that are open right now. Wednesday shuffle
+// stays open a few weeks into the season, so once the other nights close, the
+// line has to name Wednesday's deadline, not the Tuesday/Thursday one.
+const nextCloseText = openRegNextClose ? formatDate(openRegNextClose) : '';
 const heroPromoText = hasOpenRegistration
-  ? (latestClose
-      ? `Registration closes ${formatDate(latestClose)} · Sign up while all forms are open.`
-      : 'Sign up while all forms are open.')
+  ? (openRegAllOpen
+      ? (openRegCloseDatesDiffer
+          ? `Sign up now · First deadline ${nextCloseText}.`
+          : `Registration closes ${nextCloseText} · Sign up while all forms are open.`)
+      : openRegDay
+        ? `${openRegDay} registration is still open · Closes ${nextCloseText}.`
+        : `Some leagues are still open · Next deadline ${nextCloseText}.`)
   : heroRegStatus === 'open' && heroSeasonLabel
   ? `${heroSeasonLabel} registration is open now.`
   : heroRegStatus === 'coming-soon' && heroSeasonLabel

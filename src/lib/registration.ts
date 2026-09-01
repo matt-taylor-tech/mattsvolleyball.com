@@ -44,6 +44,17 @@ export interface RegistrationData {
   openRegIsExternal: boolean;
   // Day name when exactly one division is open (e.g. "Wednesday"), else ''.
   openRegDay: string;
+  // Close date of the NEXT deadline among the forms that are open right now,
+  // as a raw datetime string ('' when nothing is open). Use this for any
+  // "registration closes" copy. Do not use latestClose: that one follows the
+  // Thursday leagues, so it is already in the past once the season starts and
+  // only a late-open league (Wednesday shuffle) is still taking signups.
+  openRegNextClose: string;
+  // True when every listed form is open right now.
+  openRegAllOpen: boolean;
+  // True when the open forms do not all close on the same day, so a single
+  // "registration closes X" line would understate the later ones.
+  openRegCloseDatesDiffer: boolean;
   // True when TeamLinkt was reached and parsed successfully - even with zero
   // forms listed (registration genuinely closed). False only on fetch/parse
   // failure, where callers should avoid asserting a closed state.
@@ -100,6 +111,30 @@ function getDivisionLabel(name: string, groupName: string): string {
   return remainder || name;
 }
 
+/**
+ * Summarises the forms that are open right now: the next deadline, whether all
+ * forms are open, and whether they share a close date.
+ *
+ * Kept separate from the fetch so it can be tested on its own. Wednesday
+ * shuffle stays open a few weeks into the season, so "registration closes"
+ * copy has to follow the open forms, not the season-wide latest close.
+ */
+export function summariseOpenRegistration(
+  forms: { closeDatetime: string; isOpen: boolean }[],
+): { openRegNextClose: string; openRegAllOpen: boolean; openRegCloseDatesDiffer: boolean } {
+  const open = forms.filter((f) => f.isOpen);
+  if (open.length === 0) {
+    return { openRegNextClose: '', openRegAllOpen: false, openRegCloseDatesDiffer: false };
+  }
+  const closes = open.map((f) => f.closeDatetime).sort();
+  const closeDays = new Set(closes.map((c) => c.slice(0, 10)));
+  return {
+    openRegNextClose: closes[0],
+    openRegAllOpen: open.length === forms.length,
+    openRegCloseDatesDiffer: closeDays.size > 1,
+  };
+}
+
 export async function getRegistrationData(options: RegistrationOptions = {}): Promise<RegistrationData> {
   const fallback: RegistrationData = {
     seasonLabel: '',
@@ -112,6 +147,9 @@ export async function getRegistrationData(options: RegistrationOptions = {}): Pr
     openRegUrl: '/leagues/',
     openRegIsExternal: false,
     openRegDay: '',
+    openRegNextClose: '',
+    openRegAllOpen: false,
+    openRegCloseDatesDiffer: false,
     registrationKnown: false,
   };
 
@@ -239,6 +277,14 @@ export async function getRegistrationData(options: RegistrationOptions = {}): Pr
     const openRegDay = openCards.length === 1
       ? capitalize(getDayFromName(openCards[0].name))
       : '';
+    const openRegSummary = summariseOpenRegistration(
+      entries.map((e) => {
+        const reg = e.AssociationRegistration;
+        const open = new Date(reg.open_datetime.replace(' ', 'T'));
+        const close = new Date(reg.close_datetime.replace(' ', 'T'));
+        return { closeDatetime: reg.close_datetime, isOpen: now >= open && now <= close };
+      }),
+    );
 
     return {
       seasonLabel: season.label,
@@ -251,6 +297,7 @@ export async function getRegistrationData(options: RegistrationOptions = {}): Pr
       openRegUrl,
       openRegIsExternal,
       openRegDay,
+      ...openRegSummary,
       registrationKnown: true,
     };
   } catch {
