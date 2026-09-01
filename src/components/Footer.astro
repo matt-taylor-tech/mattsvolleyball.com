@@ -1,5 +1,6 @@
 ---
 import { GROUPME_MAIN_URL, GROUPME_ICON_PATH } from '../lib/community';
+import { REGISTRATION_PAGE_URL } from '../lib/seasonConfig';
 
 interface Props {
   regStatus: 'open' | 'coming-soon' | 'in-progress' | 'closed';
@@ -57,7 +58,7 @@ const socialLinks = [
           </li>
           {regStatus === 'open' ? (
             <li>
-              <a href="https://app.teamlinkt.com/register/find/mattsvolleyball" target="_blank" rel="noopener noreferrer" class="text-sand-300 hover:text-white transition-colors text-sm font-semibold">
+              <a href={REGISTRATION_PAGE_URL} target="_blank" rel="noopener noreferrer" class="text-sand-300 hover:text-white transition-colors text-sm font-semibold">
                 Register Now →
               </a>
             </li>

@@ -1,3 +1,5 @@
+import { REGISTRATION_SCRAPE_URLS } from './seasonConfig';
+
 export interface RegEntry {
   AssociationRegistration: {
     id: number;
@@ -154,16 +156,29 @@ export async function getRegistrationData(options: RegistrationOptions = {}): Pr
   };
 
   try {
-    const res = await fetch('https://app.teamlinkt.com/register/find/mattsvolleyball', {
-      headers: { 'User-Agent': 'MattsVolleyball/1.0' },
-    });
-    const html = await res.text();
-    // TeamLinkt serves an object keyed by season id when forms exist, and a
-    // bare `[]` when none are available (all registration closed).
-    const match = html.match(/season_registration_grouped\s*=\s*(\{[\s\S]*?\}|\[\]);/);
-    if (!match) return fallback;
-
-    const data: Record<string, SeasonGroup> = JSON.parse(match[1]);
+    // TeamLinkt's find page lists only the forms that are open right now, so
+    // before registration opens it reports nothing. A page loaded with a `cid`
+    // lists the whole season instead. Try those pages in order and take the
+    // first one that actually names a form. See REGISTRATION_SCRAPE_URLS.
+    let data: Record<string, SeasonGroup> | null = null;
+    let parsedAny = false;
+    for (const url of REGISTRATION_SCRAPE_URLS) {
+      const res = await fetch(url, { headers: { 'User-Agent': 'MattsVolleyball/1.0' } });
+      if (!res.ok) continue;
+      const html = await res.text();
+      // TeamLinkt serves an object keyed by season id when forms exist, and a
+      // bare `[]` when none are listed.
+      const match = html.match(/season_registration_grouped\s*=\s*(\{[\s\S]*?\}|\[\]);/);
+      if (!match) continue;
+      parsedAny = true;
+      const parsed: Record<string, SeasonGroup> | unknown[] = JSON.parse(match[1]);
+      if (!Array.isArray(parsed) && Object.keys(parsed).length > 0) {
+        data = parsed as Record<string, SeasonGroup>;
+        break;
+      }
+    }
+    // Reached TeamLinkt but no page listed a form: registration really is closed.
+    if (!data) return parsedAny ? { ...fallback, registrationKnown: true } : fallback;
     const seasonIds = Object.keys(data).sort((a, b) => Number(b) - Number(a));
     if (seasonIds.length === 0) return { ...fallback, registrationKnown: true };
 

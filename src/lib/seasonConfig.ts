@@ -20,11 +20,15 @@
 const CURRENT_SEASON = {
   id: '57274',
   label: 'Summer Redux 2026',
+  // Playoff nights, as YYYY-MM-DD. See ACTIVE_PLAYOFF_DATES below for why the
+  // dates are listed by hand instead of read from TeamLinkt.
+  playoffDates: ['2026-09-15', '2026-09-16', '2026-09-17', '2026-09-22', '2026-09-24'],
 };
 
 const NEXT_SEASON = {
   id: '60566',
   label: 'Fall 2026',
+  playoffDates: [] as string[], // Fill in when the Fall playoff nights are set
 };
 
 const NEXT_NEXT_SEASON = {
@@ -85,7 +89,9 @@ export const UPCOMING_SEASON_LABEL = NEXT_SEASON.label;
 // Once the forms are public, live TeamLinkt data takes over automatically and
 // this becomes inert. Set to '' to disable the announcement.
 // Format: 'YYYY-MM-DD HH:MM:SS' (local time).
-export const UPCOMING_REG_OPEN_DATETIME = '2026-09-04 00:00:00';
+// Matches the open date on the TeamLinkt forms. Live data wins once the forms
+// are visible, so this only covers the gap before then.
+export const UPCOMING_REG_OPEN_DATETIME = '2026-09-03 00:00:00';
 
 // Length of the upcoming regular season, in weeks, plus how playoffs run. Used
 // by promo copy on the home and leagues pages so the week count lives in one
@@ -183,7 +189,43 @@ export const DAY_FULL_LABEL: Record<string, string> = {
 // ── API URLs ──────────────────────────────────────────────────────────────────
 const ORG_ID = '10757';
 const API_BASE = 'https://app.mattsvolleyball.com/leagues';
-export const REGISTRATION_PAGE_URL = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
+// TeamLinkt registration containers for the upcoming season, one per night.
+// The id is TeamLinkt's association_registration_container_id, which its own
+// links pass as the `cid` query parameter.
+//
+// Why this matters: TeamLinkt's public find page lists only the forms that are
+// open RIGHT NOW. Before registration opens it renders "There are currently no
+// registration forms available", so a visitor sees nothing and the scraper in
+// src/lib/registration.ts finds nothing. Adding any cid makes the page list the
+// whole season's forms with their real open and close dates. Any single cid
+// lists them all; the id only decides which night starts out selected.
+//
+// These ids change every season. Get them from the registration links TeamLinkt
+// generates for each night.
+export const UPCOMING_REG_CONTAINER_IDS: Record<string, string> = {
+  Tue: '77315',
+  Wed: '77316',
+  Thu: '77317',
+};
+
+const REG_FIND_BASE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
+
+/** Where every "Register Now" link on the site should point. */
+export const REGISTRATION_PAGE_URL = UPCOMING_REG_CONTAINER_IDS.Tue
+  ? `${REG_FIND_BASE}?cid=${UPCOMING_REG_CONTAINER_IDS.Tue}`
+  : REG_FIND_BASE;
+
+/** Registration page for one night, for a day key like 'Wed'. */
+export function registrationPageUrlForDay(day: string): string {
+  const cid = UPCOMING_REG_CONTAINER_IDS[day];
+  return cid ? `${REG_FIND_BASE}?cid=${cid}` : REGISTRATION_PAGE_URL;
+}
+
+// Pages the scraper tries in order. The first one that lists any form wins, so
+// the bare page still works if the container ids ever go stale.
+export const REGISTRATION_SCRAPE_URLS: string[] = [
+  ...new Set([REGISTRATION_PAGE_URL, REG_FIND_BASE]),
+];
 
 export const EVENTS_API    = `${API_BASE}/getAllEvents/${ORG_ID}`;
 export const TEAMS_API_URL = `${API_BASE}/getTeams/${ORG_ID}/${ACTIVE_SEASON_ID}`;
@@ -191,13 +233,61 @@ export const STANDINGS_API_URL = `${API_BASE}/getStandings/${ORG_ID}/${ACTIVE_SE
 export const UPCOMING_TEAMS_API_URL = `${API_BASE}/getTeams/${ORG_ID}/${UPCOMING_SEASON_ID}`;
 
 // ── Playoffs ──────────────────────────────────────────────────────────────────
-// Set PLAYOFFS_ACTIVE = true once the regular season is complete and playoff
-// brackets have been created in TeamLinkt. This unlocks the playoff bracket view
-// and adds playoff games to the schedule.
-// PLAYOFF_ID is the TeamLinkt playoff bracket ID — find it in the "Playoffs"
-// schedule type dropdown on the TeamLinkt Schedule page.
-export const PLAYOFFS_ACTIVE = false; // set true when Redux (then Fall) playoff brackets are built
-export const PLAYOFF_ID = ''; // set to the TeamLinkt bracket id when playoffs are built
+// Playoff nights are listed by date on each season above, and everything else
+// is worked out from that list.
+//
+// Why dates and not the API: playoff games are sometimes entered in TeamLinkt as
+// ordinary regular-season games, with no bracket behind them. When that happens
+// nothing in the API marks them as playoffs, so the API cannot be the source of
+// truth. The night itself is the fact we always know in advance.
+//
+// This separates two things the old single flag mixed together:
+//   1. "Is tonight a playoff night?" -> the date list. Always answerable, and it
+//      labels games whichever way they were entered.
+//   2. "Is there a bracket to draw?" -> PLAYOFF_ID. Only true when a real
+//      bracket exists in TeamLinkt.
+export const ACTIVE_PLAYOFF_DATES: string[] = [
+  ...(HAS_ACTIVE_ROLLED_OVER ? NEXT_SEASON.playoffDates : CURRENT_SEASON.playoffDates),
+].sort();
+
+const MONTH_NUMBERS: Record<string, string> = {
+  Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06',
+  Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12',
+};
+
+/**
+ * Normalises a date to 'YYYY-MM-DD'. Accepts TeamLinkt's display format
+ * ('Tue Sep 15, 2026') as well as an ISO date. Returns '' if neither matches.
+ * Deliberately string-based: parsing to a Date would shift the day for a
+ * viewer in another time zone, and these are league dates, not instants.
+ */
+export function toDateKey(value: string): string {
+  const iso = value.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (iso) return iso[1];
+  const parts = value.match(/([A-Z][a-z]{2})\s+(\d{1,2}),\s*(\d{4})/);
+  if (!parts) return '';
+  const month = MONTH_NUMBERS[parts[1]];
+  return month ? `${parts[3]}-${month}-${parts[2].padStart(2, '0')}` : '';
+}
+
+/** True when a date is one of the active season's playoff nights. */
+export function isPlayoffDate(value: string): boolean {
+  const key = toDateKey(value);
+  return key !== '' && ACTIVE_PLAYOFF_DATES.includes(key);
+}
+
+const todayKey = new Date().toLocaleDateString('en-CA');
+
+// True from the first playoff night onward. Stays true after the last one so
+// the finished bracket keeps showing, until the season rolls over.
+export const PLAYOFFS_ACTIVE =
+  ACTIVE_PLAYOFF_DATES.length > 0 && todayKey >= ACTIVE_PLAYOFF_DATES[0];
+
+// The TeamLinkt bracket id, from the "Playoffs" schedule type dropdown on the
+// TeamLinkt Schedule page. Leave empty when playoff games were entered as
+// regular-season games: the schedule still labels them from the dates above,
+// and the bracket page reports that there is no bracket to show.
+export const PLAYOFF_ID = '';
 
 // Max teams per NIGHT for the upcoming season, keyed by day. Fall 2026 caps
 // Tuesday and Thursday at 12 teams each. The split between the Recreational and

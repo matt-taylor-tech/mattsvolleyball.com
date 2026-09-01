@@ -90,7 +90,12 @@ export async function loadConfig() {
   const rolloverAt = new Date(rolloverDate);
   const hasRolledOver = !Number.isNaN(rolloverAt.getTime()) && new Date() >= rolloverAt;
 
-  const playoffsActive = /export const PLAYOFFS_ACTIVE = true/.test(source) && !hasRolledOver;
+  // Playoff nights are listed by date on each season in seasonConfig.ts, and
+  // PLAYOFFS_ACTIVE is worked out from them. Mirror that here rather than
+  // looking for a boolean that no longer exists.
+  const playoffDates = extractPlayoffDates(source, hasRolledOver);
+  const todayKey = new Date().toLocaleDateString('en-CA', { timeZone: TIME_ZONE });
+  const playoffsActive = playoffDates.length > 0 && todayKey >= playoffDates[0] && !hasRolledOver;
   const playoffId = source.match(/export const PLAYOFF_ID = '([^']*)'/)?.[1] ?? '';
 
   const allDivisions = hasRolledOver ? upcomingDivisions : currentDivisions;
@@ -100,7 +105,15 @@ export async function loadConfig() {
   }
 
   const divisions = allDivisions.filter((d) => !DISABLED_DAYS.has(d.day));
-  return { seasonId, divisions, playoffsActive, playoffId };
+  return { seasonId, divisions, playoffsActive, playoffId, playoffDates };
+}
+
+/** Playoff nights (YYYY-MM-DD, sorted) for whichever season is active. */
+function extractPlayoffDates(source, hasRolledOver) {
+  const seasonName = hasRolledOver ? 'NEXT_SEASON' : 'CURRENT_SEASON';
+  const block = source.match(new RegExp(`const ${seasonName} = \\{([\\s\\S]*?)\\};`))?.[1] ?? '';
+  const list = block.match(/playoffDates:\s*\[([^\]]*)\]/)?.[1] ?? '';
+  return [...list.matchAll(/'(\d{4}-\d{2}-\d{2})'/g)].map((m) => m[1]).sort();
 }
 
 /**

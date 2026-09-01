@@ -1,7 +1,7 @@
 ---
 import type { RegCard } from '../lib/registration';
 import SpotsCounter from './SpotsCounter.astro';
-import { UPCOMING_DIVISIONS, UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_MAX_TEAMS_BY_NIGHT, UPCOMING_PLAYER_CAPS_BY_DIVISION, UPCOMING_REG_OPEN_DATETIME } from '../lib/seasonConfig';
+import { UPCOMING_DIVISIONS, UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_MAX_TEAMS_BY_NIGHT, UPCOMING_PLAYER_CAPS_BY_DIVISION, UPCOMING_REG_OPEN_DATETIME, REGISTRATION_PAGE_URL } from '../lib/seasonConfig';
 import { formatFullDate } from '../lib/registration';
 
 interface Props {
@@ -17,7 +17,7 @@ interface Props {
   regEntries?: RegCard[];
 }
 
-const { day, format, description, details, highlight, price, registrationUrl = 'https://app.teamlinkt.com/register/find/mattsvolleyball', registrationKnown = false, link, regEntries } = Astro.props;
+const { day, format, description, details, highlight, price, registrationUrl = REGISTRATION_PAGE_URL, registrationKnown = false, link, regEntries } = Astro.props;
 const dayKey = day.slice(0, 3);
 const dayDivisions = UPCOMING_DIVISIONS.filter(
   (d) => d.day === dayKey && (

@@ -46,7 +46,12 @@ async function updateRegistrationCTA() {
       });
     };
 
-    const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
+    // Keep in sync with REGISTRATION_PAGE_URL in src/lib/seasonConfig.ts. The
+    // cid matters: without it TeamLinkt's find page tells visitors there are no
+    // registration forms available. This file is served as-is, so it cannot
+    // import the config.
+    const REG_PAGE = data.registrationPageUrl
+      || 'https://app.teamlinkt.com/register/find/mattsvolleyball?cid=77315';
 
     const updateHomeHero = () => {
       const heroSection = document.querySelector('[data-hero-no-update]');

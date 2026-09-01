@@ -8,6 +8,7 @@
 import { getRegistrationData } from '../../src/lib/registration';
 import {
   NEXT_NEXT_SEASON_LABEL, UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME,
+  REGISTRATION_PAGE_URL,
 } from '../../src/lib/seasonConfig';
 
 export const onRequestGet: PagesFunction = async () => {
@@ -40,6 +41,8 @@ export const onRequestGet: PagesFunction = async () => {
         earliestOpen,
         latestClose,
         nextNextSeasonLabel: NEXT_NEXT_SEASON_LABEL,
+        // So the client script never has to hardcode the cid-bearing URL.
+        registrationPageUrl: REGISTRATION_PAGE_URL,
         hasOpenRegistration,
         openRegUrl,
         openRegIsExternal,

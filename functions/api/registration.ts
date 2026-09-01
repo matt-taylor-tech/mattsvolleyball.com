@@ -1,6 +1,9 @@
+import { REGISTRATION_SCRAPE_URLS } from '../../src/lib/seasonConfig';
+
 export const onRequestGet: PagesFunction = async () => {
   try {
-    const res = await fetch('https://app.teamlinkt.com/register/find/mattsvolleyball', {
+    // Uses the same cid-bearing page as src/lib/registration.ts. See that file.
+    const res = await fetch(REGISTRATION_SCRAPE_URLS[0], {
       headers: { 'User-Agent': 'MattsVolleyball/1.0' },
     });
     const html = await res.text();

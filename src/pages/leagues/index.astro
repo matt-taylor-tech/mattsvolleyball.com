@@ -3,11 +3,11 @@ import Layout from '../../layouts/Layout.astro';
 import LeagueCard from '../../components/LeagueCard.astro';
 import FAQAccordion from '../../components/FAQAccordion.astro';
 import { getRegistrationData, formatDate, formatFullDate, getDayFromName } from '../../lib/registration';
-import { UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL, HAS_UPCOMING_SEASON_STARTED } from '../../lib/seasonConfig';
+import { REGISTRATION_PAGE_URL, UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL, HAS_UPCOMING_SEASON_STARTED } from '../../lib/seasonConfig';
 import type { RegCard } from '../../lib/registration';
 
 const { seasonLabel, regStatus, seasonDates, earliestOpen, openRegNextClose, openRegCloseDatesDiffer, regCards, hasOpenRegistration, openRegUrl, openRegIsExternal, openRegDay, registrationKnown } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
-const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
+const REG_PAGE = REGISTRATION_PAGE_URL;
 
 // Hero status, mirroring the homepage: the season's first game day wins, then
 // live TeamLinkt data when the upcoming season's forms are public, then a

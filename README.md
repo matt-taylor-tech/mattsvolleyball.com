@@ -83,7 +83,9 @@ Season start/end dates are scraped from the TeamLinkt registration detail page (
 - Registration windows and close dates come from TeamLinkt, so no manual content changes are needed for those.
 - Before TeamLinkt publishes the forms there is nothing to scrape. For that window, `src/lib/seasonConfig.ts` carries the announcement: `UPCOMING_REG_OPEN_DATETIME`, `UPCOMING_SEASON_START_LABEL`, and `UPCOMING_REGULAR_SEASON_WEEKS`. Live data takes over on its own once the forms go public.
 - `UPCOMING_SEASON_START_DATETIME` is the new season's first game day. On that date the home and leagues pages switch from "registration" to "the season is underway", the home page moves the schedule above the league nights, and the live data pages roll over to the new season. Because the rollover waits for the new season's first game, the old season stays up through its own playoffs and there is no playoff end date to guess.
-- Season ids, division ids, and the roster caps do need a manual update each season. [teamlinkt.md](teamlinkt.md) is the runbook, and `npm run check:teamlinkt` validates the result.
+- Playoff nights are listed by date on each season (`playoffDates`), because playoff games are sometimes entered in TeamLinkt as regular-season games and nothing in the API marks them. Games on those dates are labelled PLAYOFFS whichever way they were entered, and `PLAYOFFS_ACTIVE` follows the list, so there is no flag to remember.
+- Registration forms are read through a `cid` link. TeamLinkt's bare find page lists only forms that are open right now, so before registration opens both the site and its visitors see nothing. See [teamlinkt.md](teamlinkt.md).
+- Season ids, division ids, playoff dates, registration container ids, and the roster caps do need a manual update each season. [teamlinkt.md](teamlinkt.md) is the runbook, and `npm run check:teamlinkt` validates the result.
 
 ### Roster caps and the "spots left" counters
 

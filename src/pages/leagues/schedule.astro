@@ -121,7 +121,7 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
   import {
     DIVISION_IDS, DIVISIONS_BY_DAY, DAY_FOR_DIVISION, DIVISION_NAME,
     EVENTS_API, TEAMS_API_URL, ACTIVE_SEASON_ID,
-    PLAYOFFS_ACTIVE, PLAYOFF_ID,
+    PLAYOFFS_ACTIVE, PLAYOFF_ID, isPlayoffDate,
   } from '../../lib/seasonConfig';
 
   const API_URL = EVENTS_API;
@@ -288,7 +288,12 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
       Promise.all(DIVISION_IDS.map(fetchDivision)),
       fetchPlayoffGames(),
     ]);
-    const regular = regularResults.flat().filter((g) => g.timestamp >= startOfTodaySec);
+    // Playoff games are sometimes entered as ordinary regular-season games, so
+    // the bracket endpoint never sees them. The date is what settles it: any
+    // game on a playoff night is a playoff game, however it was entered.
+    const regular = regularResults.flat()
+      .filter((g) => g.timestamp >= startOfTodaySec)
+      .map((g) => (isPlayoffDate(g.date) ? { ...g, isPlayoff: true } : g));
 
     // Deduplicate: if a game appears in both regular and playoff results (same
     // timestamp + home team), keep the playoff copy (which carries isPlayoff=true).
