@@ -1,0 +1,44 @@
+name: Daily site rebuild
+
+# The site is static, so anything that depends on today's date is decided when
+# the site is built, not when someone visits. That covers the registration
+# window opening, the season start switching the home page to "underway", and
+# the live data pages rolling over to the new season. Without a build on the
+# day, the site keeps showing yesterday's answer.
+#
+# This rebuilds once a day so those changes land on their own. It also refreshes
+# the build-time TeamLinkt data (registration cards, champions).
+
+on:
+  schedule:
+    # 05:10 UTC = 1:10 AM EDT, or 12:10 AM EST in winter. Both are AFTER local
+    # midnight, so a change dated "September 29" is never published early.
+    # GitHub cron lag only makes it later, which is safe.
+    - cron: '10 5 * * *'
+  workflow_dispatch:
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ask Cloudflare Pages for a new build
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.CLOUDFLARE_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$DEPLOY_HOOK_URL" ]; then
+            echo "Secret CLOUDFLARE_DEPLOY_HOOK_URL is not set, so there is nothing to trigger."
+            echo "Add it in Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+          status=$(curl --silent --show-error --max-time 30 \
+            --output /tmp/deploy-hook-response.txt \
+            --write-out '%{http_code}' \
+            --request POST "$DEPLOY_HOOK_URL")
+          echo "Cloudflare replied with HTTP $status:"
+          cat /tmp/deploy-hook-response.txt
+          echo
+          if [ "$status" != "200" ]; then
+            echo "The deploy hook failed, so the site was not rebuilt." >&2
+            exit 1
+          fi
+          echo "Build requested. Cloudflare Pages publishes it in a few minutes."
