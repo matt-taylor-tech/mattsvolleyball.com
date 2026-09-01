@@ -80,7 +80,13 @@ Update:
      split between that night's divisions follows signups. Fall 2026 uses this.
    - `UPCOMING_MAX_TEAMS_BY_DIVISION` - one division has its own team cap.
    - `UPCOMING_PLAYER_CAPS_BY_DIVISION` - shuffle-style player cap.
-6. `scripts/post-missing-scores.mjs`: the `CAPTAINS_TOPICS` map is keyed by
+6. `playoffDates` on the season: the playoff nights, as YYYY-MM-DD. Everything
+   playoff-related is worked out from this list, so there is no flag to flip on
+   and off. See "Playoffs" below.
+7. `UPCOMING_REG_CONTAINER_IDS`: the `cid` value from each night's TeamLinkt
+   registration link. Without these the site cannot see the forms before they
+   open. See "Registration links" below.
+8. `scripts/post-missing-scores.mjs`: the `CAPTAINS_TOPICS` map is keyed by
    division id, so add the new season's ids there too.
 
 Run `npm run check:teamlinkt` after any change here. It confirms both seasons and
@@ -100,8 +106,48 @@ This validates configured season/division IDs against TeamLinkt dropdowns and en
 
 ## Auto Rollover
 
-- `src/lib/seasonConfig.ts` includes `ACTIVE_ROLLOVER_DATE`.
-- After this date, active live-data pages promote `NEXT_SEASON` to active on the next build.
+- `ACTIVE_ROLLOVER_DATE` is `UPCOMING_SEASON_START_DATETIME`, the new season's
+  first game day. After it, the live-data pages promote `NEXT_SEASON` on the next
+  build. The current season therefore keeps its schedule and standings through
+  its own playoffs.
+
+## Playoffs
+
+Playoff games are sometimes entered in TeamLinkt as ordinary regular-season
+games, with no bracket behind them. Nothing in the API marks those as playoffs,
+so the API cannot be the source of truth. The date is, and it is known ahead of
+time. List the playoff nights on the season:
+
+```ts
+playoffDates: ['2026-09-15', '2026-09-16', '2026-09-17', '2026-09-22', '2026-09-24'],
+```
+
+From that list:
+
+- Any game on one of those nights is labelled PLAYOFFS on the schedule, whichever
+  way it was entered, and the bye line for that night is hidden.
+- `PLAYOFFS_ACTIVE` becomes true on the first playoff night and stays true until
+  the season rolls over, so a finished bracket keeps showing.
+- The GroupMe bots read the same list.
+
+`PLAYOFF_ID` stays separate and manual. It is the TeamLinkt bracket id from the
+"Playoffs" schedule type dropdown, and it answers a different question: whether
+there is a real bracket to draw. Leave it empty when playoff games were entered
+as regular-season games. The schedule still labels them; the bracket page just
+reports that there is no bracket.
+
+## Registration links
+
+TeamLinkt's public find page lists only the forms that are open right now. Before
+registration opens it says "There are currently no registration forms available",
+which means the scraper sees nothing and a visitor clicking Register Now sees
+nothing. A find page loaded with a `cid` lists the whole season instead.
+
+`cid` is TeamLinkt's `association_registration_container_id`, one per night. Take
+it from the registration link TeamLinkt generates for each night and put it in
+`UPCOMING_REG_CONTAINER_IDS`. Any single cid lists every form; the id only decides
+which night starts out selected. The scraper tries the cid page first and falls
+back to the bare page.
 
 ## Notes
 
