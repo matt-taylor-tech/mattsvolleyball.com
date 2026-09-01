@@ -1,4 +1,5 @@
 ---
+import { REGISTRATION_PAGE_URL } from '../lib/seasonConfig';
 interface Props {
   regStatus: 'open' | 'coming-soon' | 'in-progress' | 'closed';
   hasOpenRegistration?: boolean;
@@ -7,7 +8,7 @@ interface Props {
 }
 
 const { regStatus, hasOpenRegistration = false, openRegUrl = '/leagues/', openRegIsExternal = false } = Astro.props;
-const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
+const REG_PAGE = REGISTRATION_PAGE_URL;
 // Show a "Sign Up" CTA whenever registration is open - including a late-open
 // league during an in-progress season. Falls back to "View Leagues" otherwise.
 const showSignUp = regStatus === 'open' || hasOpenRegistration;

@@ -1,4 +1,5 @@
 ---
+import { REGISTRATION_PAGE_URL } from '../lib/seasonConfig';
 import Layout from '../layouts/Layout.astro';
 import GalleryGrid from '../components/GalleryGrid.astro';
 ---
@@ -36,7 +37,7 @@ import GalleryGrid from '../components/GalleryGrid.astro';
         Join a league and make some memories on the sand.
       </p>
       <a
-        href="https://app.teamlinkt.com/register/find/mattsvolleyball"
+        href={REGISTRATION_PAGE_URL}
         target="_blank"
         rel="noopener noreferrer"
         class="btn-primary"

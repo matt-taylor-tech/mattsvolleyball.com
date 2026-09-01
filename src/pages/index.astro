@@ -5,13 +5,13 @@ import UpcomingGames from '../components/UpcomingGames.astro';
 import FindYourNight from '../components/FindYourNight.astro';
 import { getChampions } from '../lib/champions';
 import { getRegistrationData, formatDate, formatFullDate } from '../lib/registration';
-import { UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL, UPCOMING_REGULAR_SEASON_WEEKS, HAS_UPCOMING_SEASON_STARTED, NEXT_NEXT_SEASON_LABEL, ACTIVE_SEASON_LABEL } from '../lib/seasonConfig';
+import { REGISTRATION_PAGE_URL, UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL, UPCOMING_REGULAR_SEASON_WEEKS, HAS_UPCOMING_SEASON_STARTED, NEXT_NEXT_SEASON_LABEL, ACTIVE_SEASON_LABEL } from '../lib/seasonConfig';
 import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart, Volleyball } from 'lucide-astro';
 import { GROUPME_MAIN_URL, GROUPME_ICON_PATH } from '../lib/community';
 
 const champions = await getChampions();
 const { seasonLabel, regStatus, seasonDates, earliestOpen, hasOpenRegistration, openRegUrl, openRegIsExternal, openRegDay, openRegNextClose, openRegAllOpen, openRegCloseDatesDiffer } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
-const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
+const REG_PAGE = REGISTRATION_PAGE_URL;
 // Hero priority:
 //  1. The upcoming season's first game day has arrived -> it is underway. This
 //     wins over live TeamLinkt data, which can still call the season 'open'
@@ -623,7 +623,7 @@ const heroDatesText = HAS_UPCOMING_SEASON_STARTED
         Sign up now and serve up some excitement with us.
       </p>
       <a
-        href="https://app.teamlinkt.com/register/find/mattsvolleyball"
+        href={REGISTRATION_PAGE_URL}
         target="_blank"
         rel="noopener noreferrer"
         class="btn-primary text-xl py-4 px-12"

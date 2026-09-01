@@ -17,7 +17,9 @@ import {
   loadUpcomingConfig, postForm, postToTopic,
 } from './lib/mv.mjs';
 
-const REGISTER_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
+// Keep in sync with REGISTRATION_PAGE_URL in src/lib/seasonConfig.ts. The cid
+// matters: without it TeamLinkt's find page says no forms are available.
+const REGISTER_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball?cid=77315';
 
 // ── Registration window (live TeamLinkt scrape) ───────────────────────────────
 

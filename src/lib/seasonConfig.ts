@@ -85,7 +85,9 @@ export const UPCOMING_SEASON_LABEL = NEXT_SEASON.label;
 // Once the forms are public, live TeamLinkt data takes over automatically and
 // this becomes inert. Set to '' to disable the announcement.
 // Format: 'YYYY-MM-DD HH:MM:SS' (local time).
-export const UPCOMING_REG_OPEN_DATETIME = '2026-09-04 00:00:00';
+// Matches the open date on the TeamLinkt forms. Live data wins once the forms
+// are visible, so this only covers the gap before then.
+export const UPCOMING_REG_OPEN_DATETIME = '2026-09-03 00:00:00';
 
 // Length of the upcoming regular season, in weeks, plus how playoffs run. Used
 // by promo copy on the home and leagues pages so the week count lives in one
@@ -183,7 +185,43 @@ export const DAY_FULL_LABEL: Record<string, string> = {
 // ── API URLs ──────────────────────────────────────────────────────────────────
 const ORG_ID = '10757';
 const API_BASE = 'https://app.mattsvolleyball.com/leagues';
-export const REGISTRATION_PAGE_URL = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
+// TeamLinkt registration containers for the upcoming season, one per night.
+// The id is TeamLinkt's association_registration_container_id, which its own
+// links pass as the `cid` query parameter.
+//
+// Why this matters: TeamLinkt's public find page lists only the forms that are
+// open RIGHT NOW. Before registration opens it renders "There are currently no
+// registration forms available", so a visitor sees nothing and the scraper in
+// src/lib/registration.ts finds nothing. Adding any cid makes the page list the
+// whole season's forms with their real open and close dates. Any single cid
+// lists them all; the id only decides which night starts out selected.
+//
+// These ids change every season. Get them from the registration links TeamLinkt
+// generates for each night.
+export const UPCOMING_REG_CONTAINER_IDS: Record<string, string> = {
+  Tue: '77315',
+  Wed: '77316',
+  Thu: '77317',
+};
+
+const REG_FIND_BASE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
+
+/** Where every "Register Now" link on the site should point. */
+export const REGISTRATION_PAGE_URL = UPCOMING_REG_CONTAINER_IDS.Tue
+  ? `${REG_FIND_BASE}?cid=${UPCOMING_REG_CONTAINER_IDS.Tue}`
+  : REG_FIND_BASE;
+
+/** Registration page for one night, for a day key like 'Wed'. */
+export function registrationPageUrlForDay(day: string): string {
+  const cid = UPCOMING_REG_CONTAINER_IDS[day];
+  return cid ? `${REG_FIND_BASE}?cid=${cid}` : REGISTRATION_PAGE_URL;
+}
+
+// Pages the scraper tries in order. The first one that lists any form wins, so
+// the bare page still works if the container ids ever go stale.
+export const REGISTRATION_SCRAPE_URLS: string[] = [
+  ...new Set([REGISTRATION_PAGE_URL, REG_FIND_BASE]),
+];
 
 export const EVENTS_API    = `${API_BASE}/getAllEvents/${ORG_ID}`;
 export const TEAMS_API_URL = `${API_BASE}/getTeams/${ORG_ID}/${ACTIVE_SEASON_ID}`;
