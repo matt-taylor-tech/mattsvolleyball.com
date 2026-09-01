@@ -105,32 +105,58 @@ async function main() {
   const token = process.env.GROUPME_TOKEN;
   if (!token) throw new Error('Missing env var GROUPME_TOKEN');
 
-  const lines = [];
-  const divisionsChecked = []; // {label, count, cap} in stable config order
+  const DAY_FULL = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday' };
+
+  // What gets counted. A night with a shared team cap (Fall 2026: Tue and Thu
+  // at 12 teams) counts as ONE target across both of its divisions, because the
+  // Recreational/Competitive split follows signups. Everything else counts per
+  // division, by player cap or by team cap.
+  const targets = [];
+  const nightsDone = new Set();
   for (const division of config.divisions) {
-    const label = `${division.day} ${division.name}`;
+    const nightCap = config.maxTeamsByNight?.[division.day];
+    if (nightCap) {
+      if (nightsDone.has(division.day)) continue;
+      nightsDone.add(division.day);
+      targets.push({
+        id: `night-${division.day}`,
+        label: `${DAY_FULL[division.day] ?? division.day} leagues`,
+        cap: nightCap,
+        unit: 'teams',
+        divisionIds: config.divisions.filter((d) => d.day === division.day).map((d) => d.id),
+      });
+      continue;
+    }
     const playerCap = config.playerCaps[division.id];
     const teamCap = config.maxTeams[division.id];
-
-    let count, cap, unit;
+    const label = `${division.day} ${division.name}`;
     if (playerCap) {
-      count = await fetchPlayerCount(config.seasonId, division.id);
-      cap = playerCap; unit = 'players';
+      targets.push({ id: division.id, label, cap: playerCap, unit: 'players', divisionIds: [division.id] });
     } else if (teamCap) {
-      count = (await fetchTeams(config.seasonId, division.id)).length;
-      cap = teamCap; unit = 'teams';
-    } else {
-      continue; // no cap configured for this division
+      targets.push({ id: division.id, label, cap: teamCap, unit: 'teams', divisionIds: [division.id] });
     }
+    // No cap configured for this division: nothing to report.
+  }
 
-    const remaining = Math.max(0, cap - count);
+  const lines = [];
+  const divisionsChecked = []; // {label, count, cap} in stable config order
+  for (const target of targets) {
+    const counts = await Promise.all(
+      target.divisionIds.map(async (divId) => (
+        target.unit === 'players'
+          ? await fetchPlayerCount(config.seasonId, divId)
+          : (await fetchTeams(config.seasonId, divId)).length
+      ))
+    );
+    const count = counts.reduce((sum, n) => sum + n, 0);
+    const remaining = Math.max(0, target.cap - count);
     const status = remaining === 0 ? 'FULL' : `${remaining} left`;
-    lines.push(`${label}: ${count}/${cap} ${unit} (${status})`);
-    divisionsChecked.push({ id: division.id, label, count, cap });
+    lines.push(`${target.label}: ${count}/${target.cap} ${target.unit} (${status})`);
+    divisionsChecked.push({ id: target.id, label: target.label, count, cap: target.cap });
   }
 
   if (lines.length === 0) {
-    console.log('No capped divisions configured: nothing to post.');
+    console.log('No capped divisions or nights configured: nothing to post.');
     return;
   }
   console.log(lines.join('\n'));

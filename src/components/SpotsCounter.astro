@@ -1,0 +1,42 @@
+---
+// Placeholder line(s) for the live "X of Y teams · Z spots left" counter.
+// src/lib/spotsCounter.ts fills these in from TeamLinkt after the page loads.
+//
+// A night with a team cap (Tue/Thu in Fall 2026) gets ONE line for the whole
+// night, because the Recreational/Competitive split follows signups. A night
+// without a night cap falls back to one line per capped division.
+import {
+  UPCOMING_DIVISIONS,
+  UPCOMING_MAX_TEAMS_BY_DIVISION,
+  UPCOMING_MAX_TEAMS_BY_NIGHT,
+  UPCOMING_PLAYER_CAPS_BY_DIVISION,
+} from '../lib/seasonConfig';
+
+interface Props {
+  day: string;          // 'Mon' | 'Tue' | 'Wed' | 'Thu'
+  class?: string;       // classes for each line
+}
+
+const { day, class: className = 'mt-3 text-sm text-ocean-700 opacity-60 italic min-h-[1.25rem]' } = Astro.props;
+
+const nightMax = UPCOMING_MAX_TEAMS_BY_NIGHT[day];
+const cappedDivisions = UPCOMING_DIVISIONS.filter(
+  (d) => d.day === day && (
+    d.id in UPCOMING_MAX_TEAMS_BY_DIVISION ||
+    d.id in UPCOMING_PLAYER_CAPS_BY_DIVISION
+  )
+);
+---
+
+{nightMax ? (
+  <p class={className} data-team-count-night={day}>Checking spots…</p>
+) : (
+  cappedDivisions.map((div) => (
+    <p
+      class={className}
+      data-team-count-division={div.id}
+      data-count-unit={div.id in UPCOMING_PLAYER_CAPS_BY_DIVISION ? 'players' : 'teams'}
+      data-division-name={cappedDivisions.length > 1 ? div.name : null}
+    >Checking spots…</p>
+  ))
+)}

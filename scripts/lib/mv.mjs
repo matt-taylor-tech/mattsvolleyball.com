@@ -28,9 +28,10 @@ export const CONVERSATION_IDS = {
 // event here. It has no topics, so all nights collapse to the group itself.
 export const TEST_CONVERSATION_ID = '115965602';
 
-// Nights excluded from ALL automated posts. Monday 3v3 was canceled for
-// Summer Redux (not enough players); the site config intentionally still
-// lists it, so the exclusion lives here in the automation layer only.
+// Nights excluded from ALL automated posts. Monday 3v3 was canceled for Summer
+// Redux (not enough players) and does not run in Fall 2026 either, so the Fall
+// config no longer lists it. This exclusion still covers the Summer Redux tail.
+// Clear it when Monday comes back.
 const DISABLED_DAYS = new Set(['Mon']);
 
 // Days that get a calendar event (for RSVPs) instead of a schedule image.
@@ -122,11 +123,18 @@ export async function loadUpcomingConfig() {
     return Object.fromEntries([...block.matchAll(/'(\d+)':\s*(\d+)/g)].map((m) => [m[1], Number(m[2])]));
   };
 
+  // Night caps are keyed by day ('Tue: 12'), not by a quoted division id.
+  const parseNightCapMap = (varName) => {
+    const block = source.match(new RegExp(`export const ${varName}[^{]*\\{([\\s\\S]*?)\\};`))?.[1] ?? '';
+    return Object.fromEntries([...block.matchAll(/^\s*(Mon|Tue|Wed|Thu):\s*(\d+)/gm)].map((m) => [m[1], Number(m[2])]));
+  };
+
   return {
     seasonId,
     seasonLabel,
     divisions,
     maxTeams: parseCapMap('UPCOMING_MAX_TEAMS_BY_DIVISION'),
+    maxTeamsByNight: parseNightCapMap('UPCOMING_MAX_TEAMS_BY_NIGHT'),
     playerCaps: parseCapMap('UPCOMING_PLAYER_CAPS_BY_DIVISION'),
   };
 }

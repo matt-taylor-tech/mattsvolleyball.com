@@ -1,31 +1,15 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import ChampionCard from '../components/ChampionCard.astro';
+import SpotsCounter from '../components/SpotsCounter.astro';
 import { getChampions } from '../lib/champions';
 import { getRegistrationData, formatDate, formatFullDate } from '../lib/registration';
-import { UPCOMING_DIVISIONS, UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_PLAYER_CAPS_BY_DIVISION, UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL, NEXT_NEXT_SEASON_LABEL, ACTIVE_SEASON_LABEL } from '../lib/seasonConfig';
+import { UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL, UPCOMING_REGULAR_SEASON_WEEKS, NEXT_NEXT_SEASON_LABEL, ACTIVE_SEASON_LABEL } from '../lib/seasonConfig';
 import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart, Volleyball } from 'lucide-astro';
 
 const champions = await getChampions();
 const { seasonLabel, regStatus, seasonDates, earliestOpen, latestClose, hasOpenRegistration, openRegUrl, openRegIsExternal, openRegDay } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
 const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
-function countedDivisionsFor(day: string) {
-  return UPCOMING_DIVISIONS.filter(
-    (d) => d.day === day && (
-      d.id in UPCOMING_MAX_TEAMS_BY_DIVISION ||
-      d.id in UPCOMING_PLAYER_CAPS_BY_DIVISION
-    )
-  );
-}
-const homeDayCounts = {
-  Mon: countedDivisionsFor('Mon'),
-  Tue: countedDivisionsFor('Tue'),
-  Wed: countedDivisionsFor('Wed'),
-  Thu: countedDivisionsFor('Thu'),
-};
-function isPlayerCap(divId: string) {
-  return divId in UPCOMING_PLAYER_CAPS_BY_DIVISION;
-}
 // Hero priority:
 //  1. Live TeamLinkt data present (seasonLabel set) -> follow the upcoming
 //     season's real registration status (coming-soon -> open -> in-progress).
@@ -48,7 +32,9 @@ const heroEarliestOpen = seasonLabel ? earliestOpen : showComingSoon ? UPCOMING_
 const heroRegisterUrl = REG_PAGE;
 const heroRegisterTarget = '_blank';
 const heroPromoText = hasOpenRegistration
-  ? 'Registration closes July 19 · Sign up while all forms are open.'
+  ? (latestClose
+      ? `Registration closes ${formatDate(latestClose)} · Sign up while all forms are open.`
+      : 'Sign up while all forms are open.')
   : heroRegStatus === 'open' && heroSeasonLabel
   ? `${heroSeasonLabel} registration is open now.`
   : heroRegStatus === 'coming-soon' && heroSeasonLabel
@@ -56,9 +42,10 @@ const heroPromoText = hasOpenRegistration
     : heroRegStatus === 'in-progress' && heroSeasonLabel
       ? `Schedules are live. Check the matchups and join the action.`
       : 'League updates land here first.';
-const heroDatesText = seasonLabel
-  ? 'Season starts the week of July 27 · Runs for 7 weeks plus playoffs.'
-  : (showComingSoon && UPCOMING_SEASON_START_LABEL ? `Season starts ${UPCOMING_SEASON_START_LABEL}` : '');
+const seasonDatesLine = UPCOMING_SEASON_START_LABEL
+  ? `Season starts ${UPCOMING_SEASON_START_LABEL} · Runs for ${UPCOMING_REGULAR_SEASON_WEEKS} weeks plus playoffs.`
+  : '';
+const heroDatesText = seasonLabel || showComingSoon ? seasonDatesLine : '';
 ---
 
 <Layout title="Matt's Volleyball | Coed Sand Volleyball in Lake Norman">
@@ -214,25 +201,7 @@ const heroDatesText = seasonLabel
   <section class="py-12 md:py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <h2 class="section-heading text-center mb-12">Find Your Night</h2>
-      <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-8 max-w-6xl mx-auto">
-        <div class="text-center p-8 rounded-2xl bg-sand-50 border border-sand-200">
-          <div class="w-16 h-16 bg-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span class="text-white font-display font-bold text-lg">Mo</span>
-          </div>
-          <h3 class="font-display font-bold text-xl text-ocean-600 mb-2">Monday</h3>
-          <p class="text-ocean-600/70 text-sm leading-relaxed">
-            3v3 coed format with double-headers every night. More reps, more rallies, more fun.
-          </p>
-          {homeDayCounts.Mon.map((div) => (
-            <p
-              class="mt-3 text-sm text-ocean-700 opacity-60 italic min-h-[1.25rem]"
-              data-team-count-division={div.id}
-              data-count-unit={isPlayerCap(div.id) ? 'players' : 'teams'}
-              data-division-name={homeDayCounts.Mon.length > 1 ? div.name : null}
-            >Checking spots…</p>
-          ))}
-        </div>
-
+      <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-8 max-w-5xl mx-auto">
         <div class="text-center p-8 rounded-2xl bg-sand-50 border border-sand-200">
           <div class="w-16 h-16 bg-coral-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <span class="text-white font-display font-bold text-lg">Tu</span>
@@ -241,14 +210,7 @@ const heroDatesText = seasonLabel
           <p class="text-ocean-600/70 text-sm leading-relaxed">
             4v4 leagues with competitive and recreational divisions. Each division has its own playoff night.
           </p>
-          {homeDayCounts.Tue.map((div) => (
-            <p
-              class="mt-3 text-sm text-ocean-700 opacity-60 italic min-h-[1.25rem]"
-              data-team-count-division={div.id}
-              data-count-unit={isPlayerCap(div.id) ? 'players' : 'teams'}
-              data-division-name={homeDayCounts.Tue.length > 1 ? div.name : null}
-            >Checking spots…</p>
-          ))}
+          <SpotsCounter day="Tue" />
         </div>
 
         <div class="text-center p-8 rounded-2xl bg-sand-50 border border-sand-200">
@@ -262,14 +224,7 @@ const heroDatesText = seasonLabel
           <a href="/leagues/shuffle/" class="inline-block mt-3 text-sm font-semibold text-ocean-500 hover:text-ocean-700 transition-colors">
             Learn how shuffle works &rarr;
           </a>
-          {homeDayCounts.Wed.map((div) => (
-            <p
-              class="mt-3 text-sm text-ocean-700 opacity-60 italic min-h-[1.25rem]"
-              data-team-count-division={div.id}
-              data-count-unit={isPlayerCap(div.id) ? 'players' : 'teams'}
-              data-division-name={homeDayCounts.Wed.length > 1 ? div.name : null}
-            >Checking spots…</p>
-          ))}
+          <SpotsCounter day="Wed" />
         </div>
 
         <div class="text-center p-8 rounded-2xl bg-sand-50 border border-sand-200">
@@ -280,14 +235,7 @@ const heroDatesText = seasonLabel
           <p class="text-ocean-600/70 text-sm leading-relaxed">
             4v4 leagues with competitive and recreational divisions. Each division has its own playoff night.
           </p>
-          {homeDayCounts.Thu.map((div) => (
-            <p
-              class="mt-3 text-sm text-ocean-700 opacity-60 italic min-h-[1.25rem]"
-              data-team-count-division={div.id}
-              data-count-unit={isPlayerCap(div.id) ? 'players' : 'teams'}
-              data-division-name={homeDayCounts.Thu.length > 1 ? div.name : null}
-            >Checking spots…</p>
-          ))}
+          <SpotsCounter day="Thu" />
         </div>
       </div>
     </div>
@@ -709,39 +657,7 @@ const heroDatesText = seasonLabel
   </section>
 
   <script>
-    import { fetchUpcomingTeamCountsByDivision, fetchUpcomingPlayerCountsByDivision } from '../lib/teamCounts';
-    import { UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_PLAYER_CAPS_BY_DIVISION } from '../lib/seasonConfig';
-
-    (async () => {
-      const slots = document.querySelectorAll<HTMLElement>('[data-team-count-division]');
-      if (slots.length === 0) return;
-      try {
-        const [teamCounts, playerCounts] = await Promise.all([
-          fetchUpcomingTeamCountsByDivision(),
-          fetchUpcomingPlayerCountsByDivision(),
-        ]);
-        slots.forEach((el) => {
-          const divId = el.dataset.teamCountDivision;
-          if (!divId) return;
-          const isPlayers = el.dataset.countUnit === 'players';
-          const max = isPlayers ? UPCOMING_PLAYER_CAPS_BY_DIVISION[divId] : UPCOMING_MAX_TEAMS_BY_DIVISION[divId];
-          if (!max) return;
-          const count = isPlayers ? (playerCounts[divId] ?? 0) : (teamCounts[divId] ?? 0);
-          const unit = isPlayers ? 'players' : 'teams';
-          const name = el.dataset.divisionName;
-          const prefix = name ? `${name}: ` : '';
-          const spotsLeft = Math.max(0, max - count);
-          const cappedMsg = isPlayers
-            ? `${prefix}All ${max} player spots taken`
-            : `${prefix}All teams set · Join an existing team or as a free agent`;
-          el.textContent = spotsLeft === 0
-            ? cappedMsg
-            : `${prefix}${count} of ${max} ${unit} · ${spotsLeft} spot${spotsLeft === 1 ? '' : 's'} left`;
-          el.classList.remove('italic', 'opacity-60');
-        });
-      } catch {
-        // Leave placeholders empty on failure.
-      }
-    })();
+    import { renderSpotCounters } from '../lib/spotsCounter';
+    renderSpotCounters();
   </script>
 </Layout>

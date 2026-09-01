@@ -1,6 +1,8 @@
 ---
 import type { RegCard } from '../lib/registration';
-import { UPCOMING_DIVISIONS, UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_PLAYER_CAPS_BY_DIVISION } from '../lib/seasonConfig';
+import SpotsCounter from './SpotsCounter.astro';
+import { UPCOMING_DIVISIONS, UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_MAX_TEAMS_BY_NIGHT, UPCOMING_PLAYER_CAPS_BY_DIVISION, UPCOMING_REG_OPEN_DATETIME } from '../lib/seasonConfig';
+import { formatFullDate } from '../lib/registration';
 
 interface Props {
   day: string;
@@ -24,6 +26,17 @@ const dayDivisions = UPCOMING_DIVISIONS.filter(
   )
 );
 const hasRegEntries = regEntries && regEntries.length > 0;
+// A night with a shared team cap gets one counter for the whole night, below
+// the sign-up buttons, instead of one counter per division.
+const hasNightCap = Boolean(UPCOMING_MAX_TEAMS_BY_NIGHT[dayKey]);
+const anyRegOpen = Boolean(regEntries?.some((e) => e.isOpen));
+// Before TeamLinkt publishes the forms there are no entries to show. If we have
+// announced an open date that has not arrived yet, say "coming soon" rather than
+// "closed", so the card agrees with the announcement in the page hero.
+const announcedOpen = UPCOMING_REG_OPEN_DATETIME
+  ? new Date(UPCOMING_REG_OPEN_DATETIME.replace(' ', 'T'))
+  : null;
+const announcedOpenIsFuture = announcedOpen !== null && new Date() < announcedOpen;
 
 // Match a registration entry to a counted division by name keyword.
 // Checks both divisionLabel (e.g. "Competitive") and name (e.g. "Monday 3v3 Coed").
@@ -99,7 +112,7 @@ const gradientClass = dayColors[day] || 'from-ocean-500 to-ocean-600';
               <p class="text-xs text-ocean-600/70 text-center mt-1">
                 {entry.daysLeft} day{entry.daysLeft !== 1 ? 's' : ''} left · Closes {entry.closeDate}
               </p>
-              {matchedDiv && (
+              {matchedDiv && !hasNightCap && (
                 <p
                   class="text-xs text-ocean-700 opacity-60 italic text-center mt-1 min-h-[1rem]"
                   data-team-count-division={matchedDiv.id}
@@ -118,6 +131,13 @@ const gradientClass = dayColors[day] || 'from-ocean-500 to-ocean-600';
             </div>
           );
         })
+      ) : registrationKnown && announcedOpenIsFuture ? (
+        <div>
+          <span class="block text-center w-full py-2 rounded-lg bg-sand-200 text-ocean-600/70 font-semibold text-sm">
+            Registration Coming Soon
+          </span>
+          <p class="text-xs text-ocean-600/70 text-center mt-1">Opens {formatFullDate(UPCOMING_REG_OPEN_DATETIME)}</p>
+        </div>
       ) : registrationKnown ? (
         <span class="block text-center w-full py-2 rounded-lg bg-sand-200 text-ocean-600/70 font-semibold text-sm">
           Registration Closed
@@ -132,6 +152,9 @@ const gradientClass = dayColors[day] || 'from-ocean-500 to-ocean-600';
         >
           Sign Up for {day} Now
         </a>
+      )}
+      {hasNightCap && anyRegOpen && (
+        <SpotsCounter day={dayKey} class="text-xs text-ocean-700 opacity-60 italic text-center min-h-[1rem]" />
       )}
     </div>
   </div>

@@ -40,7 +40,7 @@ const faqItems = [
   { question: 'Can I join multiple teams?', answer: 'Yes! You can join multiple teams across different league nights. We do our best to avoid scheduling conflicts when possible.' },
   { question: 'What time are the games?', answer: 'Choose your weekly day. Games start at 6:30, 7:30, or 8:30 PM. You\'ll receive your specific game time before the season starts.' },
   { question: 'Is there an age requirement?', answer: 'Players must be at least 21 years old to participate in our leagues.' },
-  { question: 'How much does it cost?', answer: '$65 per player for Monday, Tuesday, or Thursday, $55 per player for Wednesday, plus credit card processing fees. That covers the full regular season plus playoffs.' },
+  { question: 'How much does it cost?', answer: '$65 per player for Tuesday or Thursday, $55 per player for Wednesday, plus credit card processing fees. That covers the full regular season plus playoffs.' },
   { question: 'Are spectators allowed?', answer: 'Spectators are welcome and encouraged! Come out, grab some food and drinks, and enjoy the matches.' },
   { question: 'What happens with bad weather?', answer: 'We have an inclement weather / rainout policy. Check our rules page or your TeamLinkt app for updates on any schedule changes.' },
 ];
@@ -135,21 +135,7 @@ const faqItems = [
   <!-- League Cards -->
   <section class="pb-16 md:pb-24">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-8">
-        <LeagueCard
-          day="Monday"
-          format="3v3 Coed"
-          price="$65"
-          description="3v3 coed format. Schedule, game times, and final format determined by registration. May run as double-header format."
-          registrationKnown={registrationKnown}
-          regEntries={regByDay['monday']}
-          details={[
-            '8 week season: 7 regular season weeks plus 1 playoff week',
-            'May run as double-header format depending on signups',
-            'Form your own team or join as individual',
-            'All skill levels welcome',
-          ]}
-        />
+      <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
         <LeagueCard
           day="Tuesday"
           format="4v4"
@@ -159,8 +145,8 @@ const faqItems = [
           registrationKnown={registrationKnown}
           regEntries={regByDay['tuesday']}
           details={[
-            '6 regular season games over 7 weeks plus a division-specific playoff night',
-            '1 game weekly plus 1 bye week',
+            '6 regular season games over 6 weeks plus a division-specific playoff night',
+            '1 game every week, no bye weeks',
             'Game times: 6:30, 7:30, or 8:30 PM',
             'Form your own team or join as individual',
             'All skill levels welcome',
@@ -178,7 +164,7 @@ const faqItems = [
           details={[
             'Individual sign-ups. Teams re-drafted each week',
             'Free prize raffles between games — checking in is your entry',
-            '7 weekly sessions plus playoffs',
+            '6 weekly sessions plus playoffs',
             'Approximately 2-hour sessions',
             'All skill levels welcome',
           ]}
@@ -192,8 +178,8 @@ const faqItems = [
           registrationKnown={registrationKnown}
           regEntries={regByDay['thursday']}
           details={[
-            '6 regular season games over 7 weeks plus a division-specific playoff night',
-            '1 game weekly plus 1 bye week',
+            '6 regular season games over 6 weeks plus a division-specific playoff night',
+            '1 game every week, no bye weeks',
             'Game times: 6:30, 7:30, or 8:30 PM',
             'Form your own team or join as individual',
             'All skill levels welcome',
@@ -232,39 +218,7 @@ const faqItems = [
   </section>
 
   <script>
-    import { fetchUpcomingTeamCountsByDivision, fetchUpcomingPlayerCountsByDivision } from '../../lib/teamCounts';
-    import { UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_PLAYER_CAPS_BY_DIVISION } from '../../lib/seasonConfig';
-
-    (async () => {
-      const slots = document.querySelectorAll<HTMLElement>('[data-team-count-division]');
-      if (slots.length === 0) return;
-      try {
-        const [teamCounts, playerCounts] = await Promise.all([
-          fetchUpcomingTeamCountsByDivision(),
-          fetchUpcomingPlayerCountsByDivision(),
-        ]);
-        slots.forEach((el) => {
-          const divId = el.dataset.teamCountDivision;
-          if (!divId) return;
-          const isPlayers = el.dataset.countUnit === 'players';
-          const max = isPlayers ? UPCOMING_PLAYER_CAPS_BY_DIVISION[divId] : UPCOMING_MAX_TEAMS_BY_DIVISION[divId];
-          if (!max) return;
-          const count = isPlayers ? (playerCounts[divId] ?? 0) : (teamCounts[divId] ?? 0);
-          const unit = isPlayers ? 'players' : 'teams';
-          const name = el.dataset.divisionName;
-          const prefix = name ? `${name}: ` : '';
-          const spotsLeft = Math.max(0, max - count);
-          const cappedMsg = isPlayers
-            ? `${prefix}All ${max} player spots taken`
-            : `${prefix}All teams set · Join an existing team or as a free agent`;
-          el.textContent = spotsLeft === 0
-            ? cappedMsg
-            : `${prefix}${count} of ${max} ${unit} · ${spotsLeft} spot${spotsLeft === 1 ? '' : 's'} left`;
-          el.classList.remove('italic', 'opacity-60');
-        });
-      } catch {
-        // Leave placeholders empty on failure.
-      }
-    })();
+    import { renderSpotCounters } from '../../lib/spotsCounter';
+    renderSpotCounters();
   </script>
 </Layout>
