@@ -62,13 +62,18 @@ Update:
     have and come back empty. `npm run check:teamlinkt` catches this.
 2. `NEXT_SEASON` + `UPCOMING_DIVISIONS` for promo pages:
   - Home hero / Leagues registration content
-3. `ACTIVE_ROLLOVER_DATE`: the date the live pages switch from CURRENT to NEXT.
-   Set it after the current season's playoffs finish and before the new season's
-   first game.
-4. `UPCOMING_REG_OPEN_DATETIME` + `UPCOMING_SEASON_START_LABEL` +
-   `UPCOMING_REGULAR_SEASON_WEEKS`: the announcement copy shown before TeamLinkt
-   publishes the registration forms. Live TeamLinkt data takes over on its own
-   once the forms are public.
+3. `UPCOMING_SEASON_START_DATETIME`: the new season's first game day. This one
+   date does three jobs, so there is nothing else to time by hand:
+   - the site stops leading with registration and says the season is underway
+   - the live data pages switch from CURRENT to NEXT (`ACTIVE_ROLLOVER_DATE`
+     is this date), so the old season stays up through its own playoffs
+   - the "Season starts ..." copy reads from it
+   Set `UPCOMING_SEASON_START_LABEL_OVERRIDE` only when the exact date is not
+   fixed yet and you need fuzzy wording like "the week of July 27".
+4. `UPCOMING_REG_OPEN_DATETIME` + `UPCOMING_REGULAR_SEASON_WEEKS`: the
+   announcement copy shown before TeamLinkt publishes the registration forms.
+   Live TeamLinkt data takes over on its own once the forms are public.
+   Registration close dates always come from TeamLinkt, never from this file.
 5. The caps that drive the "spots left" counters and the GroupMe registration
    digest:
    - `UPCOMING_MAX_TEAMS_BY_NIGHT` - a whole night shares one team cap, and the

@@ -3,24 +3,29 @@ import Layout from '../../layouts/Layout.astro';
 import LeagueCard from '../../components/LeagueCard.astro';
 import FAQAccordion from '../../components/FAQAccordion.astro';
 import { getRegistrationData, formatDate, formatFullDate, getDayFromName } from '../../lib/registration';
-import { UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL } from '../../lib/seasonConfig';
+import { UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL, HAS_UPCOMING_SEASON_STARTED } from '../../lib/seasonConfig';
 import type { RegCard } from '../../lib/registration';
 
 const { seasonLabel, regStatus, seasonDates, earliestOpen, openRegNextClose, openRegCloseDatesDiffer, regCards, hasOpenRegistration, openRegUrl, openRegIsExternal, openRegDay, registrationKnown } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
 const REG_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
 
-// Hero status, mirroring the homepage: follow live TeamLinkt data when the
-// upcoming season's forms are public; otherwise, if an open date is announced and
-// still in the future, show a config-driven "coming soon". Hands off to live data
-// automatically once the forms go public (no manual revert needed).
+// Hero status, mirroring the homepage: the season's first game day wins, then
+// live TeamLinkt data when the upcoming season's forms are public, then a
+// config-driven "coming soon" if an announced open date is still in the future.
+// Hands off to live data automatically once the forms go public (no manual
+// revert needed).
 const now = new Date();
 const announcedOpenDate = UPCOMING_REG_OPEN_DATETIME
   ? new Date(UPCOMING_REG_OPEN_DATETIME.replace(' ', 'T'))
   : null;
 const showComingSoon = !seasonLabel && announcedOpenDate !== null && now < announcedOpenDate;
 
-const heroRegStatus = seasonLabel ? regStatus : showComingSoon ? 'coming-soon' : regStatus;
-const heroSeasonLabel = seasonLabel || (showComingSoon ? UPCOMING_SEASON_LABEL : '');
+const heroRegStatus = HAS_UPCOMING_SEASON_STARTED
+  ? 'in-progress'
+  : seasonLabel ? regStatus : showComingSoon ? 'coming-soon' : regStatus;
+const heroSeasonLabel = HAS_UPCOMING_SEASON_STARTED
+  ? UPCOMING_SEASON_LABEL
+  : seasonLabel || (showComingSoon ? UPCOMING_SEASON_LABEL : '');
 const heroEarliestOpen = seasonLabel ? earliestOpen : showComingSoon ? UPCOMING_REG_OPEN_DATETIME : earliestOpen;
 const heroRegisterUrl = hasOpenRegistration && openRegIsExternal ? openRegUrl : REG_PAGE;
 const heroRegisterTarget = openRegIsExternal ? '_blank' : undefined;

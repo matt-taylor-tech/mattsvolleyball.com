@@ -37,14 +37,39 @@ const FUTURE_SEASON = {
   label: 'TBD',
 };
 
-// Auto-rollover trigger for live data pages.
+// First game date for the upcoming season. This drives the switch from
+// registration-focused copy to "the season is underway", and it drives the
+// live-data rollover below. Format: 'YYYY-MM-DD HH:MM:SS' (local time).
+export const UPCOMING_SEASON_START_DATETIME = '2026-09-29 00:00:00';
+
+// Display override for the start date, for when the exact first-game date is
+// not fixed yet (e.g. 'the week of July 27'). Leave empty to show the real date.
+const UPCOMING_SEASON_START_LABEL_OVERRIDE = '';
+
+const upcomingStartAt = new Date(UPCOMING_SEASON_START_DATETIME.replace(' ', 'T'));
+const upcomingStartIsValid = !Number.isNaN(upcomingStartAt.getTime());
+
+/** Human-readable start of the upcoming season, e.g. "September 29". */
+export const UPCOMING_SEASON_START_LABEL = UPCOMING_SEASON_START_LABEL_OVERRIDE
+  || (upcomingStartIsValid
+    ? upcomingStartAt.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
+    : '');
+
+// True once the upcoming season's first game day has arrived. The site then
+// stops leading with registration and says the season is underway, even if a
+// late-open league (Wednesday shuffle) is still taking signups.
+export const HAS_UPCOMING_SEASON_STARTED = upcomingStartIsValid && new Date() >= upcomingStartAt;
+
+// Auto-rollover trigger for live data pages (schedule / teams / standings /
+// scores). It fires on the upcoming season's first game day, so the live pages
+// keep showing the current season until its last game, playoffs included. That
+// means there is no playoff end date to guess here.
+// Move this earlier if you want the new season's schedule visible sooner; keep
+// it after the current season's last playoff night either way.
 // Note: for static deployments this takes effect on the next build.
-// Summer Redux plays its last regular-season games Thu Sep 10. Playoffs follow,
-// then a bye week before Fall starts Mon Sep 29. Confirm the Redux playoff dates
-// and move this if the brackets run later than the week of Sep 14.
-export const ACTIVE_ROLLOVER_DATE = '2026-09-22 00:00:00'; // Monday after Redux playoffs; Fall takes over the live pages
+export const ACTIVE_ROLLOVER_DATE = UPCOMING_SEASON_START_DATETIME;
 const now = new Date();
-const rolloverAt = new Date(ACTIVE_ROLLOVER_DATE);
+const rolloverAt = new Date(ACTIVE_ROLLOVER_DATE.replace(' ', 'T'));
 export const HAS_ACTIVE_ROLLED_OVER = !Number.isNaN(rolloverAt.getTime()) && now >= rolloverAt;
 
 // ── Active Season (schedule / standings / scores / teams / playoffs) ─────────
@@ -61,11 +86,6 @@ export const UPCOMING_SEASON_LABEL = NEXT_SEASON.label;
 // this becomes inert. Set to '' to disable the announcement.
 // Format: 'YYYY-MM-DD HH:MM:SS' (local time).
 export const UPCOMING_REG_OPEN_DATETIME = '2026-09-04 00:00:00';
-
-// Human-readable start of the upcoming season, shown alongside the coming-soon
-// announcement. Free-form (e.g. "the week of July 27") since the exact first-game
-// date may not be fixed yet. Set to '' to hide.
-export const UPCOMING_SEASON_START_LABEL = 'September 29';
 
 // Length of the upcoming regular season, in weeks, plus how playoffs run. Used
 // by promo copy on the home and leagues pages so the week count lives in one
