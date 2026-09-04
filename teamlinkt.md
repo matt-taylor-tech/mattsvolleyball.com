@@ -146,8 +146,28 @@ nothing. A find page loaded with a `cid` lists the whole season instead.
 `cid` is TeamLinkt's `association_registration_container_id`, one per night. Take
 it from the registration link TeamLinkt generates for each night and put it in
 `UPCOMING_REG_CONTAINER_IDS`. Any single cid lists every form; the id only decides
-which night starts out selected. The scraper tries the cid page first and falls
-back to the bare page.
+which night starts out selected. The scraper tries every night's cid page first,
+so one stale id cannot blind it, and falls back to the bare page.
+
+Which link a button gets depends on what the button is about:
+
+- One night: that night's cid page, from `registrationPageUrlForDay('Wed')`.
+  League cards default to their own night. The shuffle page uses Wednesday.
+- Anything general: the bare page, `REGISTRATION_PAGE_URL`. Header, footer, home
+  hero, and the CTAs on schedule, standings and scores. These buttons are not
+  about one night, so they must not land the visitor on one. This URL is
+  `https://app.teamlinkt.com/register/find/mattsvolleyball` and never changes.
+
+Two files cannot import the config and hold the URL as text. Check them when the
+container ids change:
+
+- `public/scripts/update-registration-cta.js` (general page, no cid)
+- `scripts/post-registration-status.mjs` (general page for the posted link, plus
+  a cid page it scrapes)
+
+Deep links to a single division come from the scraper, not from this file. They
+look like `https://app.teamlinkt.com/register/go/mattsvolleyball/195488` and the
+league cards use them once the forms are open.
 
 ## Notes
 

@@ -17,9 +17,16 @@ import {
   loadUpcomingConfig, postForm, postToTopic,
 } from './lib/mv.mjs';
 
-// Keep in sync with REGISTRATION_PAGE_URL in src/lib/seasonConfig.ts. The cid
-// matters: without it TeamLinkt's find page says no forms are available.
-const REGISTER_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball?cid=77315';
+// The general registration page we tell people to visit. No `cid`, so it does
+// not preselect a night. Matches REGISTRATION_PAGE_URL in
+// src/lib/seasonConfig.ts, and never changes between seasons.
+const REGISTER_PAGE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
+
+// The page we read the registration window from. This one needs a `cid`:
+// TeamLinkt's bare find page lists nothing until registration opens, while a
+// cid page lists the whole season. The id changes every season, so keep it in
+// step with UPCOMING_REG_CONTAINER_IDS in src/lib/seasonConfig.ts.
+const REGISTER_SCRAPE_PAGE = `${REGISTER_PAGE}?cid=77315`;
 
 // ── Registration window (live TeamLinkt scrape) ───────────────────────────────
 
@@ -35,7 +42,7 @@ function etNowString() {
 
 /** True while any registration window on the TeamLinkt register page is open. */
 async function registrationIsOpen() {
-  const res = await fetch(REGISTER_PAGE, { headers: { 'User-Agent': 'MattsVolleyball/1.0' } });
+  const res = await fetch(REGISTER_SCRAPE_PAGE, { headers: { 'User-Agent': 'MattsVolleyball/1.0' } });
   if (!res.ok) throw new Error(`Register page fetch failed: HTTP ${res.status}`);
   const html = await res.text();
   const match = html.match(/season_registration_grouped\s*=\s*(\{[\s\S]*?\});\s*\n/);

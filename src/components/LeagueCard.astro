@@ -1,7 +1,7 @@
 ---
 import type { RegCard } from '../lib/registration';
 import SpotsCounter from './SpotsCounter.astro';
-import { UPCOMING_DIVISIONS, UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_MAX_TEAMS_BY_NIGHT, UPCOMING_PLAYER_CAPS_BY_DIVISION, UPCOMING_REG_OPEN_DATETIME, REGISTRATION_PAGE_URL } from '../lib/seasonConfig';
+import { UPCOMING_DIVISIONS, UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_MAX_TEAMS_BY_NIGHT, UPCOMING_PLAYER_CAPS_BY_DIVISION, UPCOMING_REG_OPEN_DATETIME, registrationPageUrlForDay } from '../lib/seasonConfig';
 import { formatFullDate } from '../lib/registration';
 
 interface Props {
@@ -17,8 +17,11 @@ interface Props {
   regEntries?: RegCard[];
 }
 
-const { day, format, description, details, highlight, price, registrationUrl = REGISTRATION_PAGE_URL, registrationKnown = false, link, regEntries } = Astro.props;
+const { day, format, description, details, highlight, price, registrationUrl, registrationKnown = false, link, regEntries } = Astro.props;
 const dayKey = day.slice(0, 3);
+// A league card always speaks for one night, so its fallback sign-up link is
+// that night's registration page, not the general one.
+const cardRegistrationUrl = registrationUrl ?? registrationPageUrlForDay(dayKey);
 const dayDivisions = UPCOMING_DIVISIONS.filter(
   (d) => d.day === dayKey && (
     d.id in UPCOMING_MAX_TEAMS_BY_DIVISION ||
@@ -144,7 +147,7 @@ const gradientClass = dayColors[day] || 'from-ocean-500 to-ocean-600';
         </span>
       ) : (
         <a
-          href={registrationUrl}
+          href={cardRegistrationUrl}
           target="_blank"
           rel="noopener noreferrer"
           class="btn-primary text-center w-full"

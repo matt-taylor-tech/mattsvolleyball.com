@@ -210,21 +210,41 @@ export const UPCOMING_REG_CONTAINER_IDS: Record<string, string> = {
 
 const REG_FIND_BASE = 'https://app.teamlinkt.com/register/find/mattsvolleyball';
 
-/** Where every "Register Now" link on the site should point. */
-export const REGISTRATION_PAGE_URL = UPCOMING_REG_CONTAINER_IDS.Tue
-  ? `${REG_FIND_BASE}?cid=${UPCOMING_REG_CONTAINER_IDS.Tue}`
-  : REG_FIND_BASE;
+/**
+ * The general registration page, with no night preselected.
+ *
+ * Use this for every generic "Register Now" / "Sign Up" button: the header, the
+ * footer, the home hero, and the CTAs on the schedule, standings and scores
+ * pages. None of those buttons is about one night, so none of them should land
+ * the visitor on one night. This URL never changes between seasons.
+ */
+export const REGISTRATION_PAGE_URL = REG_FIND_BASE;
 
-/** Registration page for one night, for a day key like 'Wed'. */
+/**
+ * The registration page for one night, for a day key like 'Wed'.
+ *
+ * Use this wherever the button belongs to a single night: a league card, or the
+ * shuffle page. The `cid` only decides which night starts out selected, so the
+ * visitor can still switch. Falls back to the general page when that night has
+ * no container id yet.
+ */
 export function registrationPageUrlForDay(day: string): string {
   const cid = UPCOMING_REG_CONTAINER_IDS[day];
   return cid ? `${REG_FIND_BASE}?cid=${cid}` : REGISTRATION_PAGE_URL;
 }
 
-// Pages the scraper tries in order. The first one that lists any form wins, so
-// the bare page still works if the container ids ever go stale.
+// Pages the scraper tries in order. The first one that lists any form wins.
+//
+// Every night's cid page comes first, because a cid page lists the whole season
+// even before registration opens, while the bare page reports nothing. Listing
+// all of them, not just one, means a single stale id no longer blinds the
+// scraper. The bare page is the last resort, and it is enough once registration
+// is open.
 export const REGISTRATION_SCRAPE_URLS: string[] = [
-  ...new Set([REGISTRATION_PAGE_URL, REG_FIND_BASE]),
+  ...new Set([
+    ...Object.values(UPCOMING_REG_CONTAINER_IDS).map((cid) => `${REG_FIND_BASE}?cid=${cid}`),
+    REG_FIND_BASE,
+  ]),
 ];
 
 export const EVENTS_API    = `${API_BASE}/getAllEvents/${ORG_ID}`;

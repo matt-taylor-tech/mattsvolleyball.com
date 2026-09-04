@@ -1,5 +1,5 @@
 ---
-import { REGISTRATION_PAGE_URL } from '../../lib/seasonConfig';
+import { registrationPageUrlForDay } from '../../lib/seasonConfig';
 import Layout from '../../layouts/Layout.astro';
 import { Shuffle as ShuffleIcon, Layers, BookOpen, Sparkles, Dices, Users, Scale, TrendingUp, Check, ArrowRight, MapPin, Gift } from 'lucide-astro';
 import { getRegistrationData } from '../../lib/registration';
@@ -217,7 +217,7 @@ const { regStatus } = await getRegistrationData();
       </p>
       {regStatus === 'open' ? (
         <a
-          href={REGISTRATION_PAGE_URL}
+          href={registrationPageUrlForDay('Wed')}
           target="_blank"
           rel="noopener noreferrer"
           class="btn-primary inline-flex items-center gap-2"
