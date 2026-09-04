@@ -9,7 +9,7 @@ import {
 // Fills in the "X of Y teams · Z spots left" lines on the home and leagues
 // pages. For a night whose cap is shared by more than one division, this adds
 // a second line breaking down signups by division, e.g.:
-//   4 of 12 night spots left
+//   4 of 12 team spots left
 //   Signed up: 5 Competitive, 3 Recreational
 // Runs in the browser after load, so a slow or failed TeamLinkt call never
 // blocks the page.
@@ -41,7 +41,7 @@ function nightSpotsText(count: number, max: number, breakdown: string): string {
   const spotsLeft = Math.max(0, max - count);
   const summary = spotsLeft === 0
     ? 'All teams set · Join an existing team or as a free agent'
-    : `${spotsLeft} of ${max} night spot${spotsLeft === 1 ? '' : 's'} left`;
+    : `${spotsLeft} of ${max} team spot${spotsLeft === 1 ? '' : 's'} left`;
   return `${summary}\nSigned up: ${breakdown}`;
 }
 
