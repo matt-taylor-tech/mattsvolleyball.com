@@ -29,7 +29,7 @@ const cappedDivisions = UPCOMING_DIVISIONS.filter(
 ---
 
 {nightMax ? (
-  <p class={className} data-team-count-night={day}>Checking spots…</p>
+  <p class={`${className} whitespace-pre-line`} data-team-count-night={day}>Checking spots…</p>
 ) : (
   cappedDivisions.map((div) => (
     <p

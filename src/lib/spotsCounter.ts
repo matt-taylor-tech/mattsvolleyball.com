@@ -6,31 +6,43 @@ import {
   UPCOMING_PLAYER_CAPS_BY_DIVISION,
 } from './seasonConfig';
 
-// Fills in the "X of Y teams · Z spots left" (or, for a night with more than
-// one division, "5 Competitive, 3 Recreational · Z spots left") lines on the
-// home and leagues pages. Runs in the browser after load, so a slow or failed
-// TeamLinkt call never blocks the page.
+// Fills in the "X of Y teams · Z spots left" lines on the home and leagues
+// pages. For a night whose cap is shared by more than one division, this adds
+// a second line breaking down signups by division, e.g.:
+//   4 of 12 night spots left
+//   Signed up: 5 Competitive, 3 Recreational
+// Runs in the browser after load, so a slow or failed TeamLinkt call never
+// blocks the page.
 //
 // Two kinds of placeholder element are supported:
-//   data-team-count-night="Tue"     -> one line for the whole night, adding up
-//                                      every division that plays that night
+//   data-team-count-night="Tue"     -> one line (two when the night has more
+//                                      than one division) for the whole night,
+//                                      adding up every division that plays it
 //   data-team-count-division="123"  -> one line for a single division
 //
 // Optional attributes on either kind:
 //   data-count-unit="players"       -> count players instead of teams
 //   data-division-name="Competitive" -> prefix the line with a label
 
-function spotsText(count: number, max: number, unit: 'teams' | 'players', prefix: string, breakdown = ''): string {
+function spotsText(count: number, max: number, unit: 'teams' | 'players', prefix: string): string {
   const spotsLeft = Math.max(0, max - count);
-  // When a breakdown (e.g. "5 Competitive, 3 Recreational") is given, it leads
-  // the line in place of the plain "X of Y teams" count.
-  const lead = breakdown || `${count} of ${max} ${unit}`;
   if (spotsLeft === 0) {
     return unit === 'players'
       ? `${prefix}All ${max} player spots taken`
-      : `${prefix}${lead} · All teams set · Join an existing team or as a free agent`;
+      : `${prefix}All teams set · Join an existing team or as a free agent`;
   }
-  return `${prefix}${lead} · ${spotsLeft} spot${spotsLeft === 1 ? '' : 's'} left`;
+  return `${prefix}${count} of ${max} ${unit} · ${spotsLeft} spot${spotsLeft === 1 ? '' : 's'} left`;
+}
+
+// Night-level cap shared by more than one division: the plain "X of Y teams"
+// count doesn't say how those teams split between divisions, so a second line
+// spells that out explicitly rather than packing bare numbers into one line.
+function nightSpotsText(count: number, max: number, breakdown: string): string {
+  const spotsLeft = Math.max(0, max - count);
+  const summary = spotsLeft === 0
+    ? 'All teams set · Join an existing team or as a free agent'
+    : `${spotsLeft} of ${max} night spot${spotsLeft === 1 ? '' : 's'} left`;
+  return `${summary}\nSigned up: ${breakdown}`;
 }
 
 export async function renderSpotCounters(): Promise<void> {
@@ -80,7 +92,7 @@ export async function renderSpotCounters(): Promise<void> {
     }
 
     if (!max) return;
-    el.textContent = spotsText(count, max, unit, prefix, breakdown);
+    el.textContent = breakdown ? nightSpotsText(count, max, breakdown) : spotsText(count, max, unit, prefix);
     el.classList.remove('italic', 'opacity-60');
   });
 }
