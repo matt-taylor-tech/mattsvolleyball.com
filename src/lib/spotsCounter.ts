@@ -6,9 +6,10 @@ import {
   UPCOMING_PLAYER_CAPS_BY_DIVISION,
 } from './seasonConfig';
 
-// Fills in the "X of Y teams · Z spots left" lines on the home and leagues
-// pages. Runs in the browser after load, so a slow or failed TeamLinkt call
-// never blocks the page.
+// Fills in the "X of Y teams · Z spots left" (or, for a night with more than
+// one division, "5 Competitive, 3 Recreational · Z spots left") lines on the
+// home and leagues pages. Runs in the browser after load, so a slow or failed
+// TeamLinkt call never blocks the page.
 //
 // Two kinds of placeholder element are supported:
 //   data-team-count-night="Tue"     -> one line for the whole night, adding up
@@ -19,14 +20,17 @@ import {
 //   data-count-unit="players"       -> count players instead of teams
 //   data-division-name="Competitive" -> prefix the line with a label
 
-function spotsText(count: number, max: number, unit: 'teams' | 'players', prefix: string): string {
+function spotsText(count: number, max: number, unit: 'teams' | 'players', prefix: string, breakdown = ''): string {
   const spotsLeft = Math.max(0, max - count);
+  // When a breakdown (e.g. "5 Competitive, 3 Recreational") is given, it leads
+  // the line in place of the plain "X of Y teams" count.
+  const lead = breakdown || `${count} of ${max} ${unit}`;
   if (spotsLeft === 0) {
     return unit === 'players'
       ? `${prefix}All ${max} player spots taken`
-      : `${prefix}All teams set · Join an existing team or as a free agent`;
+      : `${prefix}${lead} · All teams set · Join an existing team or as a free agent`;
   }
-  return `${prefix}${count} of ${max} ${unit} · ${spotsLeft} spot${spotsLeft === 1 ? '' : 's'} left`;
+  return `${prefix}${lead} · ${spotsLeft} spot${spotsLeft === 1 ? '' : 's'} left`;
 }
 
 export async function renderSpotCounters(): Promise<void> {
@@ -56,6 +60,7 @@ export async function renderSpotCounters(): Promise<void> {
 
     let max: number | undefined;
     let count = 0;
+    let breakdown = '';
 
     if (night) {
       // Night cap: add up every division that plays that night.
@@ -64,13 +69,18 @@ export async function renderSpotCounters(): Promise<void> {
       count = nightDivisions.reduce((sum, d) => {
         return sum + (isPlayers ? (playerCounts[d.id] ?? 0) : (teamCounts[d.id] ?? 0));
       }, 0);
+      // Show the Recreational/Competitive split, since the night cap alone
+      // hides how signups landed between the two divisions.
+      if (!isPlayers && nightDivisions.length > 1) {
+        breakdown = nightDivisions.map((d) => `${teamCounts[d.id] ?? 0} ${d.name}`).join(', ');
+      }
     } else if (divId) {
       max = isPlayers ? UPCOMING_PLAYER_CAPS_BY_DIVISION[divId] : UPCOMING_MAX_TEAMS_BY_DIVISION[divId];
       count = isPlayers ? (playerCounts[divId] ?? 0) : (teamCounts[divId] ?? 0);
     }
 
     if (!max) return;
-    el.textContent = spotsText(count, max, unit, prefix);
+    el.textContent = spotsText(count, max, unit, prefix, breakdown);
     el.classList.remove('italic', 'opacity-60');
   });
 }
