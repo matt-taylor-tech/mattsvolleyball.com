@@ -1,47 +1,71 @@
 ---
-// The three league nights, each with a live "spots left" counter.
-import SpotsCounter from './SpotsCounter.astro';
+// The three league nights. Reuses LeagueCard so the registration buttons
+// (Sign Up / Coming Soon / Closed, per-division deep links, spots counter)
+// are identical to the leagues page instead of a second copy of that logic.
+import LeagueCard from './LeagueCard.astro';
+import type { RegCard } from '../lib/registration';
+
+interface Props {
+  regByDay: Record<string, RegCard[]>;
+  registrationKnown: boolean;
+}
+
+const { regByDay, registrationKnown } = Astro.props;
 ---
 
   <section class="py-12 md:py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <h2 class="section-heading text-center mb-12">Find Your Night</h2>
       <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-8 max-w-5xl mx-auto">
-        <div class="text-center p-8 rounded-2xl bg-sand-50 border border-sand-200">
-          <div class="w-16 h-16 bg-coral-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span class="text-white font-display font-bold text-lg">Tu</span>
-          </div>
-          <h3 class="font-display font-bold text-xl text-ocean-600 mb-2">Tuesday</h3>
-          <p class="text-ocean-600/70 text-sm leading-relaxed">
-            4v4 leagues with competitive and recreational divisions. Each division has its own playoff night.
-          </p>
-          <SpotsCounter day="Tue" />
-        </div>
-
-        <div class="text-center p-8 rounded-2xl bg-sand-50 border border-sand-200">
-          <div class="w-16 h-16 bg-ocean-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span class="text-white font-display font-bold text-lg">We</span>
-          </div>
-          <h3 class="font-display font-bold text-xl text-ocean-600 mb-2">Wednesday</h3>
-          <p class="text-ocean-600/70 text-sm leading-relaxed">
-            Shuffle league. Teams are re-drafted each week so you'll meet everyone. Play our Level Up format where winning teams take on progressive handicaps, keeping every match competitive. Plus free prize raffles between games all night long.
-          </p>
-          <a href="/leagues/shuffle/" class="inline-block mt-3 text-sm font-semibold text-ocean-500 hover:text-ocean-700 transition-colors">
-            Learn how shuffle works &rarr;
-          </a>
-          <SpotsCounter day="Wed" />
-        </div>
-
-        <div class="text-center p-8 rounded-2xl bg-sand-50 border border-sand-200">
-          <div class="w-16 h-16 bg-sand-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span class="text-white font-display font-bold text-lg">Th</span>
-          </div>
-          <h3 class="font-display font-bold text-xl text-ocean-600 mb-2">Thursday</h3>
-          <p class="text-ocean-600/70 text-sm leading-relaxed">
-            4v4 leagues with competitive and recreational divisions. Each division has its own playoff night.
-          </p>
-          <SpotsCounter day="Thu" />
-        </div>
+        <LeagueCard
+          day="Tuesday"
+          format="4v4"
+          price="$65"
+          description="Requires 1 female minimum per team. Welcomes all skill levels, typically intermediate to competitive."
+          highlight="Two divisions: recreational and competitive with separate playoff nights."
+          registrationKnown={registrationKnown}
+          regEntries={regByDay['tuesday']}
+          details={[
+            '6 regular season games over 6 weeks plus a division-specific playoff night',
+            '1 game every week, no bye weeks',
+            'Game times: 6:30, 7:30, or 8:30 PM',
+            'Form your own team or join as individual',
+            'All skill levels welcome',
+          ]}
+        />
+        <LeagueCard
+          day="Wednesday"
+          format="Shuffle"
+          price="$55"
+          description="Social focus with volleyball secondary. Individual sign-ups with weekly team redrafts. Meet new people every week!"
+          link={{ href: '/leagues/shuffle/', label: 'Learn how shuffle works →' }}
+          highlight='Level Up format: winning teams advance and receive handicaps, keeping every match competitive.'
+          registrationKnown={registrationKnown}
+          regEntries={regByDay['wednesday']}
+          details={[
+            'Individual sign-ups. Teams re-drafted each week',
+            'Free prize raffles between games — checking in is your entry',
+            '6 weekly sessions plus playoffs',
+            'Approximately 2-hour sessions',
+            'All skill levels welcome',
+          ]}
+        />
+        <LeagueCard
+          day="Thursday"
+          format="4v4"
+          price="$65"
+          description="Requires 1 female minimum per team. Welcomes all skill levels, typically intermediate to competitive."
+          highlight="Two divisions: recreational and competitive with separate playoff nights."
+          registrationKnown={registrationKnown}
+          regEntries={regByDay['thursday']}
+          details={[
+            '6 regular season games over 6 weeks plus a division-specific playoff night',
+            '1 game every week, no bye weeks',
+            'Game times: 6:30, 7:30, or 8:30 PM',
+            'Form your own team or join as individual',
+            'All skill levels welcome',
+          ]}
+        />
       </div>
     </div>
   </section>
