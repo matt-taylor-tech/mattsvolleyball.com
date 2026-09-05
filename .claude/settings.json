@@ -293,7 +293,12 @@
       "Bash(disown)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:4321/)",
       "Bash(node \"/private/tmp/claude-501/-Users-suigeneris-Github-mattsvolleyball-com/7eb79d93-3230-46b4-bc2e-27584bea6143/scratchpad/screenshot.mjs\")",
-      "Bash(gh pr *)"
+      "Bash(gh pr *)",
+      "Bash(npx wrangler *)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" https://volleyballengine.com/api/cron/registration-digest)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" https://volleyballengine.com/demo)",
+      "Bash(curl -sD - -o /dev/null \"https://volleyballengine.com/demo\")",
+      "Bash(timeout 300 npx next build)"
     ]
   }
 }
