@@ -298,7 +298,10 @@
       "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" https://volleyballengine.com/api/cron/registration-digest)",
       "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" https://volleyballengine.com/demo)",
       "Bash(curl -sD - -o /dev/null \"https://volleyballengine.com/demo\")",
-      "Bash(timeout 300 npx next build)"
+      "Bash(timeout 300 npx next build)",
+      "Bash(npx opennextjs-cloudflare *)",
+      "mcp__supabase-mv__query_logs",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
