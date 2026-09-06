@@ -7,14 +7,27 @@
 // and recent group messages are scanned for it before posting. Counts only
 // grow, so an unchanged snapshot means nothing new to say.
 //
+// Quiet rule: once the team nights are full and the digest saying so has
+// posted, the main group hears nothing more for the rest of the season except
+// a spot-opened alert when a TEAM drops. Player-cap nights (Wed Shuffle) keep
+// being counted and shown in the digest, but their counts never trigger a post
+// to the main group -- a shuffle roster ticks up one player at a time, and
+// redigesting the same two FULL lines on each tick is pestering, not news.
+//
+// --shuffle mode is the other half of that trade: the shuffle count still gets
+// an audience, just in the night's own group and on a fixed twice-a-week
+// cadence instead of daily in front of everyone.
+//
 // Env:  GROUPME_TOKEN    user access token
 // Args: --dry-run     print instead of posting
 //       --force       skip the registration-window gate (testing)
 //       --test        route posts to the Bot Test Group
+//       --shuffle     post spots-left to each player-cap night's own group
+//                     instead of the status digest to the main group
 
 import {
   API_BASE, ORG_ID, MAIN_GROUP_ID, TEST_CONVERSATION_ID, TIME_ZONE,
-  loadUpcomingConfig, postForm, postToTopic,
+  CONVERSATION_IDS, etDateKey, loadUpcomingConfig, postForm, postToTopic,
 } from './lib/mv.mjs';
 
 // The general registration page we tell people to visit. No `cid`, so it does
@@ -87,15 +100,33 @@ async function fetchPlayerCount(seasonId, divisionId) {
   return total;
 }
 
-/** source_guids of recent messages, newest first. */
-async function recentGuids(token, conversationId) {
-  const res = await fetch(
-    `https://api.groupme.com/v3/groups/${conversationId}/messages?limit=100`,
-    { headers: { 'X-Access-Token': token } },
-  );
-  if (!res.ok) return []; // fresh conversation; treat as no history
-  const messages = (await res.json())?.response?.messages ?? [];
-  return messages.map((m) => m.source_guid).filter(Boolean);
+/**
+ * source_guids of recent messages, newest first.
+ *
+ * Pages backwards until `stopAt` matches a guid or `maxPages` requests have
+ * gone out. One page is NOT enough for the snapshot baseline: 100 messages is
+ * about three weeks in the main group, and the quiet rule can leave the bot
+ * silent for a whole season, so the last digest we need to compare against
+ * would scroll out of reach and the bot would start over from scratch.
+ */
+async function recentGuids(token, conversationId, { stopAt, maxPages = 6 } = {}) {
+  const out = [];
+  let beforeId = null;
+  for (let page = 0; page < maxPages; page += 1) {
+    const url = new URL(`https://api.groupme.com/v3/groups/${conversationId}/messages`);
+    url.searchParams.set('limit', '100');
+    if (beforeId) url.searchParams.set('before_id', beforeId);
+    const res = await fetch(url, { headers: { 'X-Access-Token': token } });
+    // 304 once the history runs out; anything else means a fresh or
+    // unreadable conversation. Either way, what we have so far is the answer.
+    if (!res.ok) break;
+    const messages = (await res.json())?.response?.messages ?? [];
+    if (messages.length === 0) break;
+    out.push(...messages.map((m) => m.source_guid).filter(Boolean));
+    if (stopAt && out.some(stopAt)) break;
+    beforeId = messages[messages.length - 1].id;
+  }
+  return out;
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
@@ -104,6 +135,7 @@ async function main() {
   const dryRun = process.argv.includes('--dry-run');
   const testMode = process.argv.includes('--test');
   const force = process.argv.includes('--force');
+  const shuffleMode = process.argv.includes('--shuffle');
 
   if (!force && !(await registrationIsOpen())) {
     console.log('No registration window open: nothing to post.');
@@ -129,7 +161,9 @@ async function main() {
       nightsDone.add(division.day);
       targets.push({
         id: `night-${division.day}`,
+        day: division.day,
         label: `${DAY_FULL[division.day] ?? division.day} leagues`,
+        fullLabel: `${DAY_FULL[division.day] ?? division.day} leagues`,
         cap: nightCap,
         unit: 'teams',
         divisionIds: config.divisions.filter((d) => d.day === division.day).map((d) => d.id),
@@ -139,16 +173,21 @@ async function main() {
     const playerCap = config.playerCaps[division.id];
     const teamCap = config.maxTeams[division.id];
     const label = `${division.day} ${division.name}`;
+    // fullLabel spells the day out ("Wednesday Shuffle"). The digest keeps the
+    // terse form so its lines stay inside GroupMe's width; the standalone
+    // shuffle post has room to read like a sentence.
+    const fullLabel = `${DAY_FULL[division.day] ?? division.day} ${division.name}`;
+    const common = { id: division.id, day: division.day, label, fullLabel, divisionIds: [division.id] };
     if (playerCap) {
-      targets.push({ id: division.id, label, cap: playerCap, unit: 'players', divisionIds: [division.id] });
+      targets.push({ ...common, cap: playerCap, unit: 'players' });
     } else if (teamCap) {
-      targets.push({ id: division.id, label, cap: teamCap, unit: 'teams', divisionIds: [division.id] });
+      targets.push({ ...common, cap: teamCap, unit: 'teams' });
     }
     // No cap configured for this division: nothing to report.
   }
 
   const lines = [];
-  const divisionsChecked = []; // {label, count, cap} in stable config order
+  const divisionsChecked = []; // {id, day, label, fullLabel, count, cap, unit}, in config order
   for (const target of targets) {
     const counts = await Promise.all(
       target.divisionIds.map(async (divId) => (
@@ -161,7 +200,10 @@ async function main() {
     const remaining = Math.max(0, target.cap - count);
     const status = remaining === 0 ? 'FULL' : `${remaining} left`;
     lines.push(`${target.label}: ${count}/${target.cap} ${target.unit} (${status})`);
-    divisionsChecked.push({ id: target.id, label: target.label, count, cap: target.cap });
+    divisionsChecked.push({
+      id: target.id, day: target.day, label: target.label, fullLabel: target.fullLabel,
+      count, cap: target.cap, unit: target.unit,
+    });
   }
 
   if (lines.length === 0) {
@@ -170,23 +212,94 @@ async function main() {
   }
   console.log(lines.join('\n'));
 
+  // ── --shuffle: spots-left nudge in each player-cap night's own group ───────
+  // Cadence-driven, not change-driven: the workflow decides when (twice a
+  // week), and this only refuses to repeat itself within the same day. A
+  // shuffle roster gains and loses a player at a time, so posting on every
+  // change would be the daily nagging we just took out of the main group.
+  if (shuffleMode) {
+    const todayKey = etDateKey(new Date());
+    for (const night of divisionsChecked.filter((d) => d.unit === 'players')) {
+      const conversationId = testMode ? TEST_CONVERSATION_ID : CONVERSATION_IDS[night.day];
+      if (!conversationId) {
+        console.log(`No conversation configured for ${night.day}: skipping ${night.label}.`);
+        continue;
+      }
+      const remaining = Math.max(0, night.cap - night.count);
+      if (remaining === 0) {
+        console.log(`${night.label} is full: nothing to nudge about.`);
+        continue;
+      }
+
+      // One page is plenty here: this group turns over 100 messages in about
+      // ten days, and we only need to know about today.
+      const guid = `mv-shufflespots-${night.id}-${todayKey}`;
+      const seenHere = new Set(await recentGuids(token, conversationId, { maxPages: 1 }));
+      if (seenHere.has(guid)) {
+        console.log(`Already posted ${night.label} spots today.`);
+        continue;
+      }
+
+      const spots = remaining === 1 ? '1 spot' : `${remaining} spots`;
+      const message = [
+        `🏐 ${night.fullLabel}: ${spots} left for ${config.seasonLabel}`,
+        `${night.count} of ${night.cap} players are in. Grab a spot, or send a friend:`,
+        REGISTER_PAGE,
+        `🤖 Auto-posted by Matt's bot`,
+      ].join('\n');
+
+      const where = testMode ? 'TEST group' : `${night.day} group`;
+      if (dryRun) {
+        console.log(`[dry-run] Would post to the ${where} (guid ${guid}):\n\n${message}\n`);
+      } else {
+        await postToTopic(token, conversationId, message, null, guid);
+        console.log(`Posted to the ${where} (${guid}).`);
+      }
+    }
+    return;
+  }
+
   const conversationId = testMode ? TEST_CONVERSATION_ID : MAIN_GROUP_ID;
   const target = testMode ? 'TEST group' : 'main group';
   const snapshot = divisionsChecked.map((d) => d.count);
-  const guid = `mv-regstatus-${snapshot.join('-')}`;
 
-  const guids = await recentGuids(token, conversationId);
+  // The season id rides along in the snapshot guid so a baseline never leaks
+  // across the season rollover: counts reset to zero at rollover, and a stale
+  // full snapshot would otherwise read as "every team dropped" and fire a
+  // round of spot-opened alerts on day one of the new season.
+  const snapshotPrefix = `mv-regstatus-${config.seasonId}-`;
+  const guid = `${snapshotPrefix}${snapshot.join('-')}`;
+
+  /** Counts from a snapshot guid, or null if it isn't one we can trust. */
+  const decodeSnapshot = (g) => {
+    let body = null;
+    if (g.startsWith(snapshotPrefix)) {
+      body = g.slice(snapshotPrefix.length);
+    } else if (g.startsWith('mv-regstatus-')) {
+      // Legacy guid, written before the season id was included. It carries
+      // only the counts, so the field count is the only sanity check
+      // available; another season's guid fails it and is ignored.
+      body = g.slice('mv-regstatus-'.length);
+    }
+    if (body === null) return null;
+    const parts = body.split('-').map(Number);
+    const usable = parts.length === divisionsChecked.length && parts.every(Number.isFinite);
+    return usable ? parts : null;
+  };
+
+  const guids = await recentGuids(token, conversationId, { stopAt: (g) => decodeSnapshot(g) !== null });
   const seen = new Set(guids);
   const toPost = []; // {guid, message}
 
   // Spot-opened alerts: a division that was at/over cap in the last posted
   // digest and now has room again means someone dropped. Announce it; those
-  // spots refill fastest when people hear quickly.
-  const lastSnapshot = guids
-    .find((g) => g.startsWith('mv-regstatus-'))
-    ?.slice('mv-regstatus-'.length).split('-').map(Number);
-  if (lastSnapshot && lastSnapshot.length === divisionsChecked.length) {
+  // spots refill fastest when people hear quickly. Team spots only — a
+  // shuffle roster gains and loses individuals all season, so alerting on it
+  // would be noise rather than news.
+  const lastSnapshot = guids.map(decodeSnapshot).find((counts) => counts !== null) ?? null;
+  if (lastSnapshot) {
     for (const [i, division] of divisionsChecked.entries()) {
+      if (division.unit !== 'teams') continue;
       if (lastSnapshot[i] >= division.cap && division.count < division.cap) {
         const spotGuid = `mv-spotopen-${division.id}-${division.count}`;
         if (seen.has(spotGuid)) continue;
@@ -202,18 +315,23 @@ async function main() {
     }
   }
 
-  // Once the league is full and the FULL digest has posted, stay quiet even
-  // if raw counts drift (e.g. an over-cap add): the message would read the
-  // same. The next post is the spot-opened alert, when there's actual news.
-  const allFullNow = divisionsChecked.every((d) => d.count >= d.cap);
-  const allFullBefore = lastSnapshot
-    && lastSnapshot.length === divisionsChecked.length
-    && divisionsChecked.every((d, i) => lastSnapshot[i] >= d.cap);
+  // Once a digest has gone out saying the team nights are full, that digest was
+  // the last word: from here the main group only ever hears a spot-opened
+  // alert. Checking what the LAST DIGEST said (rather than what is true now)
+  // is what keeps a reopened spot from restarting the daily digest -- the
+  // alert above already carried that news, and a digest behind it would just
+  // say the same thing twice.
+  //
+  // Player-cap nights are excluded from the test, so a shuffle roster filling
+  // up can never break the silence on its own. Those counts go to the night's
+  // own group instead, via --shuffle.
+  const teamsFullBefore = lastSnapshot
+    && divisionsChecked.every((d, i) => d.unit !== 'teams' || lastSnapshot[i] >= d.cap);
 
   if (seen.has(guid)) {
     console.log('Counts unchanged since the last digest.');
-  } else if (allFullNow && allFullBefore) {
-    console.log('Still fully booked; FULL digest already posted.');
+  } else if (teamsFullBefore) {
+    console.log('Team nights were full as of the last digest: main group stays quiet.');
   } else {
     toPost.push({
       guid,

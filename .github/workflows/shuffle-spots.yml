@@ -1,0 +1,47 @@
+name: Shuffle spots
+
+on:
+  schedule:
+    # 14:15 UTC = 10:15 AM EDT; with GitHub cron lag this lands by ~11 AM.
+    # Monday and Thursday: the two moments people actually decide to play.
+    # Thursday is the morning after shuffle night, while last night is still
+    # fresh; Monday is when the week gets planned. Wednesday itself is left
+    # alone -- the schedule post, the RSVP check and the weather check all
+    # already land in that group on game day. Nothing else reaches a shuffle
+    # group on Monday: the weekly recap only posts to tracked divisions.
+    #
+    # Posts only while a registration window is open AND the night still has
+    # spots. Goes to the night's own group, never the main league group.
+    - cron: '15 14 * * 1,4'
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Skip the registration-window gate'
+        type: boolean
+        default: false
+      dry_run:
+        description: 'Print instead of posting'
+        type: boolean
+        default: false
+      test:
+        description: 'Post to the Bot Test Group instead of the night group'
+        type: boolean
+        default: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Post shuffle spots
+        env:
+          GROUPME_TOKEN: ${{ secrets.GROUPME_TOKEN }}
+        run: |
+          ARGS="--shuffle"
+          if [ "${{ inputs.force }}" = "true" ]; then ARGS="$ARGS --force"; fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          if [ "${{ inputs.test }}" = "true" ]; then ARGS="$ARGS --test"; fi
+          node scripts/post-registration-status.mjs $ARGS
