@@ -109,7 +109,20 @@ const gradientClass = dayColors[day] || 'from-ocean-500 to-ocean-600';
           const matchedDiv = divisionFor(entry);
           return entry.isOpen ? (
             <div>
-              <a href={entry.regUrl} target="_blank" rel="noopener noreferrer" class="btn-primary text-center w-full block">
+              {/* Once the night is at cap, src/lib/spotsCounter.ts retitles this
+                  button in the browser ("Join the Waitlist" for a player cap,
+                  "Join a Team" for a team cap). The link is right either way:
+                  TeamLinkt keeps the form open past the cap and takes the extra
+                  signups as a free waitlist. */}
+              <a
+                href={entry.regUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="btn-primary text-center w-full block"
+                data-signup-night={hasNightCap ? dayKey : null}
+                data-signup-division={!hasNightCap && matchedDiv ? matchedDiv.id : null}
+                data-signup-label={label}
+              >
                 Sign Up - {label}
               </a>
               <p class="text-xs text-ocean-600/70 text-center mt-1">
