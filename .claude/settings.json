@@ -301,7 +301,10 @@
       "Bash(timeout 300 npx next build)",
       "Bash(npx opennextjs-cloudflare *)",
       "mcp__supabase-mv__query_logs",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(npx eslint *)",
+      "Bash(npx tsx *)",
+      "Bash(supabase start *)"
     ]
   }
 }
