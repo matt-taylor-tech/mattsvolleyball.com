@@ -6,10 +6,11 @@ Coed sand volleyball leagues in the Lake Norman area, NC. Built with Astro, Tail
 
 - **Astro** (static output)
 - **Tailwind CSS** with custom sand/ocean/coral palette
-- **Cloudflare Pages** for hosting
+- **Cloudflare Pages** for hosting, plus Pages Functions for a small live registration API
 - **Cloudflare R2** for image storage
 - **Formspree** for contact form
 - **TeamLinkt** for schedule, teams, standings, scores, and registration
+- **GroupMe** for league chat, fed by scheduled bots running on GitHub Actions
 
 ## Getting Started
 
@@ -19,40 +20,66 @@ npm run dev      # Start dev server
 npm run build    # Build to dist/
 npm run preview  # Preview production build
 npm run check:teamlinkt  # Validate season/division IDs against TeamLinkt
-npm run post:schedule    # Post today's games to GroupMe (--dry-run / --date=YYYY-MM-DD)
 ```
 
-TeamLinkt maintenance notes and endpoint references live in [teamlinkt.md](teamlinkt.md).
+TeamLinkt maintenance notes and endpoint references live in [teamlinkt.md](teamlinkt.md). It is the runbook for setting up each new season.
+
+### Local secrets
+
+Neither file is committed.
+
+- `.env` holds the R2 credentials (see [Deployment](#deployment-cloudflare-pages)). The build and the champions scripts read it.
+- `.groupme.local.json` holds a GroupMe user access token as `{ "access_token": "..." }`. The GroupMe scripts read the token from the `GROUPME_TOKEN` environment variable, so pass it in when running one locally:
+
+```bash
+GROUPME_TOKEN=$(node -p "require('./.groupme.local.json').access_token") \
+  npm run post:schedule -- --test --dry-run
+```
 
 ## Project Structure
 
 ```text
+.github/workflows/           # Scheduled GroupMe bots + daily site rebuild
+emails/                      # HTML registration email templates
+functions/api/               # Cloudflare Pages Functions (live registration status)
+public/scripts/              # Browser script that refreshes register buttons
+scripts/                     # GroupMe bots, TeamLinkt preflight, R2 champion tools
+│   └── lib/mv.mjs           # Shared GroupMe, date, and config helpers for the bots
 src/
 ├── components/
 │   ├── Header.astro         # Sticky nav with mobile menu & dropdown
 │   ├── Footer.astro         # 3-column footer with social links
 │   ├── ChampionCard.astro   # Champion team card with R2 image support
 │   ├── LeagueCard.astro     # League info card with registration state CTA
+│   ├── SpotsCounter.astro   # "X of Y teams · Z spots left" placeholders
+│   ├── UpcomingGames.astro  # Upcoming games widget
+│   ├── FindYourNight.astro  # Home page league-night cards (reuses LeagueCard)
+│   ├── ExternalRedirect.astro  # Instant redirect page to an external URL (currently unused)
 │   ├── FAQAccordion.astro   # Accessible accordion
 │   └── GalleryGrid.astro    # Responsive image grid
-├── content/
-│   ├── config.ts            # Content collection schemas
-│   └── seasons/             # Season info markdown files
+├── data/
+│   └── champions.fallback.json  # Committed champions snapshot for R2 outages
 ├── lib/
+│   ├── seasonConfig.ts      # Season/division ids, dates, caps, playoff nights
 │   ├── registration.ts      # TeamLinkt scrape + regStatus logic
+│   ├── spotsCounter.ts      # Browser-side spots-left counters
+│   ├── teamCounts.ts        # Live team counts per division
+│   ├── community.ts         # GroupMe links used across the site
 │   └── champions.ts         # R2 object listing + champion filename parsing
 ├── layouts/
 │   └── Layout.astro         # Base layout with SEO meta tags
 ├── pages/
 │   ├── index.astro          # Home
+│   ├── 404.astro
 │   ├── champions.astro      # Hall of Champions
 │   ├── contact.astro        # Contact form + social links
 │   ├── image-gallery.astro  # Photo gallery
 │   ├── playlists.astro      # Curated playlists
 │   ├── rainout-info.astro   # Weather/rainout policy
+│   ├── terms.astro
 │   ├── leagues/
 │   │   ├── index.astro      # Leagues + FAQ
-│   │   └── *.astro          # schedule/standings/scores/shuffle/etc.
+│   │   └── *.astro          # schedule/standings/scores/teams/team/playoffs/shuffle
 │   └── rules/
 │       ├── index.astro      # Rules home
 │       └── skill-levels.astro
@@ -64,15 +91,17 @@ src/
 
 The site automatically determines what to show based on live data from TeamLinkt. The logic lives in `src/lib/registration.ts` (`getRegistrationData()`), which scrapes TeamLinkt's registration page at build time.
 
+Because the site is static, anything that depends on today's date is decided at build time. The [daily rebuild](#scheduled-jobs-github-actions) publishes those changes on their own.
+
 ### How `regStatus` works
 
 The system resolves to one of four states:
 
 | Status | Condition | Hero (home) | Nav button | Footer link |
 | --- | --- | --- | --- | --- |
-| `open` | Any registration window is currently open | "Sign Up for SPRING 2026!" + Register Now | Sign Up | Register Now → |
-| `coming-soon` | All registration windows are in the future | "SPRING 2026 Is Coming!" + opens date | View Leagues | View Leagues → |
-| `in-progress` | Current date is between season start and end dates | "SPRING 2026 Is Underway!" | View Leagues | View Leagues → |
+| `open` | Any registration window is currently open | "Sign Up for {SEASON}!" + Register Now | Sign Up | Register Now → |
+| `coming-soon` | All registration windows are in the future | "{SEASON} Is Coming!" + opens date | View Leagues | View Leagues → |
+| `in-progress` | Current date is between season start and end dates | "{SEASON} Is Underway!" | View Leagues | View Leagues → |
 | `closed` | All registration windows have passed and season has ended | "Matt's Volleyball" (generic) | View Leagues | View Leagues → |
 
 Season start/end dates are scraped from the TeamLinkt registration detail page ("Season Dates" field).
@@ -101,6 +130,12 @@ Three cap shapes are supported, all in `src/lib/seasonConfig.ts`:
 
 Fall 2026 caps Tuesday and Thursday by night (12 teams each) and Wednesday by players (30). The GroupMe registration digest (`npm run check:registration`) reads the same maps, so its report matches the site.
 
+### Live register buttons between builds
+
+Registration can open or close between daily builds. To keep the buttons current, `public/scripts/update-registration-cta.js` calls `/api/registration-status` after the page loads and updates any element marked with `data-cta-type`. That endpoint is a Cloudflare Pages Function (`functions/api/registration-status.ts`), cached for 5 minutes. `functions/api/registration.ts` returns the full scraped registration data as JSON.
+
+`update-registration-cta.js` cannot import the config, so it holds the registration URL as text. [teamlinkt.md](teamlinkt.md) lists it among the files to check when registration links change.
+
 ### Where `regStatus` is used
 
 - `src/pages/index.astro` - Hero heading, subtitle, and CTA buttons
@@ -109,13 +144,54 @@ Fall 2026 caps Tuesday and Thursday by night (12 teams each) and Wednesday by pl
 - `src/components/Header.astro` - Nav button (Sign Up vs View Leagues)
 - `src/components/Footer.astro` - Quick links (Register Now vs View Leagues)
 - `src/layouts/Layout.astro` - Fetches data once and passes to Header/Footer
+- `functions/api/registration-status.ts` + `public/scripts/update-registration-cta.js` - Live button updates after page load
 
-## Content Collections
+## GroupMe Automation
 
-Legacy Astro content collections for seasons were removed because they were unused.
-Season labels, dates, and registration status are read directly from TeamLinkt via `src/lib/registration.ts`.
+The league's GroupMe chats are fed by Node scripts in `scripts/`. Shared helpers, including each night's GroupMe conversation ids, live in `scripts/lib/mv.mjs`.
 
-### Champions (R2 filename-driven)
+| Script | npm script | What it does |
+| --- | --- | --- |
+| `post-daily-schedule.mjs` | `post:schedule` | Posts a screenshot of today's schedule to that night's topic (text fallback). On Wednesday Shuffle days it creates an RSVP calendar event instead. |
+| `post-missing-scores.mjs` | `post:missing` | The morning after a game night, nudges each division's captains topic about unsubmitted scores. Silent when everything is scored. |
+| `post-results.mjs` | `post:results` | Weekly recap: last week's set-by-set results and current standings, one message per division. |
+| `post-registration-status.mjs` | `check:registration` | While registration is open, posts a spots-left digest to the main group when counts change. `--shuffle` posts to each player-cap night's own group instead. |
+| `check-shuffle-rsvp.mjs` | `check:rsvp` | On shuffle Wednesdays, reads the RSVP count and posts either a "need a few more" nudge or a "we're on" confirmation. |
+| `check-weather.mjs` | `check:weather` | On league nights, checks the NWS hourly forecast for the game window and warns when rain or storms look likely. The rainout call itself stays manual. |
+| `bulk-add-members.mjs` | none | Adds registered players to the GroupMe groups from a TeamLinkt registration CSV export. Dry run unless `--send` is passed. |
+
+Common flags (not every script takes every one; each script's header comment lists its own):
+
+- `--dry-run` prints the message instead of posting
+- `--test` routes posts to the Bot Test Group instead of the real chats
+- `--date=YYYY-MM-DD` overrides "today" (Eastern time)
+- `--force` skips the registration-window or game-day gate
+
+All of them need `GROUPME_TOKEN`. See [Local secrets](#local-secrets) for running one locally.
+
+When division ids change each season, also update `CAPTAINS_TOPICS` in `scripts/post-missing-scores.mjs` (see [teamlinkt.md](teamlinkt.md)).
+
+### Scheduled jobs (GitHub Actions)
+
+Each workflow in `.github/workflows/` runs on a schedule and can also be started by hand from the Actions tab, with inputs for dry run, test group, and date overrides. Times are Eastern daylight time; the crons are in UTC, so they run an hour earlier in winter, and GitHub can start scheduled jobs up to about 45 minutes late.
+
+| Workflow | When | Runs |
+| --- | --- | --- |
+| `daily-rebuild.yml` | Daily, 1:10 AM | Triggers a Cloudflare Pages deploy so date-driven changes publish |
+| `daily-schedule.yml` | Mon-Fri, 9:15 AM | `post-missing-scores.mjs`, then `post-daily-schedule.mjs` |
+| `registration-alerts.yml` | Daily, 10:15 AM | `post-registration-status.mjs` |
+| `shuffle-spots.yml` | Mon + Thu, 10:15 AM | `post-registration-status.mjs --shuffle` |
+| `weekly-recap.yml` | Mon, 11:15 AM | `post-results.mjs` |
+| `weather-check.yml` | Mon-Thu, 2:15 PM | `check-weather.mjs` |
+| `shuffle-rsvp.yml` | Wed, 2:15 PM | `check-shuffle-rsvp.mjs` |
+
+Repository secrets:
+
+- `GROUPME_TOKEN` - GroupMe user access token (all bots)
+- `GROUPME_BOT_ID`, `GROUPME_BOT_ID_TEST` - bot ids used as a fallback for posting to a group's main chat
+- `CLOUDFLARE_DEPLOY_HOOK_URL` - Cloudflare Pages deploy hook for the daily rebuild
+
+## Champions (R2 filename-driven)
 
 Champions are not read from markdown files. The champions page reads image object keys from R2 and parses metadata from each filename.
 
@@ -137,16 +213,19 @@ Where this is implemented:
 - `src/lib/champions.ts` (`getChampions()`)
 - `src/pages/champions.astro`
 
-If you're bulk uploading and normalizing names, use:
+If you're bulk uploading and normalizing names, use `scripts/upload-champions.mjs`. It reads `champion-mapping.csv`, resizes and compresses each image, and uploads it to R2:
 
 ```bash
+node scripts/upload-champions.mjs --dry-run   # Preview
 node scripts/upload-champions.mjs
 ```
 
-Dry run:
+### Fallback snapshot
+
+If the R2 credentials are missing, the listing fails, or R2 returns no results at build time, the champions page reads `src/data/champions.fallback.json` instead. Refresh that snapshot after uploading new photos, then commit it:
 
 ```bash
-node scripts/upload-champions.mjs --dry-run
+npm run sync:champions
 ```
 
 ## Deployment (Cloudflare Pages)
@@ -160,11 +239,17 @@ node scripts/upload-champions.mjs --dry-run
   - `R2_SECRET_ACCESS_KEY` = R2 secret access key
   - `R2_BUCKET_NAME` = bucket name
 
-If the private R2 credentials are missing, the champions page safely renders without entries.
+If the private R2 credentials are missing, the champions page falls back to the committed snapshot (see [Fallback snapshot](#fallback-snapshot)).
+
+The `functions/` directory is deployed with the site as Cloudflare Pages Functions.
 
 ## Images
 
-Images are served from Cloudflare R2. Place your logo at `public/images/vbenginelite.png`. All other images (champion photos, gallery) should be uploaded to R2 and referenced via the `PUBLIC_R2_BASE_URL`.
+Images are served from Cloudflare R2 and referenced via `PUBLIC_R2_BASE_URL`. That includes the logo (`logos/vbenginelite.png`, used by the header, footer, and social preview image), champion photos, and the gallery.
+
+## Registration Emails
+
+`emails/` holds standalone HTML email templates for registration announcements: one league-wide, one for Wednesday Shuffle, and one for Monday 3v3 Coed. They are not part of the site build. Update the season details in them before each send.
 
 ## Contact Form
 
@@ -178,3 +263,9 @@ Update the form `action` URL there if you switch Formspree projects.
 - [Facebook](https://www.facebook.com/groups/mattsvolleyball/)
 - [Instagram](https://instagram.com/mattsvolleyball/)
 - [GroupMe](https://groupme.com/join_group/115950918/jG3kZJ04)
+
+## License
+
+The code in this repository is source-available under the [PolyForm Noncommercial License 1.0.0](LICENSE). You're welcome to read it, learn from it, and use it for noncommercial purposes. Commercial use requires permission.
+
+The Matt's Volleyball name, logo, photos, and league content are not covered by the license and may not be reused.
