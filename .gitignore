@@ -23,8 +23,10 @@ node_modules/
 # OS
 .DS_Store
 Thumbs.db
-.claude/settings.json
-.claude/settings.json
+
+# local AI tool config
+.claude/
+.codex/
 
 # playwright mcp verification artifacts
 .playwright-mcp/
