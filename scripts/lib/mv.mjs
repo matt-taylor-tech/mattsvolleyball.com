@@ -108,6 +108,26 @@ export async function loadConfig() {
   return { seasonId, divisions, playoffsActive, playoffId, playoffDates };
 }
 
+/**
+ * Both configured seasons, current first, ignoring the rollover date:
+ * [{ which, id, label, divisions }]. Seasons without a numeric id are skipped.
+ * Used by the champion wizard, which works on whichever season just finished.
+ */
+export async function loadSeasons() {
+  const source = await readFile(SEASON_CONFIG_PATH, 'utf8');
+  return [
+    ['current', 'CURRENT_SEASON', 'CURRENT_DIVISIONS'],
+    ['next', 'NEXT_SEASON', 'UPCOMING_DIVISIONS'],
+  ]
+    .map(([which, seasonVar, divisionsVar]) => ({
+      which,
+      id: extractSingleId(source, seasonVar),
+      label: source.match(new RegExp(`const ${seasonVar} = \\{[\\s\\S]*?label: '([^']+)'`))?.[1] ?? '',
+      divisions: extractDivisions(source, divisionsVar),
+    }))
+    .filter((s) => s.id);
+}
+
 /** Playoff nights (YYYY-MM-DD, sorted) for whichever season is active. */
 function extractPlayoffDates(source, hasRolledOver) {
   const seasonName = hasRolledOver ? 'NEXT_SEASON' : 'CURRENT_SEASON';

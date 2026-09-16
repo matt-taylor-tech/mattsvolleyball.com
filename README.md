@@ -213,16 +213,28 @@ Where this is implemented:
 - `src/lib/champions.ts` (`getChampions()`)
 - `src/pages/champions.astro`
 
-If you're bulk uploading and normalizing names, use `scripts/upload-champions.mjs`. It reads `champion-mapping.csv`, resizes and compresses each image, and uploads it to R2:
+### Adding champion photos
+
+Use the champion wizard instead of naming and uploading files by hand:
 
 ```bash
-node scripts/upload-champions.mjs --dry-run   # Preview
-node scripts/upload-champions.mjs
+npm run champions
 ```
+
+It opens a local page (`http://127.0.0.1:4390`) where you:
+
+1. Pick the season. It offers `CURRENT_SEASON` and `NEXT_SEASON` from `src/lib/seasonConfig.ts`, with the current season first.
+2. Drop in the photos.
+3. Pick each champion team from that season's TeamLinkt teams, grouped by night and division. This fills in the year, season, night and division. "Edit details" lets you override them, for example for an older season.
+4. Drag the square crop, then upload.
+
+The wizard builds the file name, crops the photo to 1200×1200 JPEG, uploads it to R2, and refreshes `src/data/champions.fallback.json`. Commit that file afterwards. A checklist shows which divisions already have a photo, and you get a warning before replacing an existing file. New photos go live at the nightly rebuild. To publish right away, set `CLOUDFLARE_DEPLOY_HOOK_URL` in `.env`, which adds a "Rebuild site now" button.
+
+Export iPhone HEIC photos as JPEG first. The shared R2 and image code is in `scripts/lib/champions-r2.mjs`.
 
 ### Fallback snapshot
 
-If the R2 credentials are missing, the listing fails, or R2 returns no results at build time, the champions page reads `src/data/champions.fallback.json` instead. Refresh that snapshot after uploading new photos, then commit it:
+If the R2 credentials are missing, the listing fails, or R2 returns no results at build time, the champions page reads `src/data/champions.fallback.json` instead. The wizard refreshes it after each upload. If you change R2 any other way, refresh it by hand and commit it:
 
 ```bash
 npm run sync:champions

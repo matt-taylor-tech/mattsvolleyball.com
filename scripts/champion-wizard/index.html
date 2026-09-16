@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Champion Photos</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+<style>
+  :root {
+    --bg: #F7F6F3;
+    --panel: #FFFFFF;
+    --line: #DAD8D2;
+    --muted: #87847D;
+    --text: #231F20;
+    --soft: #F0EEEA;
+    --accent: #BB4430;
+    --accent-hover: #A13926;
+    --ok: #3F7D58;
+    --warn: #9A6B12;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #171415;
+      --panel: #231F20;
+      --line: #4B5563;
+      --muted: #A5A29B;
+      --text: #F0EEEA;
+      --soft: #363133;
+      --accent: #CD5844;
+      --accent-hover: #BB4430;
+      --ok: #7BBF94;
+      --warn: #E0B35A;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 32px 16px 64px;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { max-width: 1040px; margin: 0 auto; }
+  h1 { font-size: 26px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  h2 { font-size: 16px; margin: 0 0 12px; }
+  p { margin: 0; }
+  .muted { color: var(--muted); }
+  .small { font-size: 13px; }
+  svg.icon { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+
+  header { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; justify-content: space-between; margin-bottom: 24px; }
+  .seasons { display: inline-flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  .seasons button { border: 0; border-radius: 0; background: var(--panel); color: var(--text); padding: 8px 14px; }
+  .seasons button + button { border-left: 1px solid var(--line); }
+  .seasons button[aria-pressed="true"] { background: var(--text); color: var(--bg); }
+
+  button, .btn {
+    font: inherit; cursor: pointer; border-radius: 4px; padding: 8px 14px;
+    border: 1px solid var(--line); background: var(--panel); color: var(--text);
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  button.primary:hover:not(:disabled) { background: var(--accent-hover); }
+  button.link { border: 0; background: none; padding: 0; color: var(--accent); text-decoration: underline; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 16px; }
+  .checklist { margin-bottom: 20px; }
+  .checklist ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px 16px; }
+  .checklist li { display: flex; gap: 8px; align-items: center; }
+  .checklist li.done { color: var(--ok); }
+  .checklist li.todo { color: var(--muted); }
+
+  .drop {
+    border: 2px dashed var(--line); border-radius: 4px; padding: 32px 16px; text-align: center;
+    background: var(--panel); cursor: pointer; margin-bottom: 20px;
+  }
+  .drop.over { border-color: var(--accent); }
+  .drop svg.icon { width: 32px; height: 32px; color: var(--muted); margin-bottom: 8px; }
+
+  .item { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 20px; margin-bottom: 16px; }
+  @media (max-width: 760px) { .item { grid-template-columns: 1fr; } }
+  .crop { background: var(--soft); border-radius: 4px; overflow: hidden; height: 420px; }
+  .crop img { display: block; max-width: 100%; }
+  .fields { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  select, input {
+    width: 100%; font: inherit; padding: 8px 10px; border-radius: 4px;
+    border: 1px solid var(--line); background: var(--panel); color: var(--text);
+  }
+  .summary { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .key { font-family: ui-monospace, Consolas, monospace; font-size: 12px; background: var(--soft); padding: 6px 8px; border-radius: 3px; overflow-wrap: anywhere; }
+  .note { display: flex; gap: 6px; align-items: flex-start; font-size: 13px; }
+  .note.warn { color: var(--warn); }
+  .note.ok { color: var(--ok); }
+  .note.err { color: var(--accent); }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: auto; }
+  .item.uploaded .crop { opacity: .6; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+
+  .banner { border-color: var(--ok); margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+  code { font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Champion photos</h1>
+      <p class="muted">Pick the team, crop the photo, and upload. File names, resizing and the snapshot are handled for you.</p>
+    </div>
+    <div>
+      <div class="small muted" style="margin-bottom:4px">Season</div>
+      <div class="seasons" id="seasons"><span class="muted small" style="padding:8px 14px">Loading from TeamLinkt…</span></div>
+    </div>
+  </header>
+
+  <div class="panel banner" id="banner" hidden>
+    <div class="note ok">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+      <span id="bannerText"></span>
+    </div>
+    <div class="row" style="margin:0">
+      <button id="rebuild" hidden>
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+        Rebuild site now
+      </button>
+      <span class="small" id="rebuildStatus"></span>
+    </div>
+  </div>
+
+  <section class="panel checklist" id="checklist" hidden>
+    <h2 id="checklistTitle"></h2>
+    <ul id="checklistItems"></ul>
+  </section>
+
+  <div class="drop" id="drop" tabindex="0" role="button">
+    <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>
+    <p><strong>Drop champion photos here</strong> or click to choose</p>
+    <p class="small muted">JPEG, PNG or WebP (export iPhone HEIC photos as JPEG first). Each is cropped square and saved at 1200×1200.</p>
+    <input type="file" id="fileInput" accept="image/*" multiple hidden>
+  </div>
+
+  <div class="toolbar" id="toolbar" hidden>
+    <span class="muted small" id="queueCount"></span>
+    <button class="primary" id="uploadAll">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M12 16V4"/><path d="m6 10 6-6 6 6"/><path d="M4 20h16"/></svg>
+      Upload all ready photos
+    </button>
+  </div>
+
+  <div id="queue"></div>
+</main>
+
+<template id="itemTemplate">
+  <section class="panel item">
+    <div class="crop"><img alt=""></div>
+    <div class="fields">
+      <div class="small muted file-name"></div>
+      <div>
+        <label>Champion team</label>
+        <select class="team"></select>
+      </div>
+      <div class="other" hidden>
+        <label>Team name</label>
+        <input class="other-name" type="text" placeholder="Type the team name">
+      </div>
+      <div class="summary small">
+        <span class="summary-text muted"></span>
+        <button type="button" class="link edit-toggle">Edit details</button>
+      </div>
+      <div class="details" hidden>
+        <div class="grid2">
+          <div><label>Year</label><input class="f-year" type="number" min="2000" max="2100"></div>
+          <div><label>Season</label><select class="f-season"></select></div>
+          <div><label>Night</label><input class="f-day" type="text" placeholder="Tuesday"></div>
+          <div><label>Division</label><input class="f-division" type="text" placeholder="Competitive"></div>
+          <div style="grid-column: 1 / -1"><label>Team name</label><input class="f-team" type="text"></div>
+        </div>
+      </div>
+      <div>
+        <div class="small muted" style="margin-bottom:4px">Saved as</div>
+        <div class="key">—</div>
+      </div>
+      <div class="note status" hidden></div>
+      <div class="row">
+        <button class="primary upload">Upload</button>
+        <button class="remove">Remove</button>
+      </div>
+    </div>
+  </section>
+</template>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+<script>
+(() => {
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const ICONS = {
+    warn: '<svg class="icon" viewBox="0 0 24 24"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>',
+    ok: '<svg class="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>',
+    err: '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>',
+    check: '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>',
+    empty: '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>',
+  };
+
+  // Mirrors slugify() in scripts/lib/champions-r2.mjs, for matching only.
+  const slug = (s) => String(s ?? '').normalize('NFKD').replace(/[̀-ͯ]/g, '')
+    .toLowerCase().replace(/&/g, ' and ').replace(/['’]/g, '').replace(/[^a-z0-9+]+/g, '-').replace(/^-+|-+$/g, '');
+
+  let context = null;
+  let season = null;          // selected season from context.seasons
+  let champions = [];         // everything currently in R2
+  const items = [];           // queued photos
+
+  async function api(path, options = {}) {
+    const res = await fetch(path, options);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    return data;
+  }
+
+  // ── Season + checklist ─────────────────────────────────────────────────────
+
+  function seasonLabel(value) {
+    return context.seasonOptions.find((o) => o.value === value)?.label ?? value;
+  }
+
+  function renderSeasons() {
+    const box = $('#seasons');
+    box.innerHTML = '';
+    for (const s of context.seasons) {
+      const b = document.createElement('button');
+      b.textContent = s.label;
+      b.setAttribute('aria-pressed', String(s === season));
+      b.onclick = () => { season = s; renderSeasons(); renderChecklist(); items.forEach(renderTeamOptions); };
+      box.append(b);
+    }
+  }
+
+  function hasChampion(year, seasonValue, day, division) {
+    const name = seasonLabel(seasonValue);
+    return champions.find((c) => c.year === Number(year) && c.season === name
+      && slug(c.day) === slug(day) && slug(c.division) === slug(division));
+  }
+
+  function renderChecklist() {
+    if (!season) return;
+    $('#checklist').hidden = false;
+    $('#checklistTitle').textContent = `${seasonLabel(season.season) || season.label} ${season.year}: photos in R2`;
+    const list = $('#checklistItems');
+    list.innerHTML = '';
+    for (const d of season.divisions) {
+      const found = hasChampion(season.year, season.season, d.day, d.division);
+      const li = document.createElement('li');
+      li.className = found ? 'done' : 'todo';
+      li.innerHTML = found ? ICONS.check : ICONS.empty;
+      li.append(document.createTextNode(found ? `${d.label}: ${found.teamName}` : `${d.label}: no photo yet`));
+      list.append(li);
+    }
+  }
+
+  async function refreshChampions() {
+    try {
+      champions = (await api('/api/champions')).champions;
+      renderChecklist();
+    } catch (err) {
+      console.warn('Could not list champions', err);
+    }
+  }
+
+  // ── Queue items ────────────────────────────────────────────────────────────
+
+  function addFiles(fileList) {
+    for (const file of fileList) {
+      if (!file.type.startsWith('image/')) continue;
+      addItem(file);
+    }
+    updateToolbar();
+  }
+
+  function addItem(file) {
+    const el = $('#itemTemplate').content.firstElementChild.cloneNode(true);
+    const item = { file, el, fields: { year: '', season: '', day: '', division: '', team: '' }, done: false, busy: false };
+    items.push(item);
+    $('#queue').append(el);
+
+    $('.file-name', el).textContent = file.name;
+    const img = $('.crop img', el);
+    item.objectUrl = URL.createObjectURL(file);
+    img.src = item.objectUrl;
+    img.onerror = () => setStatus(item, 'warn', 'This browser cannot preview the file. Try saving it as a JPEG.');
+    item.cropper = new Cropper(img, {
+      aspectRatio: 1, viewMode: 1, autoCropArea: 1, dragMode: 'move',
+      checkOrientation: false, // the browser already shows photos upright
+      background: false, zoomable: false, movable: false,
+    });
+
+    const seasonSelect = $('.f-season', el);
+    for (const o of context.seasonOptions) seasonSelect.add(new Option(o.label, o.value));
+
+    renderTeamOptions(item);
+
+    $('.team', el).onchange = () => applyChoice(item);
+    $('.other-name', el).oninput = () => { setField(item, 'team', $('.other-name', el).value, true); };
+    $('.edit-toggle', el).onclick = () => {
+      const d = $('.details', el);
+      d.hidden = !d.hidden;
+      $('.edit-toggle', el).textContent = d.hidden ? 'Edit details' : 'Hide details';
+    };
+    for (const name of ['year', 'season', 'day', 'division', 'team']) {
+      const input = $(`.f-${name}`, el);
+      input.addEventListener(input.tagName === 'SELECT' ? 'change' : 'input', () => setField(item, name, input.value, false));
+    }
+    $('.upload', el).onclick = () => upload(item);
+    $('.remove', el).onclick = () => removeItem(item);
+    renderSummary(item);
+  }
+
+  function renderTeamOptions(item) {
+    if (item.done) return;
+    const select = $('.team', item.el);
+    select.innerHTML = '';
+    select.add(new Option('Choose the champion team…', ''));
+    season.divisions.forEach((d, di) => {
+      const group = document.createElement('optgroup');
+      const found = hasChampion(season.year, season.season, d.day, d.division);
+      group.label = found ? `${d.label} (photo already uploaded)` : d.label;
+      d.teams.forEach((t, ti) => group.append(new Option(t, `${di}|${ti}`)));
+      group.append(new Option(d.teams.length ? `Another team in ${d.label}…` : `Type a team for ${d.label}…`, `${di}|other`));
+      select.append(group);
+    });
+    applyChoice(item);
+  }
+
+  function applyChoice(item) {
+    const value = $('.team', item.el).value;
+    const other = $('.other', item.el);
+    if (!value) {
+      other.hidden = true;
+      return;
+    }
+    const [di, ti] = value.split('|');
+    const d = season.divisions[Number(di)];
+    const isOther = ti === 'other';
+    other.hidden = !isOther;
+    Object.assign(item.fields, {
+      year: String(season.year),
+      season: season.season,
+      day: d.day,
+      division: d.division,
+      team: isOther ? $('.other-name', item.el).value : d.teams[Number(ti)],
+    });
+    if (isOther) $('.other-name', item.el).focus();
+    syncDetailInputs(item);
+    renderSummary(item);
+  }
+
+  function setField(item, name, value, syncInputs) {
+    item.fields[name] = value;
+    if (syncInputs) syncDetailInputs(item);
+    renderSummary(item);
+  }
+
+  function syncDetailInputs(item) {
+    for (const [name, value] of Object.entries(item.fields)) $(`.f-${name}`, item.el).value = value;
+  }
+
+  function renderSummary(item) {
+    const f = item.fields;
+    const parts = [f.year && `${seasonLabel(f.season)} ${f.year}`, f.day, f.division, f.team].filter(Boolean);
+    $('.summary-text', item.el).textContent = parts.length ? parts.join(' · ') : 'Details fill in when you pick a team.';
+    // Open the details automatically if the season couldn't be guessed from the TeamLinkt label.
+    if (f.year && !f.season) {
+      $('.details', item.el).hidden = false;
+      $('.edit-toggle', item.el).textContent = 'Hide details';
+    }
+    schedulePreview(item);
+    updateToolbar();
+  }
+
+  function schedulePreview(item) {
+    clearTimeout(item.previewTimer);
+    item.previewTimer = setTimeout(() => previewKey(item), 250);
+  }
+
+  async function previewKey(item) {
+    if (item.done) return;
+    const token = (item.previewToken = (item.previewToken ?? 0) + 1);
+    const keyEl = $('.key', item.el);
+    const f = item.fields;
+    if (!f.year && !f.team) {
+      keyEl.textContent = '—';
+      item.key = '';
+      setStatus(item);
+      return;
+    }
+    try {
+      const r = await api('/api/preview-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(f),
+      });
+      if (token !== item.previewToken) return;
+      item.key = r.key;
+      keyEl.textContent = r.key ? r.key.replace(/^mattsvolleyball\/images\/champions\//, '') : '—';
+      if (r.error) setStatus(item, 'err', r.error);
+      else if (r.exists) setStatus(item, 'warn', 'A photo with this name is already in R2. Uploading replaces it.');
+      else if (hasChampion(f.year, f.season, f.day, f.division)) {
+        const c = hasChampion(f.year, f.season, f.day, f.division);
+        setStatus(item, 'warn', `This division already has a champion photo (${c.teamName}). Uploading adds a second one; delete the old one in R2 if it was wrong.`);
+      } else setStatus(item);
+    } catch (err) {
+      if (token === item.previewToken) setStatus(item, 'err', err.message);
+    }
+    updateToolbar();
+  }
+
+  function setStatus(item, kind, text) {
+    const el = $('.status', item.el);
+    el.hidden = !kind;
+    if (!kind) return;
+    el.className = `note status ${kind}`;
+    el.innerHTML = ICONS[kind];
+    el.append(document.createTextNode(text));
+  }
+
+  function isReady(item) {
+    return !item.done && !item.busy && Boolean(item.key);
+  }
+
+  function updateToolbar() {
+    const pending = items.filter((i) => !i.done);
+    const ready = pending.filter(isReady);
+    $('#toolbar').hidden = items.length === 0;
+    $('#queueCount').textContent = `${pending.length} photo${pending.length === 1 ? '' : 's'} waiting, ${ready.length} ready`;
+    $('#uploadAll').disabled = ready.length === 0;
+    for (const i of items) $('.upload', i.el).disabled = !isReady(i);
+  }
+
+  function removeItem(item) {
+    item.cropper?.destroy();
+    URL.revokeObjectURL(item.objectUrl);
+    item.el.remove();
+    items.splice(items.indexOf(item), 1);
+    updateToolbar();
+  }
+
+  async function upload(item) {
+    if (!isReady(item)) return;
+    item.busy = true;
+    updateToolbar();
+    setStatus(item, 'ok', 'Cropping and uploading…');
+    try {
+      let crop;
+      const data = item.cropper?.getData(true);
+      if (data && data.width > 0 && $('.crop img', item.el).naturalWidth > 0) {
+        crop = { left: data.x, top: data.y, size: Math.min(data.width, data.height) };
+      }
+      const meta = encodeURIComponent(JSON.stringify({ ...item.fields, crop }));
+      const r = await api(`/api/upload?meta=${meta}`, { method: 'POST', body: item.file });
+      item.done = true;
+      item.el.classList.add('uploaded');
+      item.cropper?.disable();
+      $('.row', item.el).innerHTML = r.url ? `<a class="btn" target="_blank" rel="noopener" href="${r.url}">View uploaded photo</a>` : '';
+      const kb = (n) => `${Math.round(n / 1024).toLocaleString()} KB`;
+      setStatus(item, 'ok', `${r.replaced ? 'Replaced' : 'Uploaded'} (${kb(r.originalBytes)} → ${kb(r.bytes)}).`);
+      $('.team', item.el).disabled = true;
+      item.el.querySelectorAll('input, select').forEach((i) => { i.disabled = true; });
+      showBanner(r.championCount);
+      await refreshChampions();
+    } catch (err) {
+      setStatus(item, 'err', `Upload failed: ${err.message}`);
+    } finally {
+      item.busy = false;
+      updateToolbar();
+    }
+  }
+
+  function showBanner(count) {
+    $('#banner').hidden = false;
+    $('#bannerText').innerHTML = `Snapshot updated (${count} champions). Commit <code>src/data/champions.fallback.json</code>. `
+      + (context.canRebuild ? 'The site updates at the nightly rebuild, or rebuild now.' : 'The site picks up new photos at the nightly rebuild.');
+    $('#rebuild').hidden = !context.canRebuild;
+  }
+
+  // ── Wiring ─────────────────────────────────────────────────────────────────
+
+  const drop = $('#drop');
+  const fileInput = $('#fileInput');
+  drop.onclick = () => fileInput.click();
+  drop.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } };
+  fileInput.onchange = () => { addFiles(fileInput.files); fileInput.value = ''; };
+  drop.ondragover = (e) => { e.preventDefault(); drop.classList.add('over'); };
+  drop.ondragleave = () => drop.classList.remove('over');
+  drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove('over'); if (context) addFiles(e.dataTransfer.files); };
+
+  $('#uploadAll').onclick = async () => {
+    for (const item of items.filter(isReady)) await upload(item);
+  };
+
+  $('#rebuild').onclick = async () => {
+    const status = $('#rebuildStatus');
+    $('#rebuild').disabled = true;
+    status.textContent = 'Requesting…';
+    try {
+      await api('/api/rebuild', { method: 'POST' });
+      status.textContent = 'Build requested. Cloudflare publishes it in a few minutes.';
+    } catch (err) {
+      status.textContent = `Rebuild failed: ${err.message}`;
+      $('#rebuild').disabled = false;
+    }
+  };
+
+  (async () => {
+    drop.style.pointerEvents = 'none';
+    try {
+      context = await api('/api/context');
+      season = context.seasons[0];
+      renderSeasons();
+      await refreshChampions();
+      const failed = context.seasons.flatMap((s) => s.divisions.filter((d) => d.error));
+      if (failed.length) console.warn('TeamLinkt standings failed for', failed);
+    } catch (err) {
+      $('#seasons').innerHTML = `<span class="small" style="padding:8px 14px;color:var(--accent)">Could not load seasons: ${err.message}</span>`;
+      return;
+    }
+    drop.style.pointerEvents = '';
+  })();
+})();
+</script>
+</body>
+</html>

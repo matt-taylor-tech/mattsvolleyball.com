@@ -15,6 +15,7 @@
     "check:rsvp": "node scripts/check-shuffle-rsvp.mjs",
     "check:registration": "node scripts/post-registration-status.mjs",
     "check:weather": "node scripts/check-weather.mjs",
+    "champions": "node scripts/champion-wizard.mjs",
     "sync:champions": "node scripts/sync-champions-cache.mjs"
   },
   "dependencies": {
