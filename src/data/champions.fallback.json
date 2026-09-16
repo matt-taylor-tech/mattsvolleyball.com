@@ -28,6 +28,42 @@
   },
   {
     "year": 2026,
+    "season": "Summer I",
+    "day": "Thursday",
+    "division": "Competitive",
+    "teamName": "For Hits And Giggles",
+    "photo": "/images/champions/2026/summer-i_thursday_competitive_for-hits-and-giggles.jpg",
+    "_seasonOrder": 2
+  },
+  {
+    "year": 2026,
+    "season": "Summer I",
+    "day": "Thursday",
+    "division": "Recreational",
+    "teamName": "Turtle Power",
+    "photo": "/images/champions/2026/summer-i_thursday_recreational_turtle-power.jpg",
+    "_seasonOrder": 2
+  },
+  {
+    "year": 2026,
+    "season": "Summer I",
+    "day": "Tuesday",
+    "division": "Competitive",
+    "teamName": "Big Dig Energy",
+    "photo": "/images/champions/2026/summer-i_tuesday_competitive_big-dig-energy.jpg",
+    "_seasonOrder": 2
+  },
+  {
+    "year": 2026,
+    "season": "Summer I",
+    "day": "Tuesday",
+    "division": "Recreational",
+    "teamName": "Tuesday Tappers",
+    "photo": "/images/champions/2026/summer-i_tuesday_recreational_tuesday-tappers.jpg",
+    "_seasonOrder": 2
+  },
+  {
+    "year": 2026,
     "season": "Spring",
     "day": "Thursday",
     "division": "Competitive",
