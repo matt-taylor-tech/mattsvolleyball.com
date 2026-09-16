@@ -90,7 +90,12 @@ async function main() {
     // Untracked divisions (shuffle) have neither, so they drop out naturally.
     const messages = [];
     for (const division of config.divisions.filter((d) => d.day === day && d.tracked)) {
-      const games = await fetchResults(division.id, dateKey);
+      let games = await fetchResults(division.id, dateKey);
+      // Playoff games aren't scored (it's a bracket), so an unscored one isn't
+      // "never submitted"; leave it out rather than flag it.
+      if (config.playoffDates.includes(dateKey)) {
+        games = games.filter((g) => g.homeWins !== null && g.awayWins !== null);
+      }
       // No games that night means nothing to recap: standings alone would be
       // a 0-0 table pre-season (with null rankings) or a stale one off-week.
       if (games.length === 0) continue;

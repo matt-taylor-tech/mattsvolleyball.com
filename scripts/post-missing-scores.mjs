@@ -52,6 +52,11 @@ async function main() {
   const dayKey = dayKeyFor(dateKey);
 
   const config = await loadConfig();
+  // Playoffs are a bracket: scores aren't needed, so don't nag about them.
+  if (!simulate && config.playoffDates.includes(dateKey)) {
+    console.log(`${dateKey} is a playoff night: scores aren't needed, nothing to check.`);
+    return;
+  }
   // Untracked divisions (shuffle) never submit scores; don't nag about them.
   const nightDivisions = config.divisions.filter((d) => d.day === dayKey && d.tracked);
 

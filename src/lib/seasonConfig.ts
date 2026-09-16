@@ -22,7 +22,7 @@ const CURRENT_SEASON = {
   label: 'Summer Redux 2026',
   // Playoff nights, as YYYY-MM-DD. See ACTIVE_PLAYOFF_DATES below for why the
   // dates are listed by hand instead of read from TeamLinkt.
-  playoffDates: ['2026-09-15', '2026-09-16', '2026-09-17', '2026-09-22', '2026-09-24'],
+  playoffDates: ['2026-09-15', '2026-09-17', '2026-09-22', '2026-09-23', '2026-09-24'],
 };
 
 const NEXT_SEASON = {
