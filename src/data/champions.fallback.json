@@ -1,6 +1,33 @@
 [
   {
     "year": 2026,
+    "season": "Summer II",
+    "day": "Tuesday",
+    "division": "Competitive",
+    "teamName": "Big Dig Energy",
+    "photo": "/images/champions/2026/summer-ii_tuesday_competitive_big-dig-energy.jpg",
+    "_seasonOrder": 3
+  },
+  {
+    "year": 2026,
+    "season": "Summer II",
+    "day": "Wednesday",
+    "division": "Shuffle",
+    "teamName": "One Big Happy Team",
+    "photo": "/images/champions/2026/summer-ii_wednesday_shuffle_one-big-happy-team.jpg",
+    "_seasonOrder": 3
+  },
+  {
+    "year": 2026,
+    "season": "Summer I",
+    "day": "Monday",
+    "division": "3v3 Coed",
+    "teamName": "Ballbarians",
+    "photo": "/images/champions/2026/summer-i_monday_3v3-coed_ballbarians.jpg",
+    "_seasonOrder": 2
+  },
+  {
+    "year": 2026,
     "season": "Spring",
     "day": "Thursday",
     "division": "Competitive",

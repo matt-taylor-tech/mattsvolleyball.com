@@ -50,10 +50,7 @@
   svg.icon { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
 
   header { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; justify-content: space-between; margin-bottom: 24px; }
-  .seasons { display: inline-flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
-  .seasons button { border: 0; border-radius: 0; background: var(--panel); color: var(--text); padding: 8px 14px; }
-  .seasons button + button { border-left: 1px solid var(--line); }
-  .seasons button[aria-pressed="true"] { background: var(--text); color: var(--bg); }
+  .seasons select { min-width: 260px; }
 
   button, .btn {
     font: inherit; cursor: pointer; border-radius: 4px; padding: 8px 14px;
@@ -114,7 +111,7 @@
     </div>
     <div>
       <div class="small muted" style="margin-bottom:4px">Season</div>
-      <div class="seasons" id="seasons"><span class="muted small" style="padding:8px 14px">Loading from TeamLinkt…</span></div>
+      <div class="seasons" id="seasons"><span class="muted small">Loading from TeamLinkt…</span></div>
     </div>
   </header>
 
@@ -231,13 +228,25 @@
   function renderSeasons() {
     const box = $('#seasons');
     box.innerHTML = '';
-    for (const s of context.seasons) {
-      const b = document.createElement('button');
-      b.textContent = s.label;
-      b.setAttribute('aria-pressed', String(s === season));
-      b.onclick = () => { season = s; renderSeasons(); renderChecklist(); items.forEach(renderTeamOptions); };
-      box.append(b);
-    }
+    const select = document.createElement('select');
+    const groups = { current: 'In seasonConfig.ts', next: 'In seasonConfig.ts', past: 'Past seasons (from git history)' };
+    const optgroups = {};
+    context.seasons.forEach((s, i) => {
+      const name = groups[s.which] ?? groups.past;
+      if (!optgroups[name]) {
+        optgroups[name] = document.createElement('optgroup');
+        optgroups[name].label = name;
+        select.append(optgroups[name]);
+      }
+      const suffix = s.which === 'current' ? ' (current)' : s.which === 'next' ? ' (next)' : '';
+      optgroups[name].append(new Option(s.label + suffix, String(i), false, s === season));
+    });
+    select.onchange = () => {
+      season = context.seasons[Number(select.value)];
+      renderChecklist();
+      items.forEach(renderTeamOptions);
+    };
+    box.append(select);
   }
 
   function hasChampion(year, seasonValue, day, division) {
@@ -437,7 +446,10 @@
     $('#toolbar').hidden = items.length === 0;
     $('#queueCount').textContent = `${pending.length} photo${pending.length === 1 ? '' : 's'} waiting, ${ready.length} ready`;
     $('#uploadAll').disabled = ready.length === 0;
-    for (const i of items) $('.upload', i.el).disabled = !isReady(i);
+    for (const i of items) {
+      const button = $('.upload', i.el); // gone once the photo is uploaded
+      if (button) button.disabled = !isReady(i);
+    }
   }
 
   function removeItem(item) {
@@ -524,7 +536,7 @@
       const failed = context.seasons.flatMap((s) => s.divisions.filter((d) => d.error));
       if (failed.length) console.warn('TeamLinkt standings failed for', failed);
     } catch (err) {
-      $('#seasons').innerHTML = `<span class="small" style="padding:8px 14px;color:var(--accent)">Could not load seasons: ${err.message}</span>`;
+      $('#seasons').innerHTML = `<span class="small" style="color:var(--accent)">Could not load seasons: ${err.message}</span>`;
       return;
     }
     drop.style.pointerEvents = '';

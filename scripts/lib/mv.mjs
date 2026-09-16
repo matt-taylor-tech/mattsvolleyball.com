@@ -112,9 +112,10 @@ export async function loadConfig() {
  * Both configured seasons, current first, ignoring the rollover date:
  * [{ which, id, label, divisions }]. Seasons without a numeric id are skipped.
  * Used by the champion wizard, which works on whichever season just finished.
+ * Pass `source` to parse an older copy of seasonConfig.ts (e.g. from git history).
  */
-export async function loadSeasons() {
-  const source = await readFile(SEASON_CONFIG_PATH, 'utf8');
+export async function loadSeasons(source) {
+  source ??= await readFile(SEASON_CONFIG_PATH, 'utf8');
   return [
     ['current', 'CURRENT_SEASON', 'CURRENT_DIVISIONS'],
     ['next', 'NEXT_SEASON', 'UPCOMING_DIVISIONS'],
@@ -279,6 +280,25 @@ export async function fetchResults(divisionId, dateKey) {
       timestamp: Number(row['6']),
     }))
     .sort((a, b) => a.timestamp - b.timestamp);
+}
+
+/**
+ * Team names from a division's past games, in order of first appearance.
+ * Standings come back empty once a season closes, but its games stay listed.
+ */
+export async function fetchTeamsFromGames(divisionId) {
+  const json = await postForm(EVENTS_API, {
+    start: '0', length: '500', status: 'past',
+    type: 'scores', show_games_only: '1',
+    [`filters[${divisionId}]`]: divisionId,
+  });
+  const names = new Set();
+  for (const row of json.data || []) {
+    for (const name of [cellText(row['3']), cellText(row['4'])]) {
+      if (!PLACEHOLDER_TEAMS.has(name)) names.add(name);
+    }
+  }
+  return [...names];
 }
 
 /** True if any of the day's divisions has a TeamLinkt game on the date. */

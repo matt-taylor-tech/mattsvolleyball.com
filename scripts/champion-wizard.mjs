@@ -15,12 +15,12 @@
 
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { spawn } from 'node:child_process';
+import { spawn, execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { loadSeasons, fetchStandings, PLACEHOLDER_TEAMS } from './lib/mv.mjs';
+import { loadSeasons, fetchStandings, fetchTeamsFromGames, PLACEHOLDER_TEAMS } from './lib/mv.mjs';
 import {
-  createR2, listChampions, writeFallback, objectExists, uploadChampion,
+  REPO_ROOT, createR2, listChampions, writeFallback, objectExists, uploadChampion,
   processImage, buildKey, SEASON_DISPLAY,
 } from './lib/champions-r2.mjs';
 
@@ -56,8 +56,40 @@ function publicUrl(key) {
   return publicBase ? `${publicBase}${photo}` : '';
 }
 
+/**
+ * Seasons that used to be CURRENT_SEASON, read from the git history of
+ * seasonConfig.ts, newest first. Lets you add photos for a season that has
+ * already rolled off the config.
+ */
+async function loadPastSeasons(skipIds) {
+  const git = (...a) => execFileSync('git', a, { cwd: REPO_ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+  const seen = new Set(skipIds);
+  const past = [];
+  let commits = [];
+  try {
+    commits = git('log', '--format=%H', '--', 'src/lib/seasonConfig.ts').split(/\r?\n/).filter(Boolean);
+  } catch (err) {
+    console.warn(`Could not read git history for past seasons: ${err.message}`);
+    return past;
+  }
+  for (const commit of commits) {
+    let source;
+    try {
+      source = git('show', `${commit}:src/lib/seasonConfig.ts`);
+    } catch {
+      continue;
+    }
+    const current = (await loadSeasons(source)).find((s) => s.which === 'current');
+    if (!current || seen.has(current.id) || current.divisions.length === 0) continue;
+    seen.add(current.id);
+    past.push({ ...current, which: 'past' });
+  }
+  return past;
+}
+
 async function buildContext() {
-  const seasons = await loadSeasons();
+  const configured = await loadSeasons();
+  const seasons = [...configured, ...(await loadPastSeasons(configured.map((s) => s.id)))];
   const out = [];
   for (const season of seasons) {
     const divisions = await Promise.all(season.divisions.map(async (d) => {
@@ -66,6 +98,8 @@ async function buildContext() {
       try {
         const standings = await fetchStandings(d.id, season.id);
         teams = standings.map((s) => s.name).filter((n) => n && !PLACEHOLDER_TEAMS.has(n));
+        // Closed seasons return no standings; fall back to the teams in their games.
+        if (teams.length === 0) teams = await fetchTeamsFromGames(d.id);
       } catch (err) {
         error = err.message;
       }
