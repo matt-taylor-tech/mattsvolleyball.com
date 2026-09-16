@@ -99,6 +99,8 @@
 
   .banner { border-color: var(--ok); margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
   code { font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
+  .rename-option { display: flex; gap: 8px; align-items: center; font-weight: 400; font-size: 14px; margin: -8px 0 20px; }
+  .rename-option input { width: auto; }
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -140,6 +142,11 @@
     <p class="small muted">JPEG, PNG or WebP (export iPhone HEIC photos as JPEG first). Each is cropped square and saved at 1200×1200.</p>
     <input type="file" id="fileInput" accept="image/*" multiple hidden>
   </div>
+
+  <label class="rename-option" id="renameOption" hidden>
+    <input type="checkbox" id="renameLocal" checked>
+    <span>After upload, rename the original in <code id="photosDir"></code> to <code>{year}/{R2 name}</code></span>
+  </label>
 
   <div class="toolbar" id="toolbar" hidden>
     <span class="muted small" id="queueCount"></span>
@@ -471,7 +478,12 @@
       if (data && data.width > 0 && $('.crop img', item.el).naturalWidth > 0) {
         crop = { left: data.x, top: data.y, size: Math.min(data.width, data.height) };
       }
-      const meta = encodeURIComponent(JSON.stringify({ ...item.fields, crop }));
+      const meta = encodeURIComponent(JSON.stringify({
+        ...item.fields,
+        crop,
+        rename: Boolean(context.photosDir) && $('#renameLocal').checked,
+        file: { name: item.file.name, size: item.file.size },
+      }));
       const r = await api(`/api/upload?meta=${meta}`, { method: 'POST', body: item.file });
       item.done = true;
       item.el.classList.add('uploaded');
@@ -479,6 +491,13 @@
       $('.row', item.el).innerHTML = r.url ? `<a class="btn" target="_blank" rel="noopener" href="${r.url}">View uploaded photo</a>` : '';
       const kb = (n) => `${Math.round(n / 1024).toLocaleString()} KB`;
       setStatus(item, 'ok', `${r.replaced ? 'Replaced' : 'Uploaded'} (${kb(r.originalBytes)} → ${kb(r.bytes)}).`);
+      if (r.local?.message) {
+        const note = document.createElement('div');
+        note.className = `note ${r.local.renamed ? 'ok' : 'warn'}`;
+        note.innerHTML = r.local.renamed ? ICONS.ok : ICONS.warn;
+        note.append(document.createTextNode(r.local.message));
+        $('.status', item.el).after(note);
+      }
       $('.team', item.el).disabled = true;
       item.el.querySelectorAll('input, select').forEach((i) => { i.disabled = true; });
       showBanner(r.championCount);
@@ -531,6 +550,10 @@
     try {
       context = await api('/api/context');
       season = context.seasons[0];
+      if (context.photosDir) {
+        $('#photosDir').textContent = context.photosDir;
+        $('#renameOption').hidden = false;
+      }
       renderSeasons();
       await refreshChampions();
       const failed = context.seasons.flatMap((s) => s.divisions.filter((d) => d.error));

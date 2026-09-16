@@ -9,18 +9,21 @@
  * Usage:
  *   npm run champions            (or: node scripts/champion-wizard.mjs [--port 4321] [--no-open])
  *
- * Requires .env with R2 credentials. Optional: CLOUDFLARE_DEPLOY_HOOK_URL
- * enables the "Rebuild site now" button.
+ * Requires .env with R2 credentials. Optional .env settings:
+ *   CLOUDFLARE_DEPLOY_HOOK_URL  enables the "Rebuild site now" button
+ *   CHAMPION_PHOTOS_DIR         folder of original photos; after upload the
+ *                               matching file is renamed to {year}/{R2 name}.
+ *                               Defaults to the Google Drive Champions folder.
  */
 
 import http from 'node:http';
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir, stat, rename, mkdir } from 'node:fs/promises';
 import { spawn, execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadSeasons, fetchStandings, fetchTeamsFromGames, PLACEHOLDER_TEAMS } from './lib/mv.mjs';
 import {
-  REPO_ROOT, createR2, listChampions, writeFallback, objectExists, uploadChampion,
+  REPO_ROOT, BUCKET_PREFIX, createR2, listChampions, writeFallback, objectExists, uploadChampion,
   processImage, buildKey, SEASON_DISPLAY,
 } from './lib/champions-r2.mjs';
 
@@ -36,6 +39,67 @@ const openBrowser = !args.includes('--no-open');
 const r2 = createR2();
 const publicBase = (r2.env.PUBLIC_R2_BASE_URL ?? '').replace(/\/+$/, '');
 const deployHook = r2.env.CLOUDFLARE_DEPLOY_HOOK_URL ?? '';
+const DEFAULT_PHOTOS_DIR = 'G:/My Drive/MattsVolleyball/pictures/Champions';
+const photosDir = await resolvePhotosDir(
+  process.env.CHAMPION_PHOTOS_DIR || r2.env.CHAMPION_PHOTOS_DIR || DEFAULT_PHOTOS_DIR
+);
+
+async function resolvePhotosDir(dir) {
+  try {
+    return (await stat(dir)).isDirectory() ? path.resolve(dir) : '';
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Renames the original photo in the photos folder to {year}/{R2 name}.
+ * The browser only knows the file's name and size, so the match is by both,
+ * in the folder itself and its immediate subfolders. Never overwrites.
+ */
+async function renameLocalPhoto({ name, size }, key) {
+  if (!photosDir) return { renamed: false, message: 'No local photos folder configured.' };
+  if (!name || typeof name !== 'string' || /[\\/]/.test(name)) {
+    return { renamed: false, message: 'No file name to match.' };
+  }
+
+  const dirs = [photosDir];
+  for (const entry of await readdir(photosDir, { withFileTypes: true })) {
+    if (entry.isDirectory()) dirs.push(path.join(photosDir, entry.name));
+  }
+  const matches = [];
+  for (const dir of dirs) {
+    const candidate = path.join(dir, name);
+    try {
+      const info = await stat(candidate);
+      if (info.isFile() && info.size === size) matches.push(candidate);
+    } catch {
+      // not in this folder
+    }
+  }
+  if (matches.length === 0) return { renamed: false, message: `${name} was not found in ${photosDir}, so it was not renamed.` };
+  if (matches.length > 1) return { renamed: false, message: `${name} is in more than one folder, so it was not renamed.` };
+
+  const [year, base] = key.slice(BUCKET_PREFIX.length).split('/');
+  let ext = path.extname(name).toLowerCase();
+  if (ext === '.jpeg') ext = '.jpg';
+  const target = path.join(photosDir, year, base.replace(/\.jpg$/, '') + ext);
+  const relTarget = path.relative(photosDir, target).split(path.sep).join('/');
+
+  if (path.resolve(matches[0]).toLowerCase() === target.toLowerCase()) {
+    return { renamed: false, message: `Local file is already named ${relTarget}.` };
+  }
+  try {
+    await stat(target);
+    return { renamed: false, message: `${relTarget} already exists locally, so ${name} was not renamed.` };
+  } catch {
+    // target is free
+  }
+  await mkdir(path.dirname(target), { recursive: true });
+  await rename(matches[0], target);
+  console.log(`Renamed ${matches[0]} -> ${target}`);
+  return { renamed: true, message: `Renamed local file to ${relTarget}.` };
+}
 
 const DAY_NAMES = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' };
 
@@ -129,6 +193,7 @@ async function buildContext() {
     seasons: out,
     seasonOptions: Object.entries(SEASON_DISPLAY).map(([value, label]) => ({ value, label })),
     canRebuild: Boolean(deployHook),
+    photosDir,
   };
 }
 
@@ -220,6 +285,15 @@ const routes = {
     const champions = await listChampions(r2);
     writeFallback(champions);
 
+    let local = { renamed: false, message: '' };
+    if (meta.rename && meta.file) {
+      try {
+        local = await renameLocalPhoto(meta.file, key);
+      } catch (err) {
+        local = { renamed: false, message: `Could not rename the local file: ${err.message}` };
+      }
+    }
+
     console.log(`${replaced ? 'Replaced' : 'Uploaded'} ${key} (${Math.round(processed.length / 1024)} KB)`);
     send(res, 200, {
       key,
@@ -228,6 +302,7 @@ const routes = {
       originalBytes: original.length,
       bytes: processed.length,
       championCount: champions.length,
+      local,
     });
   },
 

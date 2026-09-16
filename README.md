@@ -230,6 +230,8 @@ It opens a local page (`http://127.0.0.1:4390`) where you:
 
 The wizard builds the file name, crops the photo to 1200×1200 JPEG, uploads it to R2, and refreshes `src/data/champions.fallback.json`. Commit that file afterwards. A checklist shows which divisions already have a photo, and you get a warning before replacing an existing file. New photos go live at the nightly rebuild. To publish right away, set `CLOUDFLARE_DEPLOY_HOOK_URL` in `.env`, which adds a "Rebuild site now" button.
 
+After each upload, the wizard also renames the original photo to `{year}/{R2 name}`, keeping its file type. It looks for the photo by name and size in `G:/My Drive/MattsVolleyball/pictures/Champions` and its year folders. To use a different folder, set `CHAMPION_PHOTOS_DIR` in `.env`. It never overwrites an existing file, and a checkbox on the page turns renaming off.
+
 Export iPhone HEIC photos as JPEG first. The shared R2 and image code is in `scripts/lib/champions-r2.mjs`.
 
 ### Fallback snapshot
