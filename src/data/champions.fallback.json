@@ -10,15 +10,6 @@
   },
   {
     "year": 2026,
-    "season": "Summer II",
-    "day": "Wednesday",
-    "division": "Shuffle",
-    "teamName": "One Big Happy Team",
-    "photo": "/images/champions/2026/summer-ii_wednesday_shuffle_one-big-happy-team.jpg",
-    "_seasonOrder": 3
-  },
-  {
-    "year": 2026,
     "season": "Summer I",
     "day": "Monday",
     "division": "3v3 Coed",
@@ -60,6 +51,15 @@
     "division": "Recreational",
     "teamName": "Tuesday Tappers",
     "photo": "/images/champions/2026/summer-i_tuesday_recreational_tuesday-tappers.jpg",
+    "_seasonOrder": 2
+  },
+  {
+    "year": 2026,
+    "season": "Summer I",
+    "day": "Wednesday",
+    "division": "Shuffle",
+    "teamName": "One Big Happy Team",
+    "photo": "/images/champions/2026/summer-i_wednesday_shuffle_one-big-happy-team.jpg",
     "_seasonOrder": 2
   },
   {
