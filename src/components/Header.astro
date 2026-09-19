@@ -1,19 +1,11 @@
 ---
 import { REGISTRATION_PAGE_URL } from '../lib/seasonConfig';
-interface Props {
-  regStatus: 'open' | 'coming-soon' | 'in-progress' | 'closed';
-  hasOpenRegistration?: boolean;
-  openRegUrl?: string;
-  openRegIsExternal?: boolean;
-}
-
-const { regStatus, hasOpenRegistration = false, openRegUrl = '/leagues/', openRegIsExternal = false } = Astro.props;
+// The Register button always links to TeamLinkt, whatever the season state.
+// Players are told to go to mattsvolleyball.com to register, so the way in has
+// to be on every page, even if this build thinks registration is closed. The
+// status comes from a daily build and goes stale when a deadline is extended;
+// TeamLinkt always shows which forms are really open.
 const REG_PAGE = REGISTRATION_PAGE_URL;
-// Show a "Sign Up" CTA whenever registration is open - including a late-open
-// league during an in-progress season. Falls back to "View Leagues" otherwise.
-const showSignUp = regStatus === 'open' || hasOpenRegistration;
-const signUpHref = regStatus === 'open' ? REG_PAGE : openRegUrl;
-const signUpExternal = regStatus === 'open' || openRegIsExternal;
 const r2Base = import.meta.env.PUBLIC_R2_BASE_URL || '';
 const currentPath = Astro.url.pathname;
 
@@ -104,21 +96,14 @@ function isActive(href: string): boolean {
           Player Portal
         </a>
 
-        {showSignUp ? (
-          <a
-            href={signUpHref}
-            target={signUpExternal ? '_blank' : undefined}
-            rel={signUpExternal ? 'noopener noreferrer' : undefined}
-            class="ml-2 btn-primary !py-2 !px-6 !text-sm"
-            data-header-cta
-          >
-            Sign Up
-          </a>
-        ) : (
-          <a href="/leagues/" class="ml-2 btn-primary !py-2 !px-6 !text-sm" data-header-cta>
-            View Leagues
-          </a>
-        )}
+        <a
+          href={REG_PAGE}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="ml-2 btn-primary !py-2 !px-6 !text-sm"
+        >
+          Register
+        </a>
       </div>
 
       <!-- Mobile Menu Button -->
@@ -173,20 +158,14 @@ function isActive(href: string): boolean {
           Player Portal ↗
         </a>
 
-        {showSignUp ? (
-          <a
-            href={signUpHref}
-            target={signUpExternal ? '_blank' : undefined}
-            rel={signUpExternal ? 'noopener noreferrer' : undefined}
-            class="btn-primary text-center mt-2"
-          >
-            Sign Up
-          </a>
-        ) : (
-          <a href="/leagues/" class="btn-primary text-center mt-2">
-            View Leagues
-          </a>
-        )}
+        <a
+          href={REG_PAGE}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn-primary text-center mt-2"
+        >
+          Register
+        </a>
       </div>
     </div>
   </nav>

@@ -97,12 +97,14 @@ Because the site is static, anything that depends on today's date is decided at 
 
 The system resolves to one of four states:
 
-| Status | Condition | Hero (home) | Nav button | Footer link |
-| --- | --- | --- | --- | --- |
-| `open` | Any registration window is currently open | "Sign Up for {SEASON}!" + Register Now | Sign Up | Register Now → |
-| `coming-soon` | All registration windows are in the future | "{SEASON} Is Coming!" + opens date | View Leagues | View Leagues → |
-| `in-progress` | Current date is between season start and end dates | "{SEASON} Is Underway!" | View Leagues | View Leagues → |
-| `closed` | All registration windows have passed and season has ended | "Matt's Volleyball" (generic) | View Leagues | View Leagues → |
+| Status | Condition | Hero (home) |
+| --- | --- | --- |
+| `open` | Any registration window is currently open | "Sign Up for {SEASON}!" + Register Now |
+| `coming-soon` | All registration windows are in the future | "{SEASON} Is Coming!" + opens date |
+| `in-progress` | Current date is between season start and end dates | "{SEASON} Is Underway!" |
+| `closed` | All registration windows have passed and season has ended | "Matt's Volleyball" (generic) |
+
+The header's Register button (desktop and mobile menu) and the footer's Register Now link do not follow `regStatus`. They always link to the TeamLinkt registration page. Players are told to go to mattsvolleyball.com to register, and the build-time status goes stale when a deadline is extended, so the way in is on every page in every state. `mattsvolleyball.com/register` (`src/pages/register.astro`) is a short link to the same page for flyers and texts.
 
 Season start/end dates are scraped from the TeamLinkt registration detail page ("Season Dates" field).
 
@@ -141,9 +143,6 @@ Registration can open or close between daily builds. To keep the buttons current
 - `src/pages/index.astro` - Hero heading, subtitle, and CTA buttons
 - `src/pages/leagues/index.astro` - Hero badge, subtitle, and register button
 - `src/pages/leagues/shuffle.astro` - Bottom CTA section
-- `src/components/Header.astro` - Nav button (Sign Up vs View Leagues)
-- `src/components/Footer.astro` - Quick links (Register Now vs View Leagues)
-- `src/layouts/Layout.astro` - Fetches data once and passes to Header/Footer
 - `functions/api/registration-status.ts` + `public/scripts/update-registration-cta.js` - Live button updates after page load
 
 ## GroupMe Automation

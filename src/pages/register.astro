@@ -1,0 +1,8 @@
+---
+// Short, permanent link for flyers, texts and group chats:
+// mattsvolleyball.com/register goes straight to the TeamLinkt registration page.
+import ExternalRedirect from '../components/ExternalRedirect.astro';
+import { REGISTRATION_PAGE_URL } from '../lib/seasonConfig';
+---
+
+<ExternalRedirect url={REGISTRATION_PAGE_URL} title="Register | Matt's Volleyball" />
