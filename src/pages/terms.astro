@@ -2,13 +2,13 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="Terms & Conditions | Matt's Volleyball" description="Terms and conditions for Matt's Volleyball leagues: code of conduct and anti-harassment policy, acceptance of league rules, and liability waiver.">
+<Layout title="Terms & Conditions | Matt's Volleyball" description="General terms, payment information, season and tournament refund policies, privacy policy, participant conduct, and liability waiver for Matt's Volleyball.">
   <!-- Hero -->
   <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white pt-20 md:pt-28">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">Terms & Conditions</h1>
       <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
-        The terms every participant agrees to when registering.
+        Registration, payments, refunds, privacy, and participant policies.
       </p>
     </div>
     <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full">
@@ -18,14 +18,80 @@ import Layout from '../layouts/Layout.astro';
 
   <section class="py-12 md:py-20">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <p class="text-ocean-700/80 text-sm mb-10">
-        These are the terms and conditions presented and agreed to during registration. By registering, each participant accepts the code of conduct, the league rules, and the liability waiver below.
+      <p class="text-ocean-700/80 text-sm mb-4">
+        Review these policies before registering for a season or tournament. Participant conduct, league rules, communications, and the liability waiver are included below.
       </p>
+      <nav aria-label="Policy sections" class="flex flex-wrap gap-x-6 gap-y-3 mb-10 text-ocean-600 font-semibold underline">
+        <a href="#general-terms" class="hover:text-ocean-500">General Terms</a>
+        <a href="#refunds" class="hover:text-ocean-500">Refunds & Cancellations</a>
+        <a href="#privacy" class="hover:text-ocean-500">Privacy Policy</a>
+        <a href="#participant-policies" class="hover:text-ocean-500">Participant Policies</a>
+      </nav>
 
       <div class="space-y-12 text-ocean-700 leading-relaxed">
 
+        <section id="general-terms" aria-labelledby="general-terms-heading" class="scroll-mt-28">
+          <h2 id="general-terms-heading" class="font-display font-extrabold text-2xl md:text-3xl text-ocean-600 mb-4">General Terms & Payments</h2>
+          <p class="mb-4">Matt's Volleyball provides recreational volleyball seasons and tournaments in the Lake Norman area. Each registration listing describes the format, location, dates, eligibility requirements, and price for that season or tournament. Registration purchases participation in the listed in-person activity; no physical product is shipped.</p>
+          <p class="mb-4">You must provide accurate registration information, meet the eligibility requirements for your event, and follow the applicable rules and participant policies. Participation is subject to registration confirmation, payment, and acceptance of the applicable participant waiver.</p>
+          <h3 class="font-display font-bold text-xl text-ocean-600 mb-3">Payments</h3>
+          <p class="mb-4">Season registration and payments go through TeamLinkt. Tournament payments are processed through Stripe. Prices are in U.S. dollars (USD), and the amount due, including any applicable fees, is shown at checkout. By completing payment, you authorize the displayed charge and confirm that you are authorized to use the selected payment method.</p>
+          <p class="mb-4">Payment information is handled by the payment provider through its checkout. Do not send full card numbers or card security codes by email or through our contact form. Matt's Volleyball handles registration support, billing questions, and refund decisions under the policy below.</p>
+          <h3 class="font-display font-bold text-xl text-ocean-600 mb-3">Schedules and support</h3>
+          <p class="mb-4">Check the registration listing and league or tournament schedule for when and where to play. Schedule changes and weather announcements are communicated through our event communication channels. See our <a href="/rainout-info/" class="font-semibold underline hover:text-ocean-500">league rainout information</a> and the cancellation policy below.</p>
+          <p class="mb-4">For registration questions, an incorrect or duplicate charge, or other concerns, email <a href="mailto:matt@mattsvolleyball.com" class="font-semibold underline hover:text-ocean-500">matt@mattsvolleyball.com</a> with your name, season or tournament, and receipt or registration reference. We will investigate reported billing errors. This process does not limit your rights with your payment provider or under applicable law.</p>
+          <p>Updates to payment and refund terms apply to registrations purchased after the updated terms are posted, unless otherwise agreed or required by law. Nothing on this page limits rights that cannot be waived under applicable law.</p>
+        </section>
+
+        <section id="refunds" aria-labelledby="refunds-heading" class="scroll-mt-28">
+          <h2 id="refunds-heading" class="font-display font-extrabold text-2xl md:text-3xl text-ocean-600 mb-4">Refunds & Cancellations</h2>
+          <p class="mb-6">To request a refund, email <a href="mailto:matt@mattsvolleyball.com" class="font-semibold underline hover:text-ocean-500">matt@mattsvolleyball.com</a> with your name, season or tournament, and receipt or registration reference. The timing of your request determines eligibility for participant-requested refunds.</p>
+          <h3 class="font-display font-bold text-xl text-ocean-600 mb-3">Season registrations — TeamLinkt</h3>
+          <ul class="list-disc pl-6 space-y-2 mb-6">
+            <li><strong>Before the season starts:</strong> If you request a refund before the season begins, you will receive a full refund minus the credit card processing fees associated with your original payment.</li>
+            <li><strong>Once the season starts:</strong> No participant-requested refunds are available.</li>
+            <li><strong>If we cancel the season:</strong> You will receive a full refund, including any credit card processing fees you paid. No credit card processing fees will be deducted.</li>
+            <li><strong>Weather:</strong> Weather-affected games are rescheduled. No refunds are provided for weather-related game postponements.</li>
+          </ul>
+          <h3 class="font-display font-bold text-xl text-ocean-600 mb-3">Tournament registrations — Stripe</h3>
+          <ul class="list-disc pl-6 space-y-2 mb-6">
+            <li><strong>Before the tournament starts:</strong> If you request a refund before the tournament begins, you will receive a full refund minus the credit card processing fees associated with your original payment.</li>
+            <li><strong>Once the tournament starts:</strong> No participant-requested refunds are available.</li>
+            <li><strong>If we cancel the tournament, including due to weather:</strong> You will receive a full refund, including any credit card processing fees you paid. No credit card processing fees will be deducted.</li>
+          </ul>
+          <p class="mb-4">Refunds for a season or tournament canceled by Matt's Volleyball are exceptions to the no-refund rules after the event begins. Removal for misconduct is governed by the Code of Conduct and Anti-Harassment Policy below.</p>
+          <p>Approved refunds are returned through the original payment provider to the original payment method where supported. The time before funds appear depends on the provider and your financial institution. If the original payment method cannot receive the refund, contact us to arrange an alternative.</p>
+        </section>
+
+        <section id="privacy" aria-labelledby="privacy-heading" class="scroll-mt-28">
+          <h2 id="privacy-heading" class="font-display font-extrabold text-2xl md:text-3xl text-ocean-600 mb-4">Privacy Policy</h2>
+          <p class="mb-4">This policy explains how Matt's Volleyball handles information in connection with this website, season and tournament registrations, payments, and event operations. For privacy questions or requests, email <a href="mailto:matt@mattsvolleyball.com" class="font-semibold underline hover:text-ocean-500">matt@mattsvolleyball.com</a>.</p>
+          <h3 class="font-display font-bold text-xl text-ocean-600 mb-3">Information and its use</h3>
+          <ul class="list-disc pl-6 space-y-2 mb-6">
+            <li><strong>Registration and participation:</strong> We receive the information you provide for participation, such as your name, email address, phone number, team or event details, and registration records. We use it to administer registrations, coordinate teams and schedules, communicate changes, and manage participation.</li>
+            <li><strong>Payments:</strong> We use payment confirmations and transaction records to match payments to registrations, keep accounting records, investigate billing issues, and handle refunds and disputes. Payment providers collect the payment details needed to process your transaction.</li>
+            <li><strong>Messages:</strong> Our contact form collects your name, email address, and message through Formspree. We use messages and other correspondence to respond to questions, requests, and reports.</li>
+            <li><strong>Website access:</strong> Hosting and content-delivery providers may process technical information such as your IP address, browser information, and requested pages to deliver the website, maintain reliability, and protect against abuse.</li>
+          </ul>
+          <h3 class="font-display font-bold text-xl text-ocean-600 mb-3">Service providers and sharing</h3>
+          <p class="mb-4">We use TeamLinkt for season registration, payments, and league management; Stripe for tournament payments; Formspree for contact-form submissions; and Cloudflare for website hosting and image delivery. These providers handle information needed to provide their services and may process information for their own purposes as described in their privacy policies.</p>
+          <ul class="list-disc pl-6 space-y-2 mb-4">
+            <li><a href="https://teamlinkt.com/legal/privacy-policy" class="font-semibold underline hover:text-ocean-500">TeamLinkt Privacy Policy</a></li>
+            <li><a href="https://stripe.com/privacy" class="font-semibold underline hover:text-ocean-500">Stripe Privacy Policy</a></li>
+            <li><a href="https://formspree.io/legal/privacy-policy/" class="font-semibold underline hover:text-ocean-500">Formspree Privacy Policy</a></li>
+            <li><a href="https://www.cloudflare.com/privacypolicy/" class="font-semibold underline hover:text-ocean-500">Cloudflare Privacy Policy</a></li>
+          </ul>
+          <p class="mb-4">Organizers and night directors use participant information for event operations and the communications described below. Team names, schedules, scores, standings, and champion photos are displayed publicly on this website. The participant image release below addresses event photographs and recordings.</p>
+          <p class="mb-4">The website loads fonts from Google Fonts and embeds Spotify players on the playlists page. Your browser connects to those providers when their content loads, which exposes technical information such as your IP address and browser details to them. See the <a href="https://policies.google.com/privacy" class="font-semibold underline hover:text-ocean-500">Google Privacy Policy</a> and <a href="https://www.spotify.com/legal/privacy-policy/" class="font-semibold underline hover:text-ocean-500">Spotify Privacy Policy</a>.</p>
+          <p class="mb-6">External services, including TeamLinkt, Stripe, Spotify, GroupMe, and social platforms, have their own privacy practices and may use cookies or similar technologies when you use them. Review their policies and privacy settings. Browser settings can limit cookies, although some provider features may not work without them.</p>
+          <h3 class="font-display font-bold text-xl text-ocean-600 mb-3">Your choices and requests</h3>
+          <p class="mb-4">Contact us to request access to, correction of, or deletion of information held by Matt's Volleyball. We may need to verify your identity before acting on a request. Records needed for accounting, legal obligations, or unresolved transactions or disputes may need to be retained. Requests about information held independently by a provider may also need to be directed to that provider.</p>
+          <p class="mb-4">You can ask to stop league communications by emailing us, as described in the League Communications section below. Opting out may limit our ability to notify you of schedule changes or cancellations.</p>
+          <p>We may update this privacy policy as our services and practices change and will provide additional notice when required by applicable law.</p>
+        </section>
+
         <!-- CODE OF CONDUCT -->
-        <div>
+        <div id="participant-policies" class="scroll-mt-28">
           <h2 class="font-display font-extrabold text-2xl md:text-3xl text-ocean-600 mb-4">Code of Conduct and Anti-Harassment Policy</h2>
           <p class="mb-4">
             I agree to treat all players, teammates, opponents, organizers, and staff with respect, both on and off the court, regardless of their skill level or experience. I understand that this is a recreational, self-officiated league that people join to have fun. I understand that the following conduct is strictly prohibited:
