@@ -42,8 +42,8 @@ const FUTURE_SEASON = {
 };
 
 // First game date for the upcoming season. This drives the switch from
-// registration-focused copy to "the season is underway", and it drives the
-// live-data rollover below. Format: 'YYYY-MM-DD HH:MM:SS' (local time).
+// registration-focused copy to "the season is underway". The live-data
+// rollover is configured separately below. Format: 'YYYY-MM-DD HH:MM:SS' (local time).
 export const UPCOMING_SEASON_START_DATETIME = '2026-09-29 00:00:00';
 
 // Display override for the start date, for when the exact first-game date is
@@ -64,14 +64,12 @@ export const UPCOMING_SEASON_START_LABEL = UPCOMING_SEASON_START_LABEL_OVERRIDE
 // late-open league (Wednesday shuffle) is still taking signups.
 export const HAS_UPCOMING_SEASON_STARTED = upcomingStartIsValid && new Date() >= upcomingStartAt;
 
-// Auto-rollover trigger for live data pages (schedule / teams / standings /
-// scores). It fires on the upcoming season's first game day, so the live pages
-// keep showing the current season until its last game, playoffs included. That
-// means there is no playoff end date to guess here.
-// Move this earlier if you want the new season's schedule visible sooner; keep
-// it after the current season's last playoff night either way.
-// Note: for static deployments this takes effect on the next build.
-export const ACTIVE_ROLLOVER_DATE = UPCOMING_SEASON_START_DATETIME;
+// Switch live data pages to the next season the day after the current season's
+// final game, including playoffs. Update this date each season independently
+// of the upcoming season's first game day. Summer Redux ended September 24.
+// Include the Eastern UTC offset so builds and scripts agree on the instant.
+// Static deployments publish the change on the next build (normally overnight).
+export const ACTIVE_ROLLOVER_DATE = '2026-09-25T00:00:00-04:00';
 const now = new Date();
 const rolloverAt = new Date(ACTIVE_ROLLOVER_DATE.replace(' ', 'T'));
 export const HAS_ACTIVE_ROLLED_OVER = !Number.isNaN(rolloverAt.getTime()) && now >= rolloverAt;
