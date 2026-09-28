@@ -203,21 +203,9 @@ const heroDatesText = HAS_UPCOMING_SEASON_STARTED
     </div>
   </section>
 
-  <!-- Before the season starts, signing up is the point, so the nights come
-       first. Once games are being played, the schedule is what people come back
-       for, so it moves above. Rendered in real order, not reordered with CSS, so
-       screen readers and keyboard users get the same order everyone else sees. -->
-  {registrationIsFocus ? (
-    <Fragment>
-      <FindYourNight regByDay={regByDay} registrationKnown={registrationKnown} />
-      <UpcomingGames />
-    </Fragment>
-  ) : (
-    <Fragment>
-      <UpcomingGames />
-      <FindYourNight regByDay={regByDay} registrationKnown={registrationKnown} />
-    </Fragment>
-  )}
+  <!-- Keep the schedule above league discovery in every season state. -->
+  <UpcomingGames />
+  <FindYourNight regByDay={regByDay} registrationKnown={registrationKnown} />
 
   <!-- Why Play Here -->
   <section class="py-12 md:py-16 bg-white">
