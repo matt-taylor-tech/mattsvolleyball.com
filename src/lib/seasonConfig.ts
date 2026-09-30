@@ -33,6 +33,16 @@ export function etNowString(now: Date = new Date()): string {
   return `${get('year')}-${get('month')}-${get('day')} ${hour}:${get('minute')}:${get('second')}`;
 }
 
+// The moment every season switch below is decided at. The site is rebuilt
+// nightly, so these are settled at build time: astro.config.mjs stamps
+// __BUILD_TIME__ into both the server render and the browser bundle, which
+// keeps a page's markup (division tabs, labels) and its client scripts (API
+// requests) on the same season. Without it, the browser would redo the date
+// math and could switch seasons before the next build did (issue #33).
+// Code outside the Vite build (the Pages Function) gets the real time.
+declare const __BUILD_TIME__: number | undefined;
+export const BUILD_NOW: Date = typeof __BUILD_TIME__ === 'number' ? new Date(__BUILD_TIME__) : new Date();
+
 /** True once an Eastern 'YYYY-MM-DD HH:MM:SS' datetime has arrived. False for ''. */
 export function hasEtDatetimePassed(datetime: string, now: Date = new Date()): boolean {
   return datetime !== '' && etNowString(now) >= datetime;
@@ -84,7 +94,7 @@ export const UPCOMING_SEASON_START_LABEL = UPCOMING_SEASON_START_LABEL_OVERRIDE
 // True once the upcoming season's first game day has arrived. The site then
 // stops leading with registration and says the season is underway, even if a
 // late-open league (Wednesday shuffle) is still taking signups.
-export const HAS_UPCOMING_SEASON_STARTED = upcomingStartIsValid && hasEtDatetimePassed(UPCOMING_SEASON_START_DATETIME);
+export const HAS_UPCOMING_SEASON_STARTED = upcomingStartIsValid && hasEtDatetimePassed(UPCOMING_SEASON_START_DATETIME, BUILD_NOW);
 
 // Switch live data pages to the next season the day after the current season's
 // final game, including playoffs. Update this date each season independently
@@ -92,9 +102,8 @@ export const HAS_UPCOMING_SEASON_STARTED = upcomingStartIsValid && hasEtDatetime
 // Include the Eastern UTC offset so builds and scripts agree on the instant.
 // Static deployments publish the change on the next build (normally overnight).
 export const ACTIVE_ROLLOVER_DATE = '2026-09-25T00:00:00-04:00';
-const now = new Date();
 const rolloverAt = new Date(ACTIVE_ROLLOVER_DATE.replace(' ', 'T'));
-export const HAS_ACTIVE_ROLLED_OVER = !Number.isNaN(rolloverAt.getTime()) && now >= rolloverAt;
+export const HAS_ACTIVE_ROLLED_OVER = !Number.isNaN(rolloverAt.getTime()) && BUILD_NOW >= rolloverAt;
 
 // ── Active Season (schedule / standings / scores / teams / playoffs) ─────────
 export const ACTIVE_SEASON_ID = HAS_ACTIVE_ROLLED_OVER ? NEXT_SEASON.id : CURRENT_SEASON.id;
@@ -316,7 +325,8 @@ export function isPlayoffDate(value: string): boolean {
   return key !== '' && ACTIVE_PLAYOFF_DATES.includes(key);
 }
 
-const todayKey = new Date().toLocaleDateString('en-CA');
+// Eastern calendar date, so a UTC build and a browser anywhere agree.
+const todayKey = etNowString(BUILD_NOW).slice(0, 10);
 
 // True from the first playoff night onward. Stays true after the last one so
 // the finished bracket keeps showing, until the season rolls over.
