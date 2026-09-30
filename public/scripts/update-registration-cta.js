@@ -166,11 +166,16 @@ async function updateRegistrationCTA() {
           el.href = REG_PAGE;
           el.target = '_blank';
           el.rel = 'noopener noreferrer';
+          el.removeAttribute('aria-disabled');
+          el.removeAttribute('tabindex');
           el.classList.remove('pointer-events-none', 'opacity-75');
           el.classList.remove('hidden');
         } else if (regStatus === 'coming-soon') {
           el.textContent = `Registration Opens ${formatFullDate(earliestOpen)}`;
-          el.href = '#';
+          // Not a link until registration opens: no href, out of the tab order
+          el.removeAttribute('href');
+          el.setAttribute('aria-disabled', 'true');
+          el.setAttribute('tabindex', '-1');
           el.classList.add('pointer-events-none', 'opacity-75');
           el.classList.remove('hidden');
         } else {

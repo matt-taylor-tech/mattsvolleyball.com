@@ -76,11 +76,14 @@ import { DIVISIONS, DIVISION_IDS, ACTIVE_SEASON_LABEL } from '../../lib/seasonCo
 
 <script>
   import { TEAMS_API_URL, DIVISION_IDS, ACTIVE_SEASON_ID } from '../../lib/seasonConfig';
+  import { escapeHtml, safeUrl } from '../../lib/html';
 
   const API_URL = TEAMS_API_URL;
   let currentDivision = DIVISION_IDS[0];
   let currentTeams: Team[] = [];
   let searchQuery = '';
+  // Bumped on every load so a slow response from an earlier tab can't overwrite a newer one
+  let loadSeq = 0;
 
   interface Team {
     id: number;
@@ -95,6 +98,7 @@ import { DIVISIONS, DIVISION_IDS, ACTIVE_SEASON_LABEL } from '../../lib/seasonCo
     body.set('season_id', ACTIVE_SEASON_ID);
 
     const res = await fetch(API_URL, { method: 'POST', body });
+    if (!res.ok) throw new Error(`Teams request failed: ${res.status}`);
     return await res.json();
   }
 
@@ -117,11 +121,11 @@ import { DIVISIONS, DIVISION_IDS, ACTIVE_SEASON_LABEL } from '../../lib/seasonCo
     container.innerHTML = `
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         ${teams.map((t) => `
-          <a href="/leagues/team/?id=${t.id}&name=${encodeURIComponent(t.name)}" class="card p-5 sm:p-6 flex items-center gap-4 hover:shadow-md transition-shadow">
-            <img src="${t.imageUrl}" alt="${t.name}" class="w-12 h-12 rounded-full object-cover bg-sand-100" />
+          <a href="/leagues/team/?id=${encodeURIComponent(t.id)}&name=${encodeURIComponent(t.name)}" class="card p-5 sm:p-6 flex items-center gap-4 hover:shadow-md transition-shadow">
+            <img src="${escapeHtml(safeUrl(t.imageUrl))}" alt="${escapeHtml(t.name)}" class="w-12 h-12 rounded-full object-cover bg-sand-100" />
             <div>
-              <h3 class="font-display font-bold text-ocean-700">${t.name}</h3>
-              <p class="text-sm text-ocean-600/70">${t.groups}</p>
+              <h3 class="font-display font-bold text-ocean-700">${escapeHtml(t.name)}</h3>
+              <p class="text-sm text-ocean-600/70">${escapeHtml(t.groups)}</p>
             </div>
           </a>
         `).join('')}
@@ -145,10 +149,14 @@ import { DIVISIONS, DIVISION_IDS, ACTIVE_SEASON_LABEL } from '../../lib/seasonCo
     container.classList.add('hidden');
     empty.classList.add('hidden');
 
+    const seq = ++loadSeq;
     try {
-      currentTeams = await fetchTeams(currentDivision);
+      const teams = await fetchTeams(currentDivision);
+      if (seq !== loadSeq) return;
+      currentTeams = teams;
       filterAndRender();
     } catch {
+      if (seq !== loadSeq) return;
       loading.classList.add('hidden');
       empty.classList.remove('hidden');
     }
