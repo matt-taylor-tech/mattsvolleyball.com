@@ -77,8 +77,15 @@ function extractDivisions(source, varName) {
   }));
 }
 
-/** Season/division config from src/lib/seasonConfig.ts, honoring the rollover date. */
-export async function loadConfig() {
+/**
+ * Season/division config from src/lib/seasonConfig.ts, honoring the rollover date.
+ *
+ * Pass `asOf` (YYYY-MM-DD, ET) to pick the season a given game night belongs
+ * to rather than the one active today. Reports about a past night (recap,
+ * missing scores) need this: the rollover usually lands the day after the
+ * final game night, so "today" already points at the next season.
+ */
+export async function loadConfig(asOf) {
   const source = await readFile(SEASON_CONFIG_PATH, 'utf8');
 
   const currentSeasonId = extractSingleId(source, 'CURRENT_SEASON');
@@ -88,13 +95,14 @@ export async function loadConfig() {
 
   const rolloverDate = source.match(/export const ACTIVE_ROLLOVER_DATE = '([^']*)'/)?.[1] ?? '';
   const rolloverAt = new Date(rolloverDate);
-  const hasRolledOver = !Number.isNaN(rolloverAt.getTime()) && new Date() >= rolloverAt;
+  const rolloverValid = !Number.isNaN(rolloverAt.getTime());
+  const hasRolledOver = rolloverValid && (asOf ? asOf >= etDateKey(rolloverAt) : new Date() >= rolloverAt);
 
   // Playoff nights are listed by date on each season in seasonConfig.ts, and
   // PLAYOFFS_ACTIVE is worked out from them. Mirror that here rather than
   // looking for a boolean that no longer exists.
   const playoffDates = extractPlayoffDates(source, hasRolledOver);
-  const todayKey = new Date().toLocaleDateString('en-CA', { timeZone: TIME_ZONE });
+  const todayKey = asOf ?? new Date().toLocaleDateString('en-CA', { timeZone: TIME_ZONE });
   const playoffsActive = playoffDates.length > 0 && todayKey >= playoffDates[0] && !hasRolledOver;
   const playoffId = source.match(/export const PLAYOFF_ID = '([^']*)'/)?.[1] ?? '';
 

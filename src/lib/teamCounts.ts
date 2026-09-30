@@ -19,10 +19,14 @@ export async function fetchUpcomingTeamCountsByDivision(): Promise<Record<string
       const body = new URLSearchParams();
       body.set('group_ids[division]', div.id);
       body.set('season_id', UPCOMING_SEASON_ID);
-      const res = await fetch(UPCOMING_TEAMS_API_URL, { method: 'POST', body });
-      if (!res.ok) return;
-      const teams: unknown = await res.json();
-      counts[div.id] = Array.isArray(teams) ? teams.length : 0;
+      try {
+        const res = await fetch(UPCOMING_TEAMS_API_URL, { method: 'POST', body });
+        if (!res.ok) return;
+        const teams: unknown = await res.json();
+        counts[div.id] = Array.isArray(teams) ? teams.length : 0;
+      } catch {
+        // Omit this division; the others still render.
+      }
     })
   );
   return counts;
@@ -41,20 +45,24 @@ export async function fetchUpcomingPlayerCountsByDivision(): Promise<Record<stri
       const teamsBody = new URLSearchParams();
       teamsBody.set('group_ids[division]', divId);
       teamsBody.set('season_id', UPCOMING_SEASON_ID);
-      const teamsRes = await fetch(UPCOMING_TEAMS_API_URL, { method: 'POST', body: teamsBody });
-      if (!teamsRes.ok) return;
-      const teams: unknown = await teamsRes.json();
-      if (!Array.isArray(teams)) return;
-      const teamIds = teams.map((t: { id?: number | string }) => t.id).filter((id): id is number | string => id != null);
-      const memberCounts = await Promise.all(
-        teamIds.map(async (teamId) => {
-          const res = await fetch(`${API_BASE}/getTeam/${ORG_ID}/${teamId}`);
-          if (!res.ok) return 0;
-          const data: { payload?: { Team?: { team_member_count?: number } } } = await res.json();
-          return data.payload?.Team?.team_member_count ?? 0;
-        })
-      );
-      counts[divId] = memberCounts.reduce((sum, n) => sum + n, 0);
+      try {
+        const teamsRes = await fetch(UPCOMING_TEAMS_API_URL, { method: 'POST', body: teamsBody });
+        if (!teamsRes.ok) return;
+        const teams: unknown = await teamsRes.json();
+        if (!Array.isArray(teams)) return;
+        const teamIds = teams.map((t: { id?: number | string }) => t.id).filter((id): id is number | string => id != null);
+        const memberCounts = await Promise.all(
+          teamIds.map(async (teamId) => {
+            const res = await fetch(`${API_BASE}/getTeam/${ORG_ID}/${teamId}`);
+            if (!res.ok) return 0;
+            const data: { payload?: { Team?: { team_member_count?: number } } } = await res.json();
+            return data.payload?.Team?.team_member_count ?? 0;
+          })
+        );
+        counts[divId] = memberCounts.reduce((sum, n) => sum + n, 0);
+      } catch {
+        // Omit this division rather than show an undercount.
+      }
     })
   );
   return counts;

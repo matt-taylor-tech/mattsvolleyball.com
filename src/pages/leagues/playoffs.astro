@@ -477,6 +477,7 @@ const playoffDays = [...new Set(ALL_DIVISIONS.filter(d => d.hasPlayoffs).map(d =
     DAY_FULL_LABEL as DAY_LABELS,
     PLAYOFFS_ACTIVE,
   } from '../../lib/seasonConfig';
+  import { escapeHtml } from '../../lib/html';
 
   const DEFAULT_PLAYOFF_TEAM_COUNT = 6;
   const PLAYOFF_TIME_SLOTS = ['6:30 PM', '7:15 PM', '8:00 PM', '8:45 PM', '9:30 PM'];
@@ -661,9 +662,9 @@ const playoffDays = [...new Set(ALL_DIVISIONS.filter(d => d.hasPlayoffs).map(d =
           if (player.title === 'BYE') {
             return `<span style="color:#C2BFB8;font-style:italic;font-size:0.75rem;">BYE</span>`;
           }
-          return `<span class="team-title-wrap"><span class="team-name-full">${player.title}</span>`
+          return `<span class="team-title-wrap"><span class="team-name-full">${escapeHtml(player.title)}</span>`
             + (player.nationality
-              ? `<span class="team-record-inline">${player.nationality}</span>`
+              ? `<span class="team-record-inline">${escapeHtml(player.nationality)}</span>`
               : '')
             + '</span>';
         },

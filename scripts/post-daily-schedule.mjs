@@ -229,7 +229,7 @@ async function main() {
       console.warn(`Screenshot failed (${err.message ?? err}); falling back to text format.`);
     }
   }
-  const messages = image ? [caption] : buildFallbackMessages(dateKey, games);
+  let messages = image ? [caption] : buildFallbackMessages(dateKey, games);
 
   if (dryRun) {
     if (image) {
@@ -247,7 +247,17 @@ async function main() {
   const token = process.env.GROUPME_TOKEN;
   if (!token) throw new Error('Missing env var GROUPME_TOKEN');
 
-  const imageUrl = image ? await uploadImage(token, image) : null;
+  let imageUrl = null;
+  if (image) {
+    try {
+      imageUrl = await uploadImage(token, image);
+    } catch (err) {
+      // An image-service hiccup should not cost the night its schedule.
+      console.warn(`Image upload failed (${err.message ?? err}); falling back to text format.`);
+      image = null;
+      messages = buildFallbackMessages(dateKey, games);
+    }
+  }
   const fallbackBotId = testMode ? process.env.GROUPME_BOT_ID_TEST : process.env.GROUPME_BOT_ID;
 
   if (conversationId) {

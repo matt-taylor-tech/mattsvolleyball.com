@@ -6,10 +6,12 @@ import '../styles/global.css';
 interface Props {
   title: string;
   description?: string;
+  /** Keep this page out of search results (404, query-driven pages). */
+  noindex?: boolean;
 }
 
 const r2Base = import.meta.env.PUBLIC_R2_BASE_URL || '';
-const { title, description = "Matt's Volleyball - the hottest coed sand volleyball leagues in the Lake Norman area! Play year-round at Saeed's Bar & Grill in Cornelius and Blythe Landing in Huntersville." } = Astro.props;
+const { title, noindex = false, description = "Matt's Volleyball - the hottest coed sand volleyball leagues in the Lake Norman area! Play year-round at Saeed's Bar & Grill in Cornelius and Blythe Landing in Huntersville." } = Astro.props;
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
 ---
 
@@ -27,7 +29,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:image" content={`${r2Base}/logos/vbenginelite.png`} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content={`${r2Base}/logos/vbenginelite.png`} />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow'} />
     <link rel="icon" type="image/x-icon" href={`${r2Base}/favicon.ico`} />
     <title>{title}</title>
     <script type="application/ld+json" set:html={JSON.stringify({

@@ -33,13 +33,15 @@ jobs:
           node-version: 20
       - name: Post weekly recap
         env:
+          INPUT_DATE: ${{ inputs.date }}
+          INPUT_DAY: ${{ inputs.day }}
           GROUPME_TOKEN: ${{ secrets.GROUPME_TOKEN }}
           GROUPME_BOT_ID: ${{ secrets.GROUPME_BOT_ID }}
           GROUPME_BOT_ID_TEST: ${{ secrets.GROUPME_BOT_ID_TEST }}
         run: |
           ARGS=""
-          if [ -n "${{ inputs.day }}" ]; then ARGS="$ARGS --day=${{ inputs.day }}"; fi
-          if [ -n "${{ inputs.date }}" ]; then ARGS="$ARGS --date=${{ inputs.date }}"; fi
+          if [ -n "$INPUT_DAY" ]; then ARGS="$ARGS --day=$INPUT_DAY"; fi
+          if [ -n "$INPUT_DATE" ]; then ARGS="$ARGS --date=$INPUT_DATE"; fi
           if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
           if [ "${{ inputs.test }}" = "true" ]; then ARGS="$ARGS --test"; fi
           node scripts/post-results.mjs $ARGS

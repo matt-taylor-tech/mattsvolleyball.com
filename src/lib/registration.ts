@@ -1,4 +1,4 @@
-import { REGISTRATION_SCRAPE_URLS } from './seasonConfig';
+import { REGISTRATION_SCRAPE_URLS, etNowString } from './seasonConfig';
 
 export interface RegEntry {
   AssociationRegistration: {
@@ -11,7 +11,7 @@ export interface RegEntry {
   Season: { id: number; name: string };
 }
 
-interface SeasonGroup {
+export interface SeasonGroup {
   label: string;
   children: Record<string, { label: string; children: Record<string, { label: string; children: RegEntry[] }> }>;
 }
@@ -92,6 +92,24 @@ function capitalize(day: string): string {
   return day.charAt(0).toUpperCase() + day.slice(1);
 }
 
+// TeamLinkt datetimes ('YYYY-MM-DD HH:MM:SS') are Eastern wall-clock times with
+// no offset. The build and the Pages Function both run in UTC, where
+// `new Date(str)` would land 4-5 hours off, so compare them as strings against
+// the current Eastern time instead (see etNowString in seasonConfig).
+
+/** True when the Eastern-time `now` string falls inside [open, close]. */
+function isWithin(nowEt: string, open: string, close: string): boolean {
+  return open <= nowEt && nowEt <= close;
+}
+
+/** 'YYYY-MM-DD' for a human date like "September 17, 2026" (runtime-zone independent). */
+function dateKeyFromLabel(label: string): string | null {
+  const d = new Date(label);
+  if (Number.isNaN(d.getTime())) return null;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 export function formatDate(dateStr: string): string {
   const d = new Date(dateStr.replace(' ', 'T'));
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -137,6 +155,53 @@ export function summariseOpenRegistration(
   };
 }
 
+const USER_AGENT = { 'User-Agent': 'MattsVolleyball/1.0' };
+
+/**
+ * Scrapes TeamLinkt's grouped registration forms, keyed by season id.
+ *
+ * TeamLinkt's find page lists only the forms that are open right now, so
+ * before registration opens it reports nothing. A page loaded with a `cid`
+ * lists the whole season instead. Try those pages in order and take the first
+ * one that actually names a form. See REGISTRATION_SCRAPE_URLS.
+ *
+ * `reachable` is true when at least one page parsed, even if it listed nothing.
+ */
+export async function fetchRegistrationGroups(): Promise<{ data: Record<string, SeasonGroup> | null; reachable: boolean }> {
+  let reachable = false;
+  for (const url of REGISTRATION_SCRAPE_URLS) {
+    const res = await fetch(url, { headers: USER_AGENT });
+    if (!res.ok) continue;
+    const html = await res.text();
+    // TeamLinkt serves an object keyed by season id when forms exist, and a
+    // bare `[]` when none are listed.
+    const match = html.match(/season_registration_grouped\s*=\s*(\{[\s\S]*?\}|\[\]);/);
+    if (!match) continue;
+    reachable = true;
+    const parsed: Record<string, SeasonGroup> | unknown[] = JSON.parse(match[1]);
+    if (!Array.isArray(parsed) && Object.keys(parsed).length > 0) {
+      return { data: parsed as Record<string, SeasonGroup>, reachable };
+    }
+  }
+  return { data: null, reachable };
+}
+
+/** Season playing dates from a registration form's detail page. Null when not found. */
+export async function fetchSeasonDates(regId: number): Promise<{ start: string; end: string } | null> {
+  try {
+    const res = await fetch(`https://app.teamlinkt.com/register/go/mattsvolleyball/${regId}`, { headers: USER_AGENT });
+    if (!res.ok) return null;
+    const html = await res.text();
+    // Look specifically for "Season Dates" label followed by date range
+    const match = html.match(
+      /Season\s+Dates<\/label>[\s\S]*?(\w+\s+\d{1,2},?\s*\d{4})\s*to\s*(\w+\s+\d{1,2},?\s*\d{4})/
+    );
+    return match ? { start: match[1].trim(), end: match[2].trim() } : null;
+  } catch {
+    return null; // non-critical
+  }
+}
+
 export async function getRegistrationData(options: RegistrationOptions = {}): Promise<RegistrationData> {
   const fallback: RegistrationData = {
     seasonLabel: '',
@@ -156,29 +221,9 @@ export async function getRegistrationData(options: RegistrationOptions = {}): Pr
   };
 
   try {
-    // TeamLinkt's find page lists only the forms that are open right now, so
-    // before registration opens it reports nothing. A page loaded with a `cid`
-    // lists the whole season instead. Try those pages in order and take the
-    // first one that actually names a form. See REGISTRATION_SCRAPE_URLS.
-    let data: Record<string, SeasonGroup> | null = null;
-    let parsedAny = false;
-    for (const url of REGISTRATION_SCRAPE_URLS) {
-      const res = await fetch(url, { headers: { 'User-Agent': 'MattsVolleyball/1.0' } });
-      if (!res.ok) continue;
-      const html = await res.text();
-      // TeamLinkt serves an object keyed by season id when forms exist, and a
-      // bare `[]` when none are listed.
-      const match = html.match(/season_registration_grouped\s*=\s*(\{[\s\S]*?\}|\[\]);/);
-      if (!match) continue;
-      parsedAny = true;
-      const parsed: Record<string, SeasonGroup> | unknown[] = JSON.parse(match[1]);
-      if (!Array.isArray(parsed) && Object.keys(parsed).length > 0) {
-        data = parsed as Record<string, SeasonGroup>;
-        break;
-      }
-    }
+    const { data, reachable } = await fetchRegistrationGroups();
     // Reached TeamLinkt but no page listed a form: registration really is closed.
-    if (!data) return parsedAny ? { ...fallback, registrationKnown: true } : fallback;
+    if (!data) return reachable ? { ...fallback, registrationKnown: true } : fallback;
     const seasonIds = Object.keys(data).sort((a, b) => Number(b) - Number(a));
     if (seasonIds.length === 0) return { ...fallback, registrationKnown: true };
 
@@ -196,16 +241,11 @@ export async function getRegistrationData(options: RegistrationOptions = {}): Pr
 
     if (entries.length === 0) return { ...fallback, seasonLabel: season.label, registrationKnown: true };
 
-    const now = new Date();
-    const anyOpen = entries.some((e) => {
-      const open = new Date(e.AssociationRegistration.open_datetime.replace(' ', 'T'));
-      const close = new Date(e.AssociationRegistration.close_datetime.replace(' ', 'T'));
-      return now >= open && now <= close;
-    });
-    const allFuture = entries.every((e) => {
-      const open = new Date(e.AssociationRegistration.open_datetime.replace(' ', 'T'));
-      return now < open;
-    });
+    const nowEt = etNowString();
+    const anyOpen = entries.some((e) => isWithin(
+      nowEt, e.AssociationRegistration.open_datetime, e.AssociationRegistration.close_datetime,
+    ));
+    const allFuture = entries.every((e) => nowEt < e.AssociationRegistration.open_datetime);
 
     let regStatus: RegistrationData['regStatus'] = anyOpen ? 'open' : allFuture ? 'coming-soon' : 'closed';
 
@@ -237,32 +277,16 @@ export async function getRegistrationData(options: RegistrationOptions = {}): Pr
     });
 
     // Fetch season playing dates from a detail page
-    let seasonDates: { start: string; end: string } | null = null;
     const firstId = entries[0]?.AssociationRegistration.id;
-    if (firstId) {
-      try {
-        const detailRes = await fetch(
-          `https://app.teamlinkt.com/register/go/mattsvolleyball/${firstId}`,
-          { headers: { 'User-Agent': 'MattsVolleyball/1.0' } },
-        );
-        const detailHtml = await detailRes.text();
-        // Look specifically for "Season Dates" label followed by date range
-        const seasonDatesMatch = detailHtml.match(
-          /Season\s+Dates<\/label>[\s\S]*?(\w+\s+\d{1,2},?\s*\d{4})\s*to\s*(\w+\s+\d{1,2},?\s*\d{4})/
-        );
-        if (seasonDatesMatch) {
-          seasonDates = { start: seasonDatesMatch[1].trim(), end: seasonDatesMatch[2].trim() };
-        }
-      } catch { /* non-critical */ }
-    }
+    const seasonDates = firstId ? await fetchSeasonDates(firstId) : null;
 
-    // If the season has started, override status to in-progress
-    if (seasonDates) {
-      const startDate = new Date(seasonDates.start);
-      const endDate = new Date(seasonDates.end);
-      if (now >= startDate && now <= endDate) {
+    const startKey = seasonDates && dateKeyFromLabel(seasonDates.start);
+    const endKey = seasonDates && dateKeyFromLabel(seasonDates.end);
+    if (startKey && endKey) {
+      const todayEt = nowEt.slice(0, 10);
+      if (todayEt >= startKey && todayEt <= endKey) {
         regStatus = 'in-progress';
-      } else if (now > endDate) {
+      } else if (todayEt > endKey) {
         regStatus = 'closed';
       }
     }
@@ -273,11 +297,12 @@ export async function getRegistrationData(options: RegistrationOptions = {}): Pr
       const day = getDayFromName(reg.name);
       const divisionLabel = getDivisionLabel(reg.name, reg.group_name);
       const colorClass = dayColors[day] || dayColors.other;
-      const open = new Date(reg.open_datetime.replace(' ', 'T'));
-      const close = new Date(reg.close_datetime.replace(' ', 'T'));
-      const isOpen = now >= open && now <= close;
-      const isFuture = now < open;
-      const daysLeft = Math.ceil((close.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      const isOpen = isWithin(nowEt, reg.open_datetime, reg.close_datetime);
+      const isFuture = nowEt < reg.open_datetime;
+      // Both sides are Eastern wall-clock strings, so read them in the same
+      // (arbitrary) zone and the difference is exact.
+      const asUtc = (str: string) => Date.parse(`${str.replace(' ', 'T')}Z`);
+      const daysLeft = Math.ceil((asUtc(reg.close_datetime) - asUtc(nowEt)) / (1000 * 60 * 60 * 24));
       const regUrl = `https://app.teamlinkt.com/register/go/mattsvolleyball/${reg.id}`;
       return { name: reg.name, divisionLabel, colorClass, isOpen, isFuture, daysLeft, regUrl, closeDate: formatDate(reg.close_datetime), openDate: formatDate(reg.open_datetime) };
     });
@@ -295,9 +320,7 @@ export async function getRegistrationData(options: RegistrationOptions = {}): Pr
     const openRegSummary = summariseOpenRegistration(
       entries.map((e) => {
         const reg = e.AssociationRegistration;
-        const open = new Date(reg.open_datetime.replace(' ', 'T'));
-        const close = new Date(reg.close_datetime.replace(' ', 'T'));
-        return { closeDatetime: reg.close_datetime, isOpen: now >= open && now <= close };
+        return { closeDatetime: reg.close_datetime, isOpen: isWithin(nowEt, reg.open_datetime, reg.close_datetime) };
       }),
     );
 

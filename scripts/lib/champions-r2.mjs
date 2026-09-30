@@ -94,7 +94,8 @@ export function loadEnv() {
   }
   for (const line of text.split(/\r?\n/)) {
     const match = line.match(/^([^#=]+)=(.*)$/);
-    if (match) env[match[1].trim()] = match[2].trim();
+    // Strip one pair of surrounding quotes, as dotenv does.
+    if (match) env[match[1].trim()] = match[2].trim().replace(/^(['"])(.*)\1$/, '$2');
   }
   return env;
 }

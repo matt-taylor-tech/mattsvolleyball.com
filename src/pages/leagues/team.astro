@@ -4,7 +4,7 @@ import { ArrowLeft, CalendarDays, ClipboardList } from 'lucide-astro';
 import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
 ---
 
-<Layout title="Team Schedule | Matt's Volleyball" description="View a team's upcoming schedule and past results.">
+<Layout title="Team Schedule | Matt's Volleyball" noindex description="View a team's upcoming schedule and past results.">
   <!-- Hero -->
   <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white pt-20 md:pt-28">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -72,6 +72,7 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
 
 <script>
   import { EVENTS_API, TEAMS_API_URL, DIVISION_IDS, ACTIVE_SEASON_ID } from '../../lib/seasonConfig';
+  import { escapeHtml, safeUrl } from '../../lib/html';
 
   const TEAMS_API = TEAMS_API_URL;
 
@@ -80,6 +81,8 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
   const teamName = params.get('name') || '';
 
   let currentStatus = 'upcoming';
+  // Bumped on every load so a slow response from an earlier tab can't overwrite a newer one
+  let loadSeq = 0;
 
   // Set page title
   if (teamName) {
@@ -98,6 +101,7 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
         body.set('season_id', ACTIVE_SEASON_ID);
 
         const res = await fetch(TEAMS_API, { method: 'POST', body });
+        if (!res.ok) continue;
         const teams: { id: number; name: string; imageUrl: string; groups: string }[] = await res.json();
         const team = teamId
           ? teams.find((t) => t.id === Number(teamId))
@@ -160,6 +164,7 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
     }
 
     const res = await fetch(EVENTS_API, { method: 'POST', body });
+    if (!res.ok) throw new Error(`Events request failed: ${res.status}`);
     const json = await res.json();
 
     const all: GameEvent[] = (json.data || []).map((row: Record<string, string | number>) => ({
@@ -221,7 +226,7 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
               <line x1="8" y1="2" x2="8" y2="6" stroke-width="2"/>
               <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
             </svg>
-            ${date}
+            ${escapeHtml(date)}
           </h3>
           <div class="space-y-1.5 sm:space-y-3">
             ${dateGames.map((g) => {
@@ -232,24 +237,24 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
               return `
                 <div class="card border-l-4 border-l-ocean-600 p-2 sm:p-5">
                   <div class="flex items-center gap-1.5 text-xs text-ocean-500 mb-1 sm:hidden">
-                    <span class="inline-block bg-ocean-600 text-white font-semibold px-2 py-0.5 rounded-full">${g.time.split(' - ')[0]}</span>
-                    <a href="${g.location.url}" target="_blank" rel="noopener noreferrer"
-                       class="hover:text-ocean-700 transition-colors">${g.location.name.split(' - ')[0]}</a>
-                    ${g.summaryUrl ? `<span class="text-ocean-400">\u00b7</span><a href="${g.summaryUrl}" target="_blank" rel="noopener noreferrer" class="text-coral-500 hover:text-coral-600 font-semibold transition-colors">Summary</a>` : ''}
+                    <span class="inline-block bg-ocean-600 text-white font-semibold px-2 py-0.5 rounded-full">${escapeHtml(g.time.split(' - ')[0])}</span>
+                    <a href="${escapeHtml(safeUrl(g.location.url))}" target="_blank" rel="noopener noreferrer"
+                       class="hover:text-ocean-700 transition-colors">${escapeHtml(g.location.name.split(' - ')[0])}</a>
+                    ${g.summaryUrl ? `<span class="text-ocean-400">\u00b7</span><a href="${escapeHtml(safeUrl(g.summaryUrl))}" target="_blank" rel="noopener noreferrer" class="text-coral-500 hover:text-coral-600 font-semibold transition-colors">Summary</a>` : ''}
                   </div>
                   <div class="flex items-center gap-2 sm:gap-3">
-                    <span class="hidden sm:inline-block text-sm font-medium text-ocean-500 sm:w-32 shrink-0">${g.time.replace(' - ', ' \u2013 ')}</span>
+                    <span class="hidden sm:inline-block text-sm font-medium text-ocean-500 sm:w-32 shrink-0">${escapeHtml(g.time.replace(' - ', ' \u2013 '))}</span>
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-2 text-ocean-800 font-bold">
                         <span class="text-ocean-500 text-xs font-normal shrink-0">${label}</span>
-                        <span class="truncate">${opponent}</span>
+                        <span class="truncate">${escapeHtml(opponent)}</span>
                       </div>
                       <div class="hidden sm:flex items-center gap-3 mt-1">
-                        <a href="${g.location.url}" target="_blank" rel="noopener noreferrer"
+                        <a href="${escapeHtml(safeUrl(g.location.url))}" target="_blank" rel="noopener noreferrer"
                            class="text-sm text-ocean-500/70 hover:text-ocean-600 transition-colors">
-                          ${g.location.name}
+                          ${escapeHtml(g.location.name)}
                         </a>
-                        ${g.summaryUrl ? `<a href="${g.summaryUrl}" target="_blank" rel="noopener noreferrer" class="text-sm text-coral-500 hover:text-coral-600 font-medium transition-colors">Summary</a>` : ''}
+                        ${g.summaryUrl ? `<a href="${escapeHtml(safeUrl(g.summaryUrl))}" target="_blank" rel="noopener noreferrer" class="text-sm text-coral-500 hover:text-coral-600 font-medium transition-colors">Summary</a>` : ''}
                       </div>
                     </div>
                   </div>
@@ -273,10 +278,13 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
     container.classList.add('hidden');
     empty.classList.add('hidden');
 
+    const seq = ++loadSeq;
     try {
       const games = await fetchGames(currentStatus);
+      if (seq !== loadSeq) return;
       render(games);
     } catch {
+      if (seq !== loadSeq) return;
       loading.classList.add('hidden');
       empty.classList.remove('hidden');
     }

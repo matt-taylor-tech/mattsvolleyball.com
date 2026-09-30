@@ -225,10 +225,17 @@ async function readJson(req) {
   }
 }
 
-/** Only answer requests addressed to this machine (guards against DNS rebinding). */
+/**
+ * Only answer requests addressed to this machine (guards against DNS rebinding)
+ * and, when the browser says where a request came from, only from the wizard's
+ * own page. Without the Origin check any website open in another tab could
+ * POST to 127.0.0.1 and upload photos or trigger a rebuild.
+ */
 function isLocalRequest(req) {
   const host = (req.headers.host ?? '').replace(/:\d+$/, '');
-  return host === '127.0.0.1' || host === 'localhost';
+  if (host !== '127.0.0.1' && host !== 'localhost') return false;
+  const origin = req.headers.origin;
+  return !origin || origin === `http://127.0.0.1:${PORT}` || origin === `http://localhost:${PORT}`;
 }
 
 const routes = {

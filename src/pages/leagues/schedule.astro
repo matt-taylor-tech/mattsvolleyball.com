@@ -123,6 +123,7 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
     EVENTS_API, TEAMS_API_URL, ACTIVE_SEASON_ID,
     PLAYOFFS_ACTIVE, PLAYOFF_ID, isPlayoffDate,
   } from '../../lib/seasonConfig';
+  import { escapeHtml, safeUrl } from '../../lib/html';
 
   const API_URL = EVENTS_API;
 
@@ -182,6 +183,7 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
         body.set('group_ids[division]', id);
         body.set('season_id', ACTIVE_SEASON_ID);
         const res = await fetch(TEAMS_API_URL, { method: 'POST', body });
+        if (!res.ok) throw new Error(`Teams request failed: ${res.status}`);
         const teams: { id: number; name: string }[] = await res.json();
         return { id, teams };
       })
@@ -201,6 +203,7 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
     body.set('schedule_type', 'playoffs');
     body.set('playoff_id', PLAYOFF_ID);
     const res = await fetch(API_URL, { method: 'POST', body });
+    if (!res.ok) throw new Error(`Playoff request failed: ${res.status}`);
     const json = await res.json();
     const startOfTodaySec = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000);
     return (json.data || [])
@@ -267,6 +270,7 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
     body.set(`filters[${divisionId}]`, divisionId);
 
     const res = await fetch(API_URL, { method: 'POST', body });
+    if (!res.ok) throw new Error(`Schedule request failed: ${res.status}`);
     const json = await res.json();
 
     return (json.data || []).map((row: Record<string, string | number>) => ({
@@ -347,7 +351,7 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
               <line x1="8" y1="2" x2="8" y2="6" stroke-width="2"/>
               <line x1="3" y1="10" x2="21" y2="10" stroke-width="2"/>
             </svg>
-            ${date}
+            ${escapeHtml(date)}
           </h3>
           <div class="grid sm:grid-cols-2 gap-2">
             ${dateGames.map((g) => {
@@ -361,16 +365,16 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
               return `
                 <div class="card border-l-4 ${stripeClass} p-2">
                   <div class="flex items-center gap-1.5 text-xs text-ocean-500 mb-1">
-                    <span class="inline-block bg-ocean-600 text-white font-semibold px-2 py-0.5 rounded-full shrink-0">${g.time.split(' - ')[0]}</span>
-                    <a href="${g.location.url}" target="_blank" rel="noopener noreferrer"
-                       class="truncate hover:text-ocean-700 transition-colors">${g.location.name.split(' - ')[0]}</a>
+                    <span class="inline-block bg-ocean-600 text-white font-semibold px-2 py-0.5 rounded-full shrink-0">${escapeHtml(g.time.split(' - ')[0])}</span>
+                    <a href="${escapeHtml(safeUrl(g.location.url))}" target="_blank" rel="noopener noreferrer"
+                       class="truncate hover:text-ocean-700 transition-colors">${escapeHtml(g.location.name.split(' - ')[0])}</a>
                     <span class="text-ocean-400 shrink-0">·</span>
-                    <span class="truncate">${divisionName}</span>${playoffBadge}
+                    <span class="truncate">${escapeHtml(divisionName)}</span>${playoffBadge}
                   </div>
                   <div class="flex items-center gap-2 text-ocean-800 font-bold">
-                    <a href="/leagues/team/?name=${encodeURIComponent(g.home)}" class="truncate hover:text-ocean-500 transition-colors">${g.home}</a>
+                    <a href="/leagues/team/?name=${encodeURIComponent(g.home)}" class="truncate hover:text-ocean-500 transition-colors">${escapeHtml(g.home)}</a>
                     <span class="text-ocean-500 text-xs font-normal shrink-0">vs</span>
-                    <a href="/leagues/team/?name=${encodeURIComponent(g.away)}" class="truncate hover:text-ocean-500 transition-colors">${g.away}</a>
+                    <a href="/leagues/team/?name=${encodeURIComponent(g.away)}" class="truncate hover:text-ocean-500 transition-colors">${escapeHtml(g.away)}</a>
                   </div>
                 </div>
               `;
@@ -386,7 +390,7 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
                   <div class="flex items-center gap-2">
                     <span class="inline-block bg-coral-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shrink-0">BYE</span>
                     <div class="flex-1 min-w-0">
-                      <div class="text-sm text-ocean-700 font-medium truncate">${byes.join(', ')}</div>
+                      <div class="text-sm text-ocean-700 font-medium truncate">${byes.map(escapeHtml).join(', ')}</div>
                     </div>
                   </div>
                 </div>
@@ -498,11 +502,13 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
 
   // Teams must load before playoff games (division mapping depends on team IDs).
   // During playoffs, teams are loaded first; regular season runs both in parallel.
+  // A failed teams request only costs the division mapping and bye rows, so
+  // the schedule still loads either way.
   if (PLAYOFFS_ACTIVE) {
-    fetchAllTeams().then(() => loadSchedule());
+    fetchAllTeams().catch(() => {}).finally(() => loadSchedule());
   } else {
     const teamsReady = fetchAllTeams();
     loadSchedule();
-    teamsReady.then(() => filterAndRender());
+    teamsReady.then(() => filterAndRender()).catch(() => {});
   }
 </script>

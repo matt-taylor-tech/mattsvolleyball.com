@@ -102,9 +102,12 @@ import {
 
 <script>
   import { STANDINGS_API_URL, DIVISION_IDS, ACTIVE_SEASON_ID } from '../../lib/seasonConfig';
+  import { escapeHtml } from '../../lib/html';
 
   const API_URL = STANDINGS_API_URL;
   let currentDivision = DIVISION_IDS[0];
+  // Bumped on every load so a slow response from an earlier tab can't overwrite a newer one
+  let loadSeq = 0;
 
   interface StandingEntry {
     team_name: string;
@@ -197,6 +200,7 @@ import {
     body.set('season_id', ACTIVE_SEASON_ID);
 
     const res = await fetch(API_URL, { method: 'POST', body });
+    if (!res.ok) throw new Error(`Standings request failed: ${res.status}`);
     return await res.json();
   }
 
@@ -229,12 +233,12 @@ import {
             <div class="flex items-center justify-between mb-2">
               <div class="flex items-center gap-3">
                 <span class="text-sm font-bold text-ocean-500 w-6">${i + 1}</span>
-                <a href="/leagues/team/?name=${encodeURIComponent(s.Team.name)}" class="font-display font-bold text-ocean-700 hover:text-ocean-500 transition-colors">${s.Team.name}</a>
+                <a href="/leagues/team/?name=${encodeURIComponent(s.Team.name)}" class="font-display font-bold text-ocean-700 hover:text-ocean-500 transition-colors">${escapeHtml(s.Team.name)}</a>
               </div>
-              <span class="text-sm font-bold text-ocean-600">${s.total_wins}-${s.total_losses}${s.total_ties > 0 ? `-${s.total_ties}` : ''}</span>
+              <span class="text-sm font-bold text-ocean-600">${escapeHtml(s.total_wins)}-${escapeHtml(s.total_losses)}${s.total_ties > 0 ? `-${escapeHtml(s.total_ties)}` : ''}</span>
             </div>
             <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-ocean-500 ml-9">
-              ${mobileColumns.map((col) => `<span>${col.abbreviation}: ${formatColumnValue(s, col)}</span>`).join('')}
+              ${mobileColumns.map((col) => `<span>${escapeHtml(col.abbreviation)}: ${escapeHtml(formatColumnValue(s, col))}</span>`).join('')}
             </div>
           </div>
         `).join('')}
@@ -249,9 +253,9 @@ import {
               <th class="text-left px-4 py-3 text-sm font-display font-bold text-ocean-600">Team</th>
               ${orderedColumns.map((col, idx) => `
                 <th
-                  title="${col.column_name}"
+                  title="${escapeHtml(col.column_name)}"
                   class="text-right ${idx === orderedColumns.length - 1 ? 'px-4' : 'px-3'} py-3 text-sm font-display font-bold text-ocean-600 whitespace-nowrap"
-                >${col.abbreviation}</th>
+                >${escapeHtml(col.abbreviation)}</th>
               `).join('')}
             </tr>
           </thead>
@@ -259,9 +263,9 @@ import {
             ${standings.map((s, i) => `
               <tr class="border-b border-sand-200 ${i % 2 === 1 ? 'bg-sand-50' : ''}">
                 <td class="px-4 py-2 text-sm font-bold text-ocean-500">${i + 1}</td>
-                <td class="px-4 py-2 text-sm font-bold whitespace-nowrap"><a href="/leagues/team/?name=${encodeURIComponent(s.Team.name)}" class="text-ocean-700 hover:text-ocean-500 transition-colors">${s.Team.name}</a></td>
+                <td class="px-4 py-2 text-sm font-bold whitespace-nowrap"><a href="/leagues/team/?name=${encodeURIComponent(s.Team.name)}" class="text-ocean-700 hover:text-ocean-500 transition-colors">${escapeHtml(s.Team.name)}</a></td>
                 ${orderedColumns.map((col, idx) => `
-                  <td class="${idx === orderedColumns.length - 1 ? 'px-4 font-bold' : 'px-3'} py-2 text-sm text-ocean-700 text-right tabular-nums">${formatColumnValue(s, col)}</td>
+                  <td class="${idx === orderedColumns.length - 1 ? 'px-4 font-bold' : 'px-3'} py-2 text-sm text-ocean-700 text-right tabular-nums">${escapeHtml(formatColumnValue(s, col))}</td>
                 `).join('')}
               </tr>
             `).join('')}
@@ -280,11 +284,14 @@ import {
     container.classList.add('hidden');
     empty.classList.add('hidden');
 
+    const seq = ++loadSeq;
     try {
       const data = await fetchStandings(currentDivision);
+      if (seq !== loadSeq) return;
       render(data);
       setSyncStamp('standings-sync');
     } catch {
+      if (seq !== loadSeq) return;
       loading.classList.add('hidden');
       empty.classList.remove('hidden');
     }
