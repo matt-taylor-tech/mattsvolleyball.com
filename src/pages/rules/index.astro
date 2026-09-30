@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { Circle, ArrowUp, Zap, Grid3x3, Check, Ban, Flame, ArrowUpFromLine, Cable, RefreshCw, ArrowLeftRight, Trophy, Lightbulb } from 'lucide-astro';
+import { GROUPME_MAIN_URL } from '../../lib/community';
 ---
 
 <Layout title="Rules | Matt's Volleyball" description="Official rules for Matt's Volleyball sand volleyball leagues in Lake Norman. Game rules, serving, spiking, net play, substitutions, and playoffs.">
@@ -343,19 +344,19 @@ import { Circle, ArrowUp, Zap, Grid3x3, Check, Ban, Flame, ArrowUpFromLine, Cabl
           <ul class="space-y-4 text-ocean-700 leading-relaxed list-none pl-0">
             <li class="flex items-start gap-3">
               <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-ocean-500" viewBox="0 0 24 24" fill="currentColor"><path d="M19.04 4.85C17.34 3.2 15.33 2.25 13 2v3.62l9 5.18c-.28-2.3-1.27-4.3-2.96-5.95M12 22c3.44 0 6.16-1.38 8.17-4.14L17.06 16l-8.99 5.2c1.25.53 2.57.8 3.93.8m1-10.59l8.15 4.66c.44-.94.73-1.93.85-2.96l-9-5.18zm-9.12 6.4c.66.91 1.38 1.65 2.17 2.19l8.99-5.1L12 13.15zM11.04 2C10 2.09 9 2.36 8 2.8v10.35l3.04-1.74zM2 12c0 1.39.3 2.77.89 4.12L6 14.28V4c-2.67 2-4 4.65-4 8"/></svg>
+              <span><strong>Need a sub? Post in the league <a href={GROUPME_MAIN_URL} target="_blank" rel="noopener noreferrer" class="text-ocean-600 font-semibold underline hover:text-ocean-500">GroupMe</a> chat.</strong> Any eligible player can volunteer to fill in.</span>
+            </li>
+            <li class="flex items-start gap-3">
+              <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-ocean-500" viewBox="0 0 24 24" fill="currentColor"><path d="M19.04 4.85C17.34 3.2 15.33 2.25 13 2v3.62l9 5.18c-.28-2.3-1.27-4.3-2.96-5.95M12 22c3.44 0 6.16-1.38 8.17-4.14L17.06 16l-8.99 5.2c1.25.53 2.57.8 3.93.8m1-10.59l8.15 4.66c.44-.94.73-1.93.85-2.96l-9-5.18zm-9.12 6.4c.66.91 1.38 1.65 2.17 2.19l8.99-5.1L12 13.15zM11.04 2C10 2.09 9 2.36 8 2.8v10.35l3.04-1.74zM2 12c0 1.39.3 2.77.89 4.12L6 14.28V4c-2.67 2-4 4.65-4 8"/></svg>
               <span>Subs must be registered and paid for the current season in a Matt’s Volleyball league. Players from <strong>any league night</strong> may substitute, subject to the rules below.</span>
             </li>
             <li class="flex items-start gap-3">
               <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-ocean-500" viewBox="0 0 24 24" fill="currentColor"><path d="M19.04 4.85C17.34 3.2 15.33 2.25 13 2v3.62l9 5.18c-.28-2.3-1.27-4.3-2.96-5.95M12 22c3.44 0 6.16-1.38 8.17-4.14L17.06 16l-8.99 5.2c1.25.53 2.57.8 3.93.8m1-10.59l8.15 4.66c.44-.94.73-1.93.85-2.96l-9-5.18zm-9.12 6.4c.66.91 1.38 1.65 2.17 2.19l8.99-5.1L12 13.15zM11.04 2C10 2.09 9 2.36 8 2.8v10.35l3.04-1.74zM2 12c0 1.39.3 2.77.89 4.12L6 14.28V4c-2.67 2-4 4.65-4 8"/></svg>
-              <span>Subs must be reasonably comparable in skill to the player they are replacing. <strong>Lower-skilled subs are always welcome.</strong> This skill-comparability check is separate from — and in addition to — the division-eligibility rule below.</span>
+              <span>Subs must be reasonably comparable in skill to the player they are replacing. <strong>Lower-skilled subs are always welcome.</strong></span>
             </li>
             <li class="flex items-start gap-3">
               <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-ocean-500" viewBox="0 0 24 24" fill="currentColor"><path d="M19.04 4.85C17.34 3.2 15.33 2.25 13 2v3.62l9 5.18c-.28-2.3-1.27-4.3-2.96-5.95M12 22c3.44 0 6.16-1.38 8.17-4.14L17.06 16l-8.99 5.2c1.25.53 2.57.8 3.93.8m1-10.59l8.15 4.66c.44-.94.73-1.93.85-2.96l-9-5.18zm-9.12 6.4c.66.91 1.38 1.65 2.17 2.19l8.99-5.1L12 13.15zM11.04 2C10 2.09 9 2.36 8 2.8v10.35l3.04-1.74zM2 12c0 1.39.3 2.77.89 4.12L6 14.28V4c-2.67 2-4 4.65-4 8"/></svg>
-              <span><strong>Eligibility is based on which division a player is registered in, not their actual skill level.</strong> Some players registered on a competitive team play at a recreational level, and some players registered on a recreational team play at a competitive level — neither changes which division they're eligible to sub in.</span>
-            </li>
-            <li class="flex items-start gap-3">
-              <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-ocean-500" viewBox="0 0 24 24" fill="currentColor"><path d="M19.04 4.85C17.34 3.2 15.33 2.25 13 2v3.62l9 5.18c-.28-2.3-1.27-4.3-2.96-5.95M12 22c3.44 0 6.16-1.38 8.17-4.14L17.06 16l-8.99 5.2c1.25.53 2.57.8 3.93.8m1-10.59l8.15 4.66c.44-.94.73-1.93.85-2.96l-9-5.18zm-9.12 6.4c.66.91 1.38 1.65 2.17 2.19l8.99-5.1L12 13.15zM11.04 2C10 2.09 9 2.36 8 2.8v10.35l3.04-1.74zM2 12c0 1.39.3 2.77.89 4.12L6 14.28V4c-2.67 2-4 4.65-4 8"/></svg>
-              <span><strong>A player registered on a competitive-division team may not substitute for a recreational team</strong>, even if they agree to “play down.” The only exception is a player who is <strong>also</strong> registered on a recreational-division team for the current season — that dual registration is what makes them eligible, not how they actually play. That player must still meet the skill-comparability requirement above.</span>
+              <span><strong>Recreational subs must be on a recreational team roster.</strong> Players who are on both a recreational-division team and a competitive-division team are eligible to sub in the recreational division. Competitive-division players who are not on a recreational-division roster are not eligible to sub, even if they “play down.”</span>
             </li>
           </ul>
 
@@ -367,7 +368,7 @@ import { Circle, ArrowUp, Zap, Grid3x3, Check, Ban, Flame, ArrowUpFromLine, Cabl
             </li>
             <li class="flex items-start gap-3">
               <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-ocean-500" viewBox="0 0 24 24" fill="currentColor"><path d="M19.04 4.85C17.34 3.2 15.33 2.25 13 2v3.62l9 5.18c-.28-2.3-1.27-4.3-2.96-5.95M12 22c3.44 0 6.16-1.38 8.17-4.14L17.06 16l-8.99 5.2c1.25.53 2.57.8 3.93.8m1-10.59l8.15 4.66c.44-.94.73-1.93.85-2.96l-9-5.18zm-9.12 6.4c.66.91 1.38 1.65 2.17 2.19l8.99-5.1L12 13.15zM11.04 2C10 2.09 9 2.36 8 2.8v10.35l3.04-1.74zM2 12c0 1.39.3 2.77.89 4.12L6 14.28V4c-2.67 2-4 4.65-4 8"/></svg>
-              <span>A recreational team that uses an ineligible sub from the competitive division <strong>forfeits the match</strong>, even if the match has already been played.</span>
+              <span>A recreational team that uses an ineligible competitive-division sub <strong>forfeits the match</strong>, even if the match has already been played.</span>
             </li>
             <li class="flex items-start gap-3">
               <svg class="w-5 h-5 mt-0.5 flex-shrink-0 text-ocean-500" viewBox="0 0 24 24" fill="currentColor"><path d="M19.04 4.85C17.34 3.2 15.33 2.25 13 2v3.62l9 5.18c-.28-2.3-1.27-4.3-2.96-5.95M12 22c3.44 0 6.16-1.38 8.17-4.14L17.06 16l-8.99 5.2c1.25.53 2.57.8 3.93.8m1-10.59l8.15 4.66c.44-.94.73-1.93.85-2.96l-9-5.18zm-9.12 6.4c.66.91 1.38 1.65 2.17 2.19l8.99-5.1L12 13.15zM11.04 2C10 2.09 9 2.36 8 2.8v10.35l3.04-1.74zM2 12c0 1.39.3 2.77.89 4.12L6 14.28V4c-2.67 2-4 4.65-4 8"/></svg>
