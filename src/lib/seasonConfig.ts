@@ -16,6 +16,28 @@
 // and playoffs pages consume the config below.
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ── Eastern time helpers ─────────────────────────────────────────────────────
+// Config and TeamLinkt datetimes ('YYYY-MM-DD HH:MM:SS') are Eastern wall-clock
+// times. Builds and the Pages Function run in UTC, where `new Date(str)` reads
+// them 4-5 hours early, so compare them as strings against Eastern "now".
+
+/** 'YYYY-MM-DD HH:MM:SS' of the given moment in Eastern time. */
+export function etNowString(now: Date = new Date()): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+  }).formatToParts(now);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? '00';
+  // Some runtimes render midnight as hour "24" with hour12: false.
+  const hour = get('hour') === '24' ? '00' : get('hour');
+  return `${get('year')}-${get('month')}-${get('day')} ${hour}:${get('minute')}:${get('second')}`;
+}
+
+/** True once an Eastern 'YYYY-MM-DD HH:MM:SS' datetime has arrived. False for ''. */
+export function hasEtDatetimePassed(datetime: string, now: Date = new Date()): boolean {
+  return datetime !== '' && etNowString(now) >= datetime;
+}
+
 // ── Base seasons ──────────────────────────────────────────────────────────────
 const CURRENT_SEASON = {
   id: '57274',
@@ -62,7 +84,7 @@ export const UPCOMING_SEASON_START_LABEL = UPCOMING_SEASON_START_LABEL_OVERRIDE
 // True once the upcoming season's first game day has arrived. The site then
 // stops leading with registration and says the season is underway, even if a
 // late-open league (Wednesday shuffle) is still taking signups.
-export const HAS_UPCOMING_SEASON_STARTED = upcomingStartIsValid && new Date() >= upcomingStartAt;
+export const HAS_UPCOMING_SEASON_STARTED = upcomingStartIsValid && hasEtDatetimePassed(UPCOMING_SEASON_START_DATETIME);
 
 // Switch live data pages to the next season the day after the current season's
 // final game, including playoffs. Update this date each season independently

@@ -19,7 +19,7 @@ async function updateRegistrationCTA() {
     if (!response.ok) throw new Error(`API returned ${response.status}`);
 
     const data = await response.json();
-    const { regStatus, seasonLabel, seasonDates, earliestOpen, latestClose, nextNextSeasonLabel } = data;
+    const { regStatus, seasonLabel, seasonDates, earliestOpen, latestClose, nextNextSeasonLabel, hasOpenRegistration } = data;
 
     const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
       '&': '&amp;',
@@ -29,16 +29,20 @@ async function updateRegistrationCTA() {
       "'": '&#39;',
     }[char]));
 
+    // TeamLinkt dates arrive as 'YYYY-MM-DD HH:MM:SS'. Safari cannot parse the
+    // space-separated form, so swap in the ISO 'T' first.
+    const parseDate = (dateStr) => new Date(String(dateStr).replace(/^(\d{4}-\d{2}-\d{2}) /, '$1T'));
+
     // Format dates for display
     const formatDate = (dateStr) => {
       if (!dateStr) return '';
-      const date = new Date(dateStr);
+      const date = parseDate(dateStr);
       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     };
 
     const formatFullDate = (dateStr) => {
       if (!dateStr) return '';
-      const date = new Date(dateStr);
+      const date = parseDate(dateStr);
       return date.toLocaleDateString('en-US', { 
         weekday: 'long',
         month: 'long', 
@@ -175,11 +179,10 @@ async function updateRegistrationCTA() {
       } 
       
       else if (type === 'sign-up') {
-        if (regStatus === 'open') {
-          el.textContent = 'Sign Up';
-          el.href = REG_PAGE;
-          el.target = '_blank';
-          el.rel = 'noopener noreferrer';
+        // Keep the server-rendered night-specific link and label; only toggle
+        // visibility. A late-open night can still take signups while the
+        // season as a whole reads 'in-progress'.
+        if (regStatus === 'open' || hasOpenRegistration) {
           el.classList.remove('hidden');
         } else {
           el.classList.add('hidden');

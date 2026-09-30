@@ -3,7 +3,7 @@ import Layout from '../../layouts/Layout.astro';
 import LeagueCard from '../../components/LeagueCard.astro';
 import FAQAccordion from '../../components/FAQAccordion.astro';
 import { getRegistrationData, formatDate, formatFullDate, getDayFromName } from '../../lib/registration';
-import { REGISTRATION_PAGE_URL, UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL, HAS_UPCOMING_SEASON_STARTED } from '../../lib/seasonConfig';
+import { REGISTRATION_PAGE_URL, UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL, HAS_UPCOMING_SEASON_STARTED, hasEtDatetimePassed } from '../../lib/seasonConfig';
 import type { RegCard } from '../../lib/registration';
 
 const { seasonLabel, regStatus, seasonDates, earliestOpen, openRegNextClose, openRegCloseDatesDiffer, regCards, hasOpenRegistration, openRegUrl, openRegIsExternal, openRegDay, registrationKnown } = await getRegistrationData({ preferredSeasonId: UPCOMING_SEASON_ID });
@@ -14,11 +14,7 @@ const REG_PAGE = REGISTRATION_PAGE_URL;
 // config-driven "coming soon" if an announced open date is still in the future.
 // Hands off to live data automatically once the forms go public (no manual
 // revert needed).
-const now = new Date();
-const announcedOpenDate = UPCOMING_REG_OPEN_DATETIME
-  ? new Date(UPCOMING_REG_OPEN_DATETIME.replace(' ', 'T'))
-  : null;
-const showComingSoon = !seasonLabel && announcedOpenDate !== null && now < announcedOpenDate;
+const showComingSoon = !seasonLabel && UPCOMING_REG_OPEN_DATETIME !== '' && !hasEtDatetimePassed(UPCOMING_REG_OPEN_DATETIME);
 
 const heroRegStatus = HAS_UPCOMING_SEASON_STARTED
   ? 'in-progress'

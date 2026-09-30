@@ -45,7 +45,9 @@ function resultLine(game) {
     .join(', ');
 
   if (game.homeWins === game.awayWins) {
-    return `${game.home} ${game.homeWins}-${game.awayWins} ${game.away}${setScores ? ` (${setScores})` : ''}`;
+    // Home team is printed first, so its set scores come first too.
+    const tiedSets = (game.sets || []).map((s) => `${s.home}-${s.away}`).join(', ');
+    return `${game.home} ${game.homeWins}-${game.awayWins} ${game.away}${tiedSets ? ` (${tiedSets})` : ''}`;
   }
   return `${boldSans(winner)} d. ${loser} ${setsWon}${setScores ? ` (${setScores})` : ''}`;
 }
@@ -86,21 +88,24 @@ async function main() {
   const footer = `🤖 Auto-posted by Matt's bot`;
 
   for (const { day, dateKey } of nights) {
+    // The season that night belonged to: right after the rollover, today's
+    // config already points at the next season's divisions.
+    const nightConfig = await loadConfig(dateKey);
     // One self-contained message per division: last week's results + standings.
     // Untracked divisions (shuffle) have neither, so they drop out naturally.
     const messages = [];
-    for (const division of config.divisions.filter((d) => d.day === day && d.tracked)) {
+    for (const division of nightConfig.divisions.filter((d) => d.day === day && d.tracked)) {
       let games = await fetchResults(division.id, dateKey);
       // Playoff games aren't scored (it's a bracket), so an unscored one isn't
       // "never submitted"; leave it out rather than flag it.
-      if (config.playoffDates.includes(dateKey)) {
+      if (nightConfig.playoffDates.includes(dateKey)) {
         games = games.filter((g) => g.homeWins !== null && g.awayWins !== null);
       }
       // No games that night means nothing to recap: standings alone would be
       // a 0-0 table pre-season (with null rankings) or a stale one off-week.
       if (games.length === 0) continue;
 
-      const standings = await fetchStandings(division.id, config.seasonId);
+      const standings = await fetchStandings(division.id, nightConfig.seasonId);
       const sections = [resultsSection(games)];
       if (standings.length >= 2) sections.push(standingsSection(standings));
 

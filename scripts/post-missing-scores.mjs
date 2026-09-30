@@ -51,7 +51,7 @@ async function main() {
   const dateKey = dateArg || previousDateKey(etDateKey(new Date()));
   const dayKey = dayKeyFor(dateKey);
 
-  const config = await loadConfig();
+  const config = await loadConfig(dateKey);
   // Playoffs are a bracket: scores aren't needed, so don't nag about them.
   if (!simulate && config.playoffDates.includes(dateKey)) {
     console.log(`${dateKey} is a playoff night: scores aren't needed, nothing to check.`);

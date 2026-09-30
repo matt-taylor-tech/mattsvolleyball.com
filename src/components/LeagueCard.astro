@@ -1,7 +1,7 @@
 ---
 import type { RegCard } from '../lib/registration';
 import SpotsCounter from './SpotsCounter.astro';
-import { UPCOMING_DIVISIONS, UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_MAX_TEAMS_BY_NIGHT, UPCOMING_PLAYER_CAPS_BY_DIVISION, UPCOMING_REG_OPEN_DATETIME, registrationPageUrlForDay } from '../lib/seasonConfig';
+import { UPCOMING_DIVISIONS, UPCOMING_MAX_TEAMS_BY_DIVISION, UPCOMING_MAX_TEAMS_BY_NIGHT, UPCOMING_PLAYER_CAPS_BY_DIVISION, UPCOMING_REG_OPEN_DATETIME, hasEtDatetimePassed, registrationPageUrlForDay } from '../lib/seasonConfig';
 import { formatFullDate } from '../lib/registration';
 
 interface Props {
@@ -36,10 +36,7 @@ const anyRegOpen = Boolean(regEntries?.some((e) => e.isOpen));
 // Before TeamLinkt publishes the forms there are no entries to show. If we have
 // announced an open date that has not arrived yet, say "coming soon" rather than
 // "closed", so the card agrees with the announcement in the page hero.
-const announcedOpen = UPCOMING_REG_OPEN_DATETIME
-  ? new Date(UPCOMING_REG_OPEN_DATETIME.replace(' ', 'T'))
-  : null;
-const announcedOpenIsFuture = announcedOpen !== null && new Date() < announcedOpen;
+const announcedOpenIsFuture = UPCOMING_REG_OPEN_DATETIME !== '' && !hasEtDatetimePassed(UPCOMING_REG_OPEN_DATETIME);
 
 // Match a registration entry to a counted division by name keyword.
 // Checks both divisionLabel (e.g. "Competitive") and name (e.g. "Monday 3v3 Coed").

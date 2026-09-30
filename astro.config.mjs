@@ -12,7 +12,7 @@ export default defineConfig({
     tailwind(),
     sitemap({
       filter: (page) => {
-        const excludes = ['/leagues/schedule', '/leagues/teams', '/leagues/standings', '/leagues/scores', '/home', '/register'];
+        const excludes = ['/leagues/schedule', '/leagues/teams', '/leagues/team/', '/leagues/standings', '/leagues/scores', '/leagues/playoffs', '/image-gallery', '/home', '/register', '/404'];
         return !page.includes('_') && !excludes.some((p) => page.includes(p));
       },
       serialize: (item) => {

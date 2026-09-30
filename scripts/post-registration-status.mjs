@@ -93,7 +93,9 @@ async function fetchPlayerCount(seasonId, divisionId) {
   let total = 0;
   for (const team of teams) {
     const res = await fetch(`${API_BASE}/getTeam/${ORG_ID}/${team.id}`);
-    if (!res.ok) continue;
+    // Throw rather than skip: a silently low count would announce spots that
+    // do not exist and trigger a spurious "changed" digest.
+    if (!res.ok) throw new Error(`HTTP ${res.status} from getTeam/${team.id}`);
     const data = await res.json();
     total += data?.payload?.Team?.team_member_count ?? 0;
   }
@@ -272,17 +274,10 @@ async function main() {
 
   /** Counts from a snapshot guid, or null if it isn't one we can trust. */
   const decodeSnapshot = (g) => {
-    let body = null;
-    if (g.startsWith(snapshotPrefix)) {
-      body = g.slice(snapshotPrefix.length);
-    } else if (g.startsWith('mv-regstatus-')) {
-      // Legacy guid, written before the season id was included. It carries
-      // only the counts, so the field count is the only sanity check
-      // available; another season's guid fails it and is ignored.
-      body = g.slice('mv-regstatus-'.length);
-    }
-    if (body === null) return null;
-    const parts = body.split('-').map(Number);
+    // Only this season's guids: another season's (or a pre-season-id legacy
+    // one) could decode its season id as a count and fake a full night.
+    if (!g.startsWith(snapshotPrefix)) return null;
+    const parts = g.slice(snapshotPrefix.length).split('-').map(Number);
     const usable = parts.length === divisionsChecked.length && parts.every(Number.isFinite);
     return usable ? parts : null;
   };
@@ -301,7 +296,9 @@ async function main() {
     for (const [i, division] of divisionsChecked.entries()) {
       if (division.unit !== 'teams') continue;
       if (lastSnapshot[i] >= division.cap && division.count < division.cap) {
-        const spotGuid = `mv-spotopen-${division.id}-${division.count}`;
+        // Season and date keep a later drop to the same count (after the spot
+        // refilled) or next season's drop from matching an old alert.
+        const spotGuid = `mv-spotopen-${config.seasonId}-${division.id}-${division.count}-${etDateKey(new Date())}`;
         if (seen.has(spotGuid)) continue;
         toPost.push({
           guid: spotGuid,

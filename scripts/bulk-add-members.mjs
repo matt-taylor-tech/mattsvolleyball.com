@@ -145,7 +145,7 @@ async function main() {
   const token = process.env.GROUPME_TOKEN;
   if (!token) throw new Error('Missing env var GROUPME_TOKEN');
 
-  const { registrants, skipped } = extractRegistrants(toRecords(parseCsv(await readFile(csvPath, 'utf8'))));
+  const { registrants, skipped } = extractRegistrants(toRecords(parseCsv((await readFile(csvPath, 'utf8')).replace(/^\uFEFF/, ''))));
 
   // Build per-group plans. Everyone -> main group; matching divisions also get
   // their extra group. In test mode everything collapses to the test group.
