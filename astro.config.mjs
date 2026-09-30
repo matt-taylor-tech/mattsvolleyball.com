@@ -24,4 +24,11 @@ export default defineConfig({
   build: {
     assets: '_assets',
   },
+  vite: {
+    // Pins the date-driven season switches in src/lib/seasonConfig.ts to the
+    // build, in the server render and the browser bundle alike.
+    define: {
+      __BUILD_TIME__: JSON.stringify(Date.now()),
+    },
+  },
 });
