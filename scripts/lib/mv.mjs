@@ -190,6 +190,23 @@ export function etDateKey(date) {
   }).format(date);
 }
 
+const MONTH_NUMBERS = {
+  Jan: '01', Feb: '02', Mar: '03', Apr: '04', May: '05', Jun: '06',
+  Jul: '07', Aug: '08', Sep: '09', Oct: '10', Nov: '11', Dec: '12',
+};
+
+/**
+ * YYYY-MM-DD of a TeamLinkt event row, from its displayed Eastern date
+ * ('Thu Oct 1, 2026'). The row's unix timestamp (row['6']) runs two hours
+ * late against the displayed time, so a game after 10 PM would land on the
+ * next day; it's still fine for ordering. Mirrors toDateKey in seasonConfig.ts.
+ */
+export function rowDateKey(row) {
+  const m = String(row['0'] ?? '').match(/([A-Z][a-z]{2})\s+(\d{1,2}),\s*(\d{4})/);
+  const month = m && MONTH_NUMBERS[m[1]];
+  return month ? `${m[3]}-${month}-${m[2].padStart(2, '0')}` : '';
+}
+
 export function utcNoonFor(dateKey) {
   const [y, m, d] = dateKey.split('-').map(Number);
   return new Date(Date.UTC(y, m - 1, d, 12));
@@ -278,7 +295,7 @@ export async function fetchResults(divisionId, dateKey) {
     [`filters[${divisionId}]`]: divisionId,
   });
   return (json.data || [])
-    .filter((row) => etDateKey(new Date(Number(row['6']) * 1000)) === dateKey)
+    .filter((row) => rowDateKey(row) === dateKey)
     .map((row) => ({
       home: cellText(row['3']),
       away: cellText(row['4']),
@@ -317,7 +334,7 @@ export async function hasGamesOn(config, dayKey, dateKey) {
       [`filters[${division.id}]`]: division.id,
     });
     const todays = (json.data || []).filter(
-      (row) => etDateKey(new Date(Number(row['6']) * 1000)) === dateKey,
+      (row) => rowDateKey(row) === dateKey,
     );
     if (todays.length > 0) return true;
   }
