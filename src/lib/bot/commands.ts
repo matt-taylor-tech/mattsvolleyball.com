@@ -1,10 +1,11 @@
 // Parses GroupMe messages into bot commands and builds the replies.
 //
 // Anyone:      !schedule [day]   !standings [day]   !spots   !help
-// Admins only: RAINOUT[: message]   GAMES ON[: message]   CLEAR
+// Admins only, in the control group: RAINOUT[: message]   GAMES ON[: message]
+//              CLEAR   STATUS   HELP (also lists these admin commands)
 //
-// Admin commands work with or without a leading "!", so Matt can type the
-// announcement the way he'd write it anyway ("RAINOUT: Thursday is canceled").
+// Admin commands work with or without a leading "!", so they can be typed the
+// way the call would be written anyway ("RAINOUT: Thursday is canceled").
 
 import { etNowString, DAY_FULL_LABEL } from '../seasonConfig';
 import type { SiteStatusKind } from './siteStatus';
@@ -15,7 +16,8 @@ export type Command =
   | { type: 'schedule'; day?: string }
   | { type: 'standings'; day?: string }
   | { type: 'spots' }
-  | { type: 'help' }
+  | { type: 'help'; admin?: boolean }
+  | { type: 'show-status' }
   | { type: 'status'; kind: SiteStatusKind; message: string; day?: string }
   | { type: 'clear' };
 
@@ -46,6 +48,8 @@ export function etToday(now: Date = new Date()): string {
 /** Admin-only commands; null if the message isn't one. */
 function parseAdmin(text: string): Command | null {
   const t = text.trim();
+  if (/^!?(help|commands)\s*$/i.test(t)) return { type: 'help', admin: true };
+  if (/^!?status\s*$/i.test(t)) return { type: 'show-status' };
   if (/^!?clear\s*$/i.test(t) || /^!?rainout\s+clear\s*$/i.test(t)) return { type: 'clear' };
   const rainout = t.match(/^!?rain\s?out\b[\s:.\-–—]*([\s\S]*)$/i);
   if (rainout) return { type: 'status', kind: 'rainout', message: rainout[1].trim(), day: findDay(rainout[1]) };
@@ -89,15 +93,12 @@ function nextLeagueDay(today: string): string | undefined {
   return undefined;
 }
 
-/** Full banner and repost wording for a status command. */
+/** Banner text for a status command, with a default when no message is given. */
 export function statusWording(kind: SiteStatusKind, message: string, day: string) {
-  const text = message || (kind === 'rainout'
+  const banner = message || (kind === 'rainout'
     ? `${dayName(day)} games are canceled tonight due to weather.`
     : `${dayName(day)} games are on tonight!`);
-  return {
-    banner: text,
-    repost: kind === 'rainout' ? `🌧️ RAINOUT: ${text}` : `✅ GAMES ON: ${text}`,
-  };
+  return { banner };
 }
 
 export const HELP_TEXT = [
@@ -107,11 +108,23 @@ export const HELP_TEXT = [
   '!spots: open spots for registration',
 ].join('\n');
 
+/** Help in the control group: the banner commands, then the public ones. */
+export const ADMIN_HELP_TEXT = [
+  '🛠️ Site banner (this group only, nothing is posted to players)',
+  'RAINOUT: <message>  red banner, e.g. RAINOUT: Thursday games are canceled tonight',
+  'GAMES ON: <message>  green banner',
+  'CLEAR  remove the banner',
+  'STATUS  show what the site says right now',
+  'Banners come down on their own at 4 AM.',
+  '',
+  HELP_TEXT,
+].join('\n');
+
 /** Replies for the read-only commands. Admin commands are handled by the callback. */
 export async function replyFor(cmd: Command, now: Date = new Date()): Promise<string[]> {
   switch (cmd.type) {
     case 'help':
-      return [HELP_TEXT];
+      return [cmd.admin ? ADMIN_HELP_TEXT : HELP_TEXT];
 
     case 'schedule': {
       const day = cmd.day ?? nextLeagueDay(etToday(now));

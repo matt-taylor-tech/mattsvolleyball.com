@@ -1,7 +1,7 @@
 ---
 // Site-wide game-night banner ("Thursday games are canceled tonight"), set
-// from GroupMe by an admin (functions/api/groupme/[secret].ts). Hidden until
-// the status loads; add ?statustest to a URL to preview the test group's banner.
+// from the GroupMe control group (functions/api/groupme/[secret].ts). Hidden
+// until the status loads.
 ---
 
 <div id="site-status" class="hidden" role="status">
@@ -32,10 +32,9 @@
   } as const;
 
   (async () => {
-    const test = new URLSearchParams(location.search).has('statustest');
     let status: SiteStatus | null = null;
     try {
-      const res = await fetch(`/api/site-status${test ? '?test=1' : ''}`);
+      const res = await fetch('/api/site-status');
       if (res.ok) status = (await res.json()).status;
     } catch {
       return;

@@ -1,5 +1,6 @@
-// The site-wide banner ("Thursday games are canceled tonight"). Set from
-// GroupMe by an admin, stored in KV, read by SiteStatusBanner on every page.
+// The site-wide banner ("Thursday games are canceled tonight"). Set by an
+// admin in the private GroupMe control group, stored in KV, read by
+// SiteStatusBanner on every page.
 // Every status expires at 4 AM Eastern the next morning, so nothing lingers.
 
 import { etNowString } from '../seasonConfig';
@@ -14,8 +15,6 @@ export interface SiteStatus {
 }
 
 export const STATUS_KEY = 'site-status';
-/** Rehearsals from the Bot Test Group write here and never reach the live banner. */
-export const TEST_STATUS_KEY = 'site-status:test';
 
 /** Seconds from `now` until 4:00 AM Eastern (tomorrow's, or today's if it's still before 4). */
 export function secondsUntilEtFourAm(now: Date = new Date()): number {

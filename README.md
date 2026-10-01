@@ -192,28 +192,29 @@ Repository secrets:
 
 ### Two-way bot and the site banner
 
-`functions/api/groupme/[secret].ts` is the callback for the bot in the main chat. GroupMe POSTs every main-chat message to it (bots can't see topics). The secret path segment keeps anyone else from calling it, since GroupMe doesn't sign callbacks. The logic lives in `src/lib/bot/`.
+`functions/api/groupme/[secret].ts` is the callback for the bots in the main chat and the Bot Test Group. GroupMe POSTs every message in those groups to it (bots can't see topics). The secret path segment keeps anyone else from calling it, since GroupMe doesn't sign callbacks. The logic lives in `src/lib/bot/`.
 
-| Message | Who | What happens |
-| --- | --- | --- |
-| `!schedule [day]` | Anyone | The bot posts the next game night's matchups (tonight if it's a league night). |
-| `!standings [day]` | Anyone | Current standings, one block per division. |
-| `!spots` | Anyone | Spots left against the registration caps (the same numbers as the site's counters). |
-| `!help` | Anyone | Lists the commands. |
-| `RAINOUT: <message>` | Admins | Puts a red banner on every page of the site and reposts the call, as Matt, into that night's topic (the night named in the message, else today's). |
-| `GAMES ON: <message>` | Admins | Same, as a green "games on" banner. |
-| `CLEAR` | Admins | Removes the banner. |
+| Message | Where | Who | What happens |
+| --- | --- | --- | --- |
+| `!schedule [day]` | Main chat or control group | Anyone | The next game night's matchups (tonight if it's a league night). |
+| `!standings [day]` | Main chat or control group | Anyone | Current standings, one block per division. |
+| `!spots` | Main chat or control group | Anyone | Spots left against the registration caps (the same numbers as the site's counters). |
+| `!help` | Main chat or control group | Anyone | Lists the commands. In the control group, `help` also lists the banner commands. |
+| `RAINOUT: <message>` | Control group | Admins | Puts a red banner on every page of the site. |
+| `GAMES ON: <message>` | Control group | Admins | Same, as a green "games on" banner. |
+| `STATUS` | Control group | Admins | Shows what the banner says right now. |
+| `CLEAR` | Control group | Admins | Removes the banner. |
 
-Banners expire on their own at 4 AM Eastern. They're stored in the `MV_STATE` KV namespace and served by `functions/api/site-status.ts` to `SiteStatusBanner.astro`. In the Bot Test Group, the same commands use the test bot and a separate test banner, so rehearsals never reach the live site or the real topics. Preview the test banner by adding `?statustest` to any page URL.
+The control group is the private Bot Test Group. Banner commands are ignored in the main chat, and the bot never posts the call to players: whoever makes the call on game night announces it in that night's topic as usual. Banners expire on their own at 4 AM Eastern. They're stored in the `MV_STATE` KV namespace and served by `functions/api/site-status.ts` to `SiteStatusBanner.astro`. To let someone else set the banner, add them to the Bot Test Group and add their GroupMe user id to `GROUPME_ADMIN_USER_IDS`.
 
 Cloudflare Pages settings (Production):
 
 - KV binding `MV_STATE`
 - `GROUPME_CALLBACK_SECRET`: a long random string, also used in the callback URL
 - `GROUPME_ADMIN_USER_IDS`: comma-separated GroupMe user ids allowed to set the banner (Matt is `69767707`)
-- `GROUPME_BOT_ID`, `GROUPME_BOT_ID_TEST`, `GROUPME_TOKEN`: the same values as the repository secrets
+- `GROUPME_BOT_ID` (Matt's Bot, main chat) and `GROUPME_BOT_ID_TEST` (Test Bot, control group): the same values as the repository secrets
 
-Then set each bot's callback URL at [dev.groupme.com/bots](https://dev.groupme.com/bots) to `https://mattsvolleyball.com/api/groupme/<GROUPME_CALLBACK_SECRET>`, starting with Test Bot. To try it locally without posting anything, run `wrangler pages dev dist --kv MV_STATE --binding GROUPME_DRY_RUN=1 ...` (plus the other bindings), and POST GroupMe-shaped JSON to the callback.
+Then set the callback URL of Test Bot and Matt's Bot at [dev.groupme.com/bots](https://dev.groupme.com/bots) to `https://mattsvolleyball.com/api/groupme/<GROUPME_CALLBACK_SECRET>`. To try it locally without posting anything, run `wrangler pages dev dist --kv MV_STATE --binding GROUPME_DRY_RUN=1 ...` (plus the other bindings), and POST GroupMe-shaped JSON to the callback.
 
 ## Champions (R2 filename-driven)
 
