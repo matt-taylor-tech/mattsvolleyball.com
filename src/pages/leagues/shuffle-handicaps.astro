@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import PageHero from '../../components/PageHero.astro';
+import PageSearch from '../../components/PageSearch.astro';
 import { ArrowLeft, MessageSquare } from 'lucide-astro';
 import { HANDICAP_LEVELS, TAG_LABELS, type HandicapTag } from '../../lib/handicaps';
 
@@ -103,6 +104,8 @@ const levelStyles: Record<number, { border: string; bg: string; text: string }> 
         ))}
       </div>
 
+      <PageSearch label="Search handicaps" items="[data-tag]" groups="[data-level]" class="mb-12" />
+
       <div class="space-y-14">
         {HANDICAP_LEVELS.map(({ level, name, description, handicaps }) => (
           <div id={`level-${level}`} data-level={level} class="scroll-mt-24">
@@ -178,5 +181,10 @@ const levelStyles: Record<number, { border: string; bg: string; text: string }> 
     });
   }
 
-  buttons.forEach((b) => b.addEventListener('click', () => applyFilter(b.dataset.filter ?? 'all')));
+  function refresh(filter: string) {
+    applyFilter(filter);
+    document.dispatchEvent(new Event('page-search:refresh'));
+  }
+
+  buttons.forEach((b) => b.addEventListener('click', () => refresh(b.dataset.filter ?? 'all')));
 </script>
