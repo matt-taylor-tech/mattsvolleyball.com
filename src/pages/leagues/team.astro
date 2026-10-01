@@ -1,23 +1,19 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import PageHero from '../../components/PageHero.astro';
 import { ArrowLeft, CalendarDays, ClipboardList } from 'lucide-astro';
 import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
 ---
 
 <Layout title="Team Schedule | Matt's Volleyball" noindex description="View a team's upcoming schedule and past results.">
   <!-- Hero -->
-  <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white pt-20 md:pt-28">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <div class="flex items-center justify-center gap-4 mb-4">
-        <img id="team-logo" src="" alt="" class="w-16 h-16 rounded-full object-cover bg-white/20 hidden" />
-        <h1 id="team-title" class="font-display font-black text-4xl sm:text-5xl md:text-6xl">Team</h1>
-      </div>
-      <p id="team-division" class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto"></p>
+  <PageHero>
+    <div class="flex items-center justify-center gap-4 mb-4">
+      <img id="team-logo" src="" alt="" class="w-16 h-16 rounded-full object-cover bg-white/20 hidden" />
+      <h1 id="team-title" class="font-display font-black text-4xl sm:text-5xl md:text-6xl">Team</h1>
     </div>
-    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full">
-      <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="#F7F6F3" />
-    </svg>
-  </section>
+    <p id="team-division" class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto"></p>
+  </PageHero>
 
   <section class="py-12 md:py-20">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

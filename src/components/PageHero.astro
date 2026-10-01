@@ -1,0 +1,29 @@
+---
+import WaveDivider from './WaveDivider.astro';
+
+// The dark gradient banner at the top of most pages. Pass title/subtitle for
+// the standard heading, or slot in custom content (logos, badges, ids that a
+// script fills in).
+interface Props {
+  title?: string;
+  subtitle?: string;
+  /** Extra classes for the section, e.g. print:hidden. */
+  class?: string;
+}
+
+const { title, subtitle, class: className } = Astro.props;
+---
+
+<section class:list={['bg-gradient-to-br from-ocean-600 to-ocean-800 text-white pt-20 md:pt-28', className]}>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    {Astro.slots.has('default') ? (
+      <slot />
+    ) : (
+      <Fragment>
+        <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">{title}</h1>
+        {subtitle && <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">{subtitle}</p>}
+      </Fragment>
+    )}
+  </div>
+  <WaveDivider />
+</section>

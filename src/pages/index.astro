@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import WaveDivider from '../components/WaveDivider.astro';
 import ChampionCard from '../components/ChampionCard.astro';
 import UpcomingGames from '../components/UpcomingGames.astro';
 import FindYourNight from '../components/FindYourNight.astro';
@@ -180,9 +181,7 @@ const heroDatesText = HAS_UPCOMING_SEASON_STARTED
       </div>
     </div>
     <!-- Wave bottom -->
-    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full">
-      <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="#F7F6F3" />
-    </svg>
+    <WaveDivider />
   </section>
 
   <!-- Your next game (filled in by script when a team is saved) -->
@@ -298,7 +297,7 @@ const heroDatesText = HAS_UPCOMING_SEASON_STARTED
       <div class="relative group/slider">
         <div
           id="champions-slider"
-          class="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 -mx-4 px-4"
+          class="flex gap-6 overflow-x-auto motion-safe:scroll-smooth snap-x snap-mandatory pb-4 -mx-4 px-4"
           style="scrollbar-width: thin; scrollbar-color: #C2BFB8 transparent;"
         >
           {champions.map((champ) => (
@@ -352,12 +351,13 @@ const heroDatesText = HAS_UPCOMING_SEASON_STARTED
     const prev = document.getElementById('champ-prev');
     const next = document.getElementById('champ-next');
     const scrollAmount = 340;
+    const behavior: ScrollBehavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
 
     prev?.addEventListener('click', () => {
-      slider?.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      slider?.scrollBy({ left: -scrollAmount, behavior });
     });
     next?.addEventListener('click', () => {
-      slider?.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      slider?.scrollBy({ left: scrollAmount, behavior });
     });
   </script>
 
