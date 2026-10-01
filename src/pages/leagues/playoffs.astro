@@ -1,5 +1,6 @@
 ---
 import Layout from '../../layouts/Layout.astro';
+import PageHero from '../../components/PageHero.astro';
 import { Trophy } from 'lucide-astro';
 import { DIVISIONS as ALL_DIVISIONS, DAY_FULL_LABEL, ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
 const playoffDays = [...new Set(ALL_DIVISIONS.filter(d => d.hasPlayoffs).map(d => d.day))];
@@ -7,17 +8,7 @@ const playoffDays = [...new Set(ALL_DIVISIONS.filter(d => d.hasPlayoffs).map(d =
 
 <Layout title="Playoffs | Matt's Volleyball" description="Playoff brackets for Matt's Volleyball leagues - single elimination tournaments by division with separate playoff nights for recreational and competitive divisions.">
   <!-- Hero -->
-  <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white pt-20 md:pt-28 print:hidden">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">Playoffs</h1>
-      <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
-        Single elimination brackets by division, with separate playoff nights for recreational and competitive leagues.
-      </p>
-    </div>
-    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full print:hidden">
-      <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="#F7F6F3" />
-    </svg>
-  </section>
+  <PageHero class="print:hidden" title="Playoffs" subtitle="Single elimination brackets by division, with separate playoff nights for recreational and competitive leagues." />
 
   <section class="py-12 md:py-20 print:py-4">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">

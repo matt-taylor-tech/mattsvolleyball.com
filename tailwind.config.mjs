@@ -39,8 +39,8 @@ export default {
         full: '9999px',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-        display: ['Montserrat', 'system-ui', 'sans-serif'],
+        sans: ['Inter Variable', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['Montserrat Variable', 'Montserrat', 'system-ui', 'sans-serif'],
       },
     },
   },

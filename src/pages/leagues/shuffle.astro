@@ -1,6 +1,7 @@
 ---
 import { DAY_FULL_LABEL, REGISTRATION_PAGE_URL, registrationPageUrlForDay, shuffleDays } from '../../lib/seasonConfig';
 import Layout from '../../layouts/Layout.astro';
+import PageHero from '../../components/PageHero.astro';
 import { Shuffle as ShuffleIcon, Layers, BookOpen, Sparkles, Dices, Users, Scale, TrendingUp, Check, ArrowRight, MapPin, Gift } from 'lucide-astro';
 import { getRegistrationData } from '../../lib/registration';
 import { HANDICAP_LEVELS } from '../../lib/handicaps';
@@ -18,38 +19,33 @@ const handicapCount = HANDICAP_LEVELS.reduce((sum, l) => sum + l.handicaps.lengt
 
 <Layout title="Shuffle League | Matt's Volleyball" description="Learn about the Shuffle league format at Matt's Volleyball. Sign up solo, get balanced teams every night, and play through the Level Up handicaps, plus free prize raffles every night.">
   <!-- Hero -->
-  <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white pt-20 md:pt-28">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">Shuffle League</h1>
-      <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
-        Social league first, volleyball second. Check in on league night and get placed on balanced teams built from who's there. Then the handicaps kick in.
-      </p>
-      {nightsLabel && <p class="text-white/70 text-sm font-semibold uppercase tracking-wide mt-4">{nightsLabel}</p>}
-      <div class="flex flex-col sm:flex-row gap-3 justify-center mt-8">
-        <a href="/leagues/shuffle-handicaps/" class="btn-primary inline-flex items-center justify-center gap-2">
-          <Dices class="w-5 h-5" />
-          See the Handicaps
+  <PageHero>
+    <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">Shuffle League</h1>
+    <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
+      Social league first, volleyball second. Check in on league night and get placed on balanced teams built from who's there. Then the handicaps kick in.
+    </p>
+    {nightsLabel && <p class="text-white/70 text-sm font-semibold uppercase tracking-wide mt-4">{nightsLabel}</p>}
+    <div class="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+      <a href="/leagues/shuffle-handicaps/" class="btn-primary inline-flex items-center justify-center gap-2">
+        <Dices class="w-5 h-5" />
+        See the Handicaps
+      </a>
+      {regStatus === 'open' && (
+        <a
+          href={registerUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center justify-center gap-2 border-2 border-white/70 hover:bg-white/10 text-white font-bold py-3 px-8 rounded-lg transition-colors text-lg"
+        >
+          Register
+          <ArrowRight class="w-4 h-4" />
         </a>
-        {regStatus === 'open' && (
-          <a
-            href={registerUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex items-center justify-center gap-2 border-2 border-white/70 hover:bg-white/10 text-white font-bold py-3 px-8 rounded-lg transition-colors text-lg"
-          >
-            Register
-            <ArrowRight class="w-4 h-4" />
-          </a>
-        )}
-      </div>
-      <p class="text-white/50 text-sm mt-6">
-        Powered by <a href="https://volleyballengine.com" target="_blank" rel="noopener noreferrer" class="underline hover:text-white/80 transition-colors">Volleyball Engine</a>
-      </p>
+      )}
     </div>
-    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full">
-      <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="#F7F6F3" />
-    </svg>
-  </section>
+    <p class="text-white/50 text-sm mt-6">
+      Powered by <a href="https://volleyballengine.com" target="_blank" rel="noopener noreferrer" class="underline hover:text-white/80 transition-colors">Volleyball Engine</a>
+    </p>
+  </PageHero>
 
   <section class="py-12 md:py-20">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -121,7 +117,7 @@ const handicapCount = HANDICAP_LEVELS.reduce((sum, l) => sum + l.handicaps.lengt
             <p class="font-display font-extrabold text-xl md:text-2xl">See all {handicapCount} handicaps</p>
             <p class="text-white/70 text-sm mt-1">Browse every level, filter by type, and find the ones you're hoping to draw.</p>
           </div>
-          <span class="inline-flex items-center gap-2 font-bold text-coral-400 group-hover:translate-x-1 transition-transform">
+          <span class="inline-flex items-center gap-2 font-bold text-coral-400 motion-safe:group-hover:translate-x-1 motion-safe:transition-transform">
             Browse
             <ArrowRight class="w-5 h-5" />
           </span>

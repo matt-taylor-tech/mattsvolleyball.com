@@ -23,7 +23,7 @@ const r2Base = import.meta.env.PUBLIC_R2_BASE_URL || '';
         alt={`${teamName} - ${season} ${year} Champions`}
         width="600"
         height="600"
-        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        class="w-full h-full object-cover motion-safe:group-hover:scale-105 motion-safe:transition-transform motion-safe:duration-300"
         loading="lazy"
         decoding="async"
       />
