@@ -1,4 +1,4 @@
-// Level Up handicap pool for the Wednesday Shuffle league.
+// Level Up handicap pool for the Shuffle league.
 //
 // Codes are `{level}-{n}` and are written out explicitly so they stay stable:
 // when a handicap is retired, delete it and leave the gap; new ones get the

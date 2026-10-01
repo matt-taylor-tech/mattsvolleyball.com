@@ -213,7 +213,19 @@ export const DAY_FULL_LABEL: Record<string, string> = {
   Tue: 'Tuesday',
   Wed: 'Wednesday',
   Thu: 'Thursday',
+  Fri: 'Friday',
 };
+
+/**
+ * Nights that run a Shuffle division, in week order (e.g. ['Wed'] or
+ * ['Wed', 'Fri']). Upcoming season first, since that's what people sign up
+ * for; falls back to the active season between rollovers.
+ */
+export function shuffleDays(): string[] {
+  const pick = (divs: DivisionConfig[]) => [...new Set(divs.filter((d) => d.name === 'Shuffle').map((d) => d.day))];
+  const upcoming = pick(UPCOMING_DIVISIONS);
+  return upcoming.length > 0 ? upcoming : pick(ACTIVE_DIVISIONS);
+}
 
 // ── API URLs ──────────────────────────────────────────────────────────────────
 const ORG_ID = '10757';
