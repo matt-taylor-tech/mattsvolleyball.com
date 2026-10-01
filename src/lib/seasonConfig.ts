@@ -171,6 +171,24 @@ export const UPCOMING_DIVISIONS: DivisionConfig[] = [
   { id: '324562', name: 'Recreational', day: 'Thu', label: 'Thu Recreational', court: 'Court 2', hasPlayoffs: true  },
 ];
 
+/**
+ * The active season as of `now`, for code that runs in a Worker (the GroupMe
+ * bot). Workers read the clock as 1970 while a module is loading, so the
+ * module-level ACTIVE_* values below would always pick the old season there.
+ * Call this inside the request handler, when the clock is real.
+ */
+export function activeSeasonAt(now: Date) {
+  const rolled = !Number.isNaN(rolloverAt.getTime()) && now >= rolloverAt;
+  const seasonId = rolled ? NEXT_SEASON.id : CURRENT_SEASON.id;
+  const divisions = rolled ? UPCOMING_DIVISIONS : CURRENT_DIVISIONS;
+  return {
+    seasonId,
+    divisions,
+    days: [...new Set(divisions.map((d) => d.day))],
+    standingsUrl: `${API_BASE}/getStandings/${ORG_ID}/${seasonId}`,
+  };
+}
+
 // Active aliases used by live stats pages (Schedule / Teams / Standings / Scores / Playoffs)
 export const ACTIVE_DIVISIONS: DivisionConfig[] = HAS_ACTIVE_ROLLED_OVER ? UPCOMING_DIVISIONS : CURRENT_DIVISIONS;
 export const DIVISIONS: DivisionConfig[] = ACTIVE_DIVISIONS;

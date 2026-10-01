@@ -190,6 +190,34 @@ Repository secrets:
 - `GROUPME_BOT_ID`, `GROUPME_BOT_ID_TEST` - bot ids used as a fallback for posting to a group's main chat
 - `CLOUDFLARE_DEPLOY_HOOK_URL` - Cloudflare Pages deploy hook for the daily rebuild
 
+### Two-way bot and the site banner
+
+`functions/api/groupme/[secret].ts` is the callback for the bots in the main chat and the Bot Test Group. GroupMe POSTs every message in those groups to it (bots can't see topics). The secret path segment keeps anyone else from calling it, since GroupMe doesn't sign callbacks. The logic lives in `src/lib/bot/`.
+
+The bot only answers admins (`GROUPME_ADMIN_USER_IDS`); messages from anyone else are ignored.
+
+| Message | Where | What happens |
+| --- | --- | --- |
+| `!schedule [day]` | Main chat or control group | The next game night's matchups (tonight if it's a league night). |
+| `!standings [day]` | Main chat or control group | Current standings, one block per division. |
+| `!spots` | Main chat or control group | Spots left against the registration caps (the same numbers as the site's counters). |
+| `!help` | Main chat or control group | Lists the commands. In the control group, `help` also lists the banner commands. |
+| `RAINOUT: <message>` | Control group | Puts a red banner on every page of the site. |
+| `GAMES ON: <message>` | Control group | Same, as a green "games on" banner. |
+| `STATUS` | Control group | Shows what the banner says right now. |
+| `CLEAR` | Control group | Removes the banner. |
+
+The control group is the private Bot Test Group. Banner commands are ignored in the main chat, and the bot never posts the call to players: whoever makes the call on game night announces it in that night's topic as usual. Banners expire on their own at 4 AM Eastern. They're stored in the `MV_STATE` KV namespace and served by `functions/api/site-status.ts` to `SiteStatusBanner.astro`. To give someone else access, add their GroupMe user id to `GROUPME_ADMIN_USER_IDS`, and add them to the Bot Test Group if they should set the banner.
+
+Cloudflare Pages settings (Production):
+
+- KV binding `MV_STATE`
+- `GROUPME_CALLBACK_SECRET`: a long random string, also used in the callback URL
+- `GROUPME_ADMIN_USER_IDS`: comma-separated GroupMe user ids the bot answers (Matt is `69767707`)
+- `GROUPME_BOT_ID` (Matt's Bot, main chat) and `GROUPME_BOT_ID_TEST` (Test Bot, control group): the same values as the repository secrets
+
+Then set the callback URL of Test Bot and Matt's Bot at [dev.groupme.com/bots](https://dev.groupme.com/bots) to `https://mattsvolleyball.com/api/groupme/<GROUPME_CALLBACK_SECRET>`. To try it locally without posting anything, run `wrangler pages dev dist --kv MV_STATE --binding GROUPME_DRY_RUN=1 ...` (plus the other bindings), and POST GroupMe-shaped JSON to the callback.
+
 ## Champions (R2 filename-driven)
 
 Champions are not read from markdown files. The champions page reads image object keys from R2 and parses metadata from each filename.
