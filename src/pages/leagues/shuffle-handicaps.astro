@@ -18,7 +18,7 @@ const tagStyles: Record<HandicapTag, { chip: string; dot: string; active: string
   gameplay: { chip: 'bg-slate-100 text-slate-700', dot: 'bg-ocean-500', active: 'aria-pressed:bg-ocean-600 aria-pressed:border-ocean-600' },
 };
 
-// Gameplay covers all of Levels 3-5, so items don't repeat the chip.
+// Gameplay is most of Levels 2-4, so items don't repeat the chip.
 const levelWideTags = new Set<HandicapTag>(['gameplay']);
 
 const tagCounts = (Object.keys(TAG_LABELS) as HandicapTag[])
@@ -30,18 +30,17 @@ const levelStyles: Record<number, { border: string; bg: string; text: string }> 
   1: { border: 'border-sand-300', bg: 'bg-sand-300', text: 'text-ocean-700' },
   2: { border: 'border-sand-400', bg: 'bg-sand-400', text: 'text-white' },
   3: { border: 'border-coral-400', bg: 'bg-coral-400', text: 'text-white' },
-  4: { border: 'border-coral-500', bg: 'bg-coral-500', text: 'text-white' },
-  5: { border: 'border-ocean-600', bg: 'bg-ocean-600', text: 'text-white' },
+  4: { border: 'border-ocean-600', bg: 'bg-ocean-600', text: 'text-white' },
 };
 ---
 
-<Layout title="Shuffle Handicaps | Matt's Volleyball" description={`The full Level Up handicap pool for the Wednesday Shuffle league at Matt's Volleyball: all ${total} handicaps across 5 levels.`}>
+<Layout title="Shuffle Handicaps | Matt's Volleyball" description={`The full Level Up handicap pool for the Wednesday Shuffle league at Matt's Volleyball: all ${total} handicaps across 4 levels.`}>
   <!-- Hero -->
   <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white pt-20 md:pt-28">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">Shuffle Handicaps</h1>
       <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
-        The full Level Up handicap pool: {total} handicaps across 5 levels.
+        The full Level Up handicap pool: {total} handicaps across 4 levels.
       </p>
     </div>
     <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full">
@@ -59,7 +58,7 @@ const levelStyles: Record<number, { border: string; bg: string; text: string }> 
 
       <div class="text-ocean-700 leading-relaxed space-y-4 mb-8">
         <p>
-          Every team starts the night at Level 1. Win a game and your team moves up a level, drawing a handicap from that level's pool for the next game. Lose and you stay put. Handicaps are removed for the playoff bracket.
+          Every team starts the night at Level 1. Win a game and your team moves up a level, drawing a handicap from that level's pool for the next game. Lose and you stay put. Nights top out at 4 games, so Level 4 is as high as it goes. Handicaps are removed for the playoff bracket.
         </p>
       </div>
 
