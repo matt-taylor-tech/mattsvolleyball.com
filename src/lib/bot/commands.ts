@@ -1,8 +1,9 @@
 // Parses GroupMe messages into bot commands and builds the replies.
 //
-// Anyone:      !schedule [day]   !standings [day]   !spots   !help
-// Admins only, in the control group: RAINOUT[: message]   GAMES ON[: message]
-//              CLEAR   STATUS   HELP (also lists these admin commands)
+// The callback only passes admins' messages here.
+// Main chat or control group: !schedule [day]   !standings [day]   !spots   !help
+// Control group only:         RAINOUT[: message]   GAMES ON[: message]
+//                             CLEAR   STATUS   HELP (also lists these banner commands)
 //
 // Admin commands work with or without a leading "!", so they can be typed the
 // way the call would be written anyway ("RAINOUT: Thursday is canceled").
@@ -45,7 +46,7 @@ export function etToday(now: Date = new Date()): string {
   return WEEK[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
 }
 
-/** Admin-only commands; null if the message isn't one. */
+/** Control-group commands (banner, status, help); null if the message isn't one. */
 function parseAdmin(text: string): Command | null {
   const t = text.trim();
   if (/^!?(help|commands)\s*$/i.test(t)) return { type: 'help', admin: true };
@@ -58,7 +59,7 @@ function parseAdmin(text: string): Command | null {
   return null;
 }
 
-/** Commands anyone can use; null if the message isn't one. */
+/** Lookup commands for either group; null if the message isn't one. */
 function parsePublic(text: string): Command | null {
   const m = text.trim().match(/^!(\w+)\s*(.*)$/);
   if (!m) return null;
@@ -72,9 +73,9 @@ function parsePublic(text: string): Command | null {
   }
 }
 
-export function parseCommand(text: string, isAdmin: boolean): Command | null {
+export function parseCommand(text: string, inControlGroup: boolean): Command | null {
   if (!text) return null;
-  return (isAdmin && parseAdmin(text)) || parsePublic(text);
+  return (inControlGroup && parseAdmin(text)) || parsePublic(text);
 }
 
 const dayName = (day: string) => DAY_FULL_LABEL[day] ?? day;

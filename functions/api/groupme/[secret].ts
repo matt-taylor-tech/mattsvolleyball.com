@@ -5,8 +5,9 @@
  * can't see topics). GroupMe doesn't sign callbacks, so the secret in the path
  * is what keeps others from calling it; only the bot's owner can see the URL.
  *
- * - Main chat and control group, anyone: !schedule, !standings, !spots, !help.
- * - Control group (the private Bot Test Group), admins only: RAINOUT /
+ * The bot only answers admins (GROUPME_ADMIN_USER_IDS); everyone else is ignored.
+ * - Main chat and control group: !schedule, !standings, !spots, !help.
+ * - Control group (the private Bot Test Group) only: RAINOUT /
  *   GAMES ON / CLEAR set the site banner, STATUS shows it, and HELP lists
  *   these alongside the public commands. Nothing is posted to players: the
  *   person who makes the call announces it in the night's topic as usual.
@@ -59,11 +60,11 @@ async function handle(msg: GroupMeMessage, env: Env): Promise<void> {
   if (!botId) return;
   const reply = (text: string) => postAsBot(botId, text, { dryRun: env.GROUPME_DRY_RUN === '1' });
 
-  // Banner commands only count in the private control group, so nothing said
-  // in the main chat can change the site.
+  // Only admins get answers. Banner commands also have to come from the
+  // private control group, so nothing said in the main chat can change the site.
   const admins = (env.GROUPME_ADMIN_USER_IDS ?? '').split(',').map((s) => s.trim()).filter(Boolean);
-  const canSetBanner = inControlGroup && !!msg.user_id && admins.includes(msg.user_id);
-  const cmd = parseCommand(msg.text ?? '', canSetBanner);
+  if (!msg.user_id || !admins.includes(msg.user_id)) return;
+  const cmd = parseCommand(msg.text ?? '', inControlGroup);
   if (!cmd) return;
 
   try {
