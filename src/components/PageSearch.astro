@@ -1,0 +1,58 @@
+---
+interface Props {
+  label: string;
+  items: string; // CSS selector for searchable items
+  groups: string; // CSS selector for sections that hide when none of their items match
+  class?: string;
+}
+
+const { label, items, groups, class: className = '' } = Astro.props;
+---
+
+<div class={className} data-page-search data-items={items} data-groups={groups}>
+  <label class="block text-xs font-semibold uppercase tracking-wide text-ocean-500 mb-2" for="page-search-input">{label}</label>
+  <input
+    id="page-search-input"
+    type="search"
+    autocomplete="off"
+    placeholder="Type to filter"
+    class="w-full rounded-xl border border-sand-300 bg-white px-4 py-3 text-ocean-700 placeholder:text-ocean-600/50 focus:outline-none focus:border-ocean-500 focus:ring-2 focus:ring-ocean-500/30"
+  />
+  <p data-search-empty hidden class="mt-4 text-ocean-700">No matches. Try a different word.</p>
+</div>
+
+<style is:global>
+  [data-nomatch] { display: none !important; }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-page-search]');
+  const input = root?.querySelector<HTMLInputElement>('input');
+  const empty = root?.querySelector<HTMLElement>('[data-search-empty]');
+
+  if (root && input && empty) {
+    const items = document.querySelectorAll<HTMLElement>(root.dataset.items!);
+    const groups = document.querySelectorAll<HTMLElement>(root.dataset.groups!);
+
+    const run = () => {
+      const terms = input.value.toLowerCase().split(/\s+/).filter(Boolean);
+      items.forEach((el) => {
+        const text = (el.textContent ?? '').toLowerCase();
+        el.toggleAttribute('data-nomatch', !terms.every((t) => text.includes(t)));
+      });
+      let shown = 0;
+      groups.forEach((g) => {
+        const any = Array.from(g.querySelectorAll<HTMLElement>(root.dataset.items!)).some(
+          (el) => !el.hidden && !el.hasAttribute('data-nomatch'),
+        );
+        g.toggleAttribute('data-nomatch', !any);
+        if (any) shown++;
+      });
+      empty.hidden = shown > 0 || terms.length === 0;
+    };
+
+    input.addEventListener('input', run);
+    // Other filters on the page can re-run the search after they change what's visible.
+    document.addEventListener('page-search:refresh', run);
+  }
+</script>

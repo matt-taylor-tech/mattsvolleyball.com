@@ -2,6 +2,7 @@
 import Layout from '../../layouts/Layout.astro';
 import PageHero from '../../components/PageHero.astro';
 import { Circle, ArrowUp, Zap, Grid3x3, Check, Ban, Flame, ArrowUpFromLine, Cable, RefreshCw, ArrowLeftRight, Trophy, Lightbulb } from 'lucide-astro';
+import PageSearch from '../../components/PageSearch.astro';
 import { GROUPME_MAIN_URL } from '../../lib/community';
 ---
 
@@ -11,7 +12,8 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
 
   <section class="py-12 md:py-20">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="space-y-12">
+      <PageSearch label="Search the rules" items="#rules-content li, #rules-content tbody tr" groups="#rules-content > div" class="mb-10" />
+      <div id="rules-content" class="space-y-12">
 
         <!-- THE GAME -->
         <div>
