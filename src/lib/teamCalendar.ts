@@ -140,9 +140,15 @@ function fold(line: string): string {
     const n = enc.encode(ch).length;
     const limit = out.length === 0 ? 75 : 74; // continuation lines start with a space
     if (bytes + n > limit) {
-      out.push(cur);
-      cur = '';
-      bytes = 0;
+      // Keep an escape like \n on one line: the standard allows splitting it,
+      // but some calendar apps then show a stray backslash. An odd run of
+      // trailing backslashes means the last one starts an escape (\\ is a
+      // complete escaped backslash).
+      const trailing = cur.match(/\\*$/)![0].length;
+      const carry = trailing % 2 === 1 ? '\\' : '';
+      out.push(carry ? cur.slice(0, -1) : cur);
+      cur = carry;
+      bytes = carry.length;
     }
     cur += ch;
     bytes += n;
