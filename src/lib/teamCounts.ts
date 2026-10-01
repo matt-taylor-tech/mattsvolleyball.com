@@ -8,11 +8,16 @@ import {
 const API_BASE = 'https://app.mattsvolleyball.com/leagues';
 const ORG_ID = '10757';
 
+// Browsers use the global fetch. Server code (the GroupMe bot) passes one that
+// adds a User-Agent, which TeamLinkt requires from Workers; browsers can't send
+// that header without triggering a CORS preflight.
+type Fetch = typeof fetch;
+
 /**
  * Live team counts for the upcoming season, keyed by division id.
  * Divisions that fail to fetch are omitted.
  */
-export async function fetchUpcomingTeamCountsByDivision(): Promise<Record<string, number>> {
+export async function fetchUpcomingTeamCountsByDivision(fetchImpl: Fetch = fetch): Promise<Record<string, number>> {
   const counts: Record<string, number> = {};
   await Promise.all(
     UPCOMING_DIVISIONS.map(async (div) => {
@@ -20,7 +25,7 @@ export async function fetchUpcomingTeamCountsByDivision(): Promise<Record<string
       body.set('group_ids[division]', div.id);
       body.set('season_id', UPCOMING_SEASON_ID);
       try {
-        const res = await fetch(UPCOMING_TEAMS_API_URL, { method: 'POST', body });
+        const res = await fetchImpl(UPCOMING_TEAMS_API_URL, { method: 'POST', body });
         if (!res.ok) return;
         const teams: unknown = await res.json();
         counts[div.id] = Array.isArray(teams) ? teams.length : 0;
@@ -37,7 +42,7 @@ export async function fetchUpcomingTeamCountsByDivision(): Promise<Record<string
  * for divisions configured in UPCOMING_PLAYER_CAPS_BY_DIVISION. Used by
  * shuffle-style leagues that track a roster cap rather than a team cap.
  */
-export async function fetchUpcomingPlayerCountsByDivision(): Promise<Record<string, number>> {
+export async function fetchUpcomingPlayerCountsByDivision(fetchImpl: Fetch = fetch): Promise<Record<string, number>> {
   const counts: Record<string, number> = {};
   const targetDivisionIds = Object.keys(UPCOMING_PLAYER_CAPS_BY_DIVISION);
   await Promise.all(
@@ -46,14 +51,14 @@ export async function fetchUpcomingPlayerCountsByDivision(): Promise<Record<stri
       teamsBody.set('group_ids[division]', divId);
       teamsBody.set('season_id', UPCOMING_SEASON_ID);
       try {
-        const teamsRes = await fetch(UPCOMING_TEAMS_API_URL, { method: 'POST', body: teamsBody });
+        const teamsRes = await fetchImpl(UPCOMING_TEAMS_API_URL, { method: 'POST', body: teamsBody });
         if (!teamsRes.ok) return;
         const teams: unknown = await teamsRes.json();
         if (!Array.isArray(teams)) return;
         const teamIds = teams.map((t: { id?: number | string }) => t.id).filter((id): id is number | string => id != null);
         const memberCounts = await Promise.all(
           teamIds.map(async (teamId) => {
-            const res = await fetch(`${API_BASE}/getTeam/${ORG_ID}/${teamId}`);
+            const res = await fetchImpl(`${API_BASE}/getTeam/${ORG_ID}/${teamId}`);
             if (!res.ok) return 0;
             const data: { payload?: { Team?: { team_member_count?: number } } } = await res.json();
             return data.payload?.Team?.team_member_count ?? 0;

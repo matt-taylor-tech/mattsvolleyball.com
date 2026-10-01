@@ -1,0 +1,70 @@
+---
+// Site-wide game-night banner ("Thursday games are canceled tonight"), set
+// from GroupMe by an admin (functions/api/groupme/[secret].ts). Hidden until
+// the status loads; add ?statustest to a URL to preview the test group's banner.
+---
+
+<div id="site-status" class="hidden" role="status">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-start gap-3">
+    <span id="site-status-icon" class="text-xl leading-6 shrink-0" aria-hidden="true"></span>
+    <p class="flex-1 font-semibold leading-6">
+      <span id="site-status-label" class="font-black uppercase tracking-wide mr-1"></span>
+      <span id="site-status-text"></span>
+    </p>
+    <button type="button" id="site-status-close" class="shrink-0 p-1 -m-1 rounded opacity-80 hover:opacity-100" aria-label="Dismiss">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+  </div>
+</div>
+
+<script>
+  interface SiteStatus {
+    kind: 'rainout' | 'games-on';
+    message: string;
+    setAt: string;
+  }
+
+  const STYLES = {
+    rainout: { classes: ['bg-coral-600', 'text-white'], icon: '🌧️', label: 'Rainout' },
+    'games-on': { classes: ['bg-emerald-600', 'text-white'], icon: '✅', label: 'Games on' },
+  } as const;
+
+  (async () => {
+    const test = new URLSearchParams(location.search).has('statustest');
+    let status: SiteStatus | null = null;
+    try {
+      const res = await fetch(`/api/site-status${test ? '?test=1' : ''}`);
+      if (res.ok) status = (await res.json()).status;
+    } catch {
+      return;
+    }
+    if (!status || !(status.kind in STYLES)) return;
+
+    // Dismissal lasts for this browser session and this one announcement.
+    const dismissKey = `mv:status-dismissed:${status.setAt}`;
+    try {
+      if (sessionStorage.getItem(dismissKey)) return;
+    } catch {
+      // No storage: just show it.
+    }
+
+    const style = STYLES[status.kind];
+    const el = document.getElementById('site-status')!;
+    el.classList.add(...style.classes);
+    document.getElementById('site-status-icon')!.textContent = style.icon;
+    document.getElementById('site-status-label')!.textContent = `${style.label}:`;
+    document.getElementById('site-status-text')!.textContent = status.message;
+    el.classList.remove('hidden');
+
+    document.getElementById('site-status-close')!.addEventListener('click', () => {
+      el.classList.add('hidden');
+      try {
+        sessionStorage.setItem(dismissKey, '1');
+      } catch {
+        // Hidden for this page view only.
+      }
+    });
+  })();
+</script>

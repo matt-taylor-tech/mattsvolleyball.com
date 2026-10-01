@@ -190,6 +190,31 @@ Repository secrets:
 - `GROUPME_BOT_ID`, `GROUPME_BOT_ID_TEST` - bot ids used as a fallback for posting to a group's main chat
 - `CLOUDFLARE_DEPLOY_HOOK_URL` - Cloudflare Pages deploy hook for the daily rebuild
 
+### Two-way bot and the site banner
+
+`functions/api/groupme/[secret].ts` is the callback for the bot in the main chat. GroupMe POSTs every main-chat message to it (bots can't see topics). The secret path segment keeps anyone else from calling it, since GroupMe doesn't sign callbacks. The logic lives in `src/lib/bot/`.
+
+| Message | Who | What happens |
+| --- | --- | --- |
+| `!schedule [day]` | Anyone | The bot posts the next game night's matchups (tonight if it's a league night). |
+| `!standings [day]` | Anyone | Current standings, one block per division. |
+| `!spots` | Anyone | Spots left against the registration caps (the same numbers as the site's counters). |
+| `!help` | Anyone | Lists the commands. |
+| `RAINOUT: <message>` | Admins | Puts a red banner on every page of the site and reposts the call, as Matt, into that night's topic (the night named in the message, else today's). |
+| `GAMES ON: <message>` | Admins | Same, as a green "games on" banner. |
+| `CLEAR` | Admins | Removes the banner. |
+
+Banners expire on their own at 4 AM Eastern. They're stored in the `MV_STATE` KV namespace and served by `functions/api/site-status.ts` to `SiteStatusBanner.astro`. In the Bot Test Group, the same commands use the test bot and a separate test banner, so rehearsals never reach the live site or the real topics. Preview the test banner by adding `?statustest` to any page URL.
+
+Cloudflare Pages settings (Production):
+
+- KV binding `MV_STATE`
+- `GROUPME_CALLBACK_SECRET`: a long random string, also used in the callback URL
+- `GROUPME_ADMIN_USER_IDS`: comma-separated GroupMe user ids allowed to set the banner (Matt is `69767707`)
+- `GROUPME_BOT_ID`, `GROUPME_BOT_ID_TEST`, `GROUPME_TOKEN`: the same values as the repository secrets
+
+Then set each bot's callback URL at [dev.groupme.com/bots](https://dev.groupme.com/bots) to `https://mattsvolleyball.com/api/groupme/<GROUPME_CALLBACK_SECRET>`, starting with Test Bot. To try it locally without posting anything, run `wrangler pages dev dist --kv MV_STATE --binding GROUPME_DRY_RUN=1 ...` (plus the other bindings), and POST GroupMe-shaped JSON to the callback.
+
 ## Champions (R2 filename-driven)
 
 Champions are not read from markdown files. The champions page reads image object keys from R2 and parses metadata from each filename.
