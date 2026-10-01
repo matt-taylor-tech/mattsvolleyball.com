@@ -269,6 +269,14 @@ If the R2 credentials are missing, the listing fails, or R2 returns no results a
 npm run sync:champions
 ```
 
+## Installable app
+
+The site installs to a phone's home screen: Android offers "Install app", and on iPhone it's Share > Add to Home Screen. The pieces:
+
+- `public/manifest.webmanifest` holds the app name, colors, icons and shortcuts. The icons in `public/icons/` were made from the ball logo on the charcoal background.
+- `public/sw.js` is the service worker. Pages load network-first, so a deploy shows up on the next load, and a copy of each visited page is kept for when there's no signal. Pages never visited fall back to `/offline/`. Hashed `/_assets/` files are cache-first. The `/api/` functions, calendar feeds, TeamLinkt and images always go to the network. Bump `VERSION` in it to clear every visitor's cache on their next visit.
+- `MobileTabBar.astro` is the bottom tab bar below the `lg` breakpoint. It's the main way around in the installed app, which has no browser back button.
+
 ## Deployment (Cloudflare Pages)
 
 - **Build command:** `npm run build`

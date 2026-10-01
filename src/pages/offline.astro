@@ -1,0 +1,26 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PageHero from '../components/PageHero.astro';
+import { GROUPME_MAIN_URL } from '../lib/community';
+// Shown by the service worker (public/sw.js) when there's no connection and
+// the page wasn't visited before.
+---
+
+<Layout title="Offline | Matt's Volleyball" noindex>
+  <PageHero title="You're offline" subtitle="No signal at the courts? It happens." />
+
+  <section class="py-12 md:py-20">
+    <div class="max-w-xl mx-auto px-4 sm:px-6 text-center space-y-6">
+      <p class="text-ocean-600/80 text-lg leading-relaxed">
+        Pages you've opened before still work. Schedules, standings and scores need a connection to load the latest from TeamLinkt.
+      </p>
+      <p class="text-ocean-600/80 leading-relaxed">
+        Game-night calls (like rainouts) are posted in the league GroupMe.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <button type="button" onclick="location.reload()" class="btn-primary">Try again</button>
+        <a href={GROUPME_MAIN_URL} target="_blank" rel="noopener noreferrer" class="btn-secondary">Open GroupMe</a>
+      </div>
+    </div>
+  </section>
+</Layout>

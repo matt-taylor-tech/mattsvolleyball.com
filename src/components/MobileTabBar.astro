@@ -1,0 +1,56 @@
+---
+import { Home, CalendarDays, ListOrdered, ClipboardList, UserPlus } from 'lucide-astro';
+import { REGISTRATION_PAGE_URL } from '../lib/seasonConfig';
+
+// Bottom tab bar on phones and tablets (below the lg breakpoint, where the
+// header collapses to a menu). It's the main way around when the site is
+// installed to the home screen, since there's no browser back button there.
+// Layout.astro pads the page bottom so the footer isn't hidden behind it.
+const currentPath = Astro.url.pathname;
+
+const tabs = [
+  { label: 'Home', href: '/', icon: Home },
+  { label: 'Schedule', href: '/leagues/schedule/', icon: CalendarDays },
+  { label: 'Standings', href: '/leagues/standings/', icon: ListOrdered },
+  { label: 'Scores', href: '/leagues/scores/', icon: ClipboardList },
+];
+
+const isActive = (href: string) => (href === '/' ? currentPath === '/' : currentPath.startsWith(href));
+---
+
+<nav
+  aria-label="Quick links"
+  class="lg:hidden print:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur-sm border-t border-sand-200 pb-[env(safe-area-inset-bottom)]"
+>
+  <ul class="grid grid-cols-5">
+    {tabs.map(({ label, href, icon: Icon }) => (
+      <li>
+        <a
+          href={href}
+          aria-current={isActive(href) ? 'page' : undefined}
+          class:list={[
+            'relative flex flex-col items-center justify-center gap-0.5 h-14 text-[11px] font-semibold transition-colors',
+            // Coral means "you are here": text plus a short bar along the top edge.
+            isActive(href)
+              ? 'text-coral-600 before:absolute before:top-0 before:inset-x-5 before:h-0.5 before:rounded-full before:bg-coral-600'
+              : 'text-ocean-600 hover:text-ocean-800',
+          ]}
+        >
+          <Icon class="w-6 h-6" aria-hidden="true" stroke-width={isActive(href) ? 2.5 : 2} />
+          {label}
+        </a>
+      </li>
+    ))}
+    <li>
+      <a
+        href={REGISTRATION_PAGE_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex flex-col items-center justify-center gap-0.5 h-14 text-[11px] font-semibold text-ocean-600 hover:text-ocean-800 transition-colors"
+      >
+        <UserPlus class="w-6 h-6" aria-hidden="true" />
+        Register
+      </a>
+    </li>
+  </ul>
+</nav>
