@@ -29,7 +29,7 @@ import path from 'node:path';
 import os from 'node:os';
 import {
   EVENTS_API, TIME_ZONE, CONVERSATION_IDS, TEST_CONVERSATION_ID, EVENT_DAYS,
-  loadConfig, etDateKey, dayKeyFor, dateLabelFor, shortDateLabelFor,
+  loadConfig, etDateKey, rowDateKey, dayKeyFor, dateLabelFor, shortDateLabelFor,
   etOffsetFor, utcNoonFor, postForm, cellText, boldSans, PLACEHOLDER_TEAMS,
   packMessages, uploadImage, postToTopic, postAsBot, createTopicEvent,
 } from './lib/mv.mjs';
@@ -40,7 +40,7 @@ const SCHEDULE_URL = 'https://mattsvolleyball.com/leagues/schedule';
 
 function parseGameRows(rows, dateKey) {
   return (rows || [])
-    .filter((row) => etDateKey(new Date(Number(row['6']) * 1000)) === dateKey)
+    .filter((row) => rowDateKey(row) === dateKey)
     .map((row) => {
       const location = cellText(row['5']);
       return {
