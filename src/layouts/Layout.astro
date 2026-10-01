@@ -2,6 +2,7 @@
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import SiteStatusBanner from '../components/SiteStatusBanner.astro';
+import MobileTabBar from '../components/MobileTabBar.astro';
 // Self-hosted fonts (bundled with the site, no Google Fonts request).
 import '@fontsource-variable/inter';
 import '@fontsource-variable/montserrat';
@@ -23,7 +24,7 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
     <meta property="og:title" content={title} />
@@ -35,6 +36,11 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
     <meta name="twitter:image" content={`${r2Base}/logos/vbenginelite.png`} />
     <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow'} />
     <link rel="icon" type="image/x-icon" href={`${r2Base}/favicon.ico`} />
+    <!-- Installable app (public/manifest.webmanifest, public/sw.js) -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Matt's VB" />
+    <meta name="theme-color" content="#FFFFFF" />
     <title>{title}</title>
     <script type="application/ld+json" set:html={JSON.stringify({
       "@context": "https://schema.org",
@@ -87,13 +93,20 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
       ]
     })} />
   </head>
-  <body class="min-h-screen flex flex-col">
+  <!-- Bottom padding keeps the footer clear of the phone tab bar (h-14 plus the home-indicator inset) -->
+  <body class="min-h-screen flex flex-col pb-[calc(3.5rem+env(safe-area-inset-bottom))] lg:pb-0 print:pb-0">
     <Header />
     <SiteStatusBanner />
     <main class="flex-1">
       <slot />
     </main>
     <Footer />
+    <MobileTabBar />
     <script is:inline src="/scripts/update-registration-cta.js"></script>
+    <script is:inline>
+      if ('serviceWorker' in navigator) {
+        addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
+      }
+    </script>
   </body>
 </html>

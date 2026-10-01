@@ -7,7 +7,7 @@ import FindYourNight from '../components/FindYourNight.astro';
 import { getChampions } from '../lib/champions';
 import { getRegistrationData, formatDate, formatFullDate, getDayFromName } from '../lib/registration';
 import { REGISTRATION_PAGE_URL, UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL, UPCOMING_REGULAR_SEASON_WEEKS, HAS_UPCOMING_SEASON_STARTED, hasEtDatetimePassed, NEXT_NEXT_SEASON_LABEL, ACTIVE_SEASON_LABEL } from '../lib/seasonConfig';
-import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart, Volleyball } from 'lucide-astro';
+import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart, Volleyball, Trophy } from 'lucide-astro';
 import { GROUPME_MAIN_URL, GROUPME_ICON_PATH } from '../lib/community';
 import type { RegCard } from '../lib/registration';
 
@@ -287,8 +287,23 @@ const heroDatesText = HAS_UPCOMING_SEASON_STARTED
     </div>
   </section>
 
-  <!-- Champions -->
-  <section class="py-12 md:py-16 bg-white">
+  <!-- Champions: the photo slider on tablet and up; phones get a single link
+       (the slider was ~700px of scrolling on a phone) -->
+  <section class="md:hidden pb-8 bg-white">
+    <div class="px-4">
+      <a href="/champions/" class="card flex items-center gap-4 p-4">
+        <Trophy class="w-8 h-8 text-coral-500 shrink-0" aria-hidden="true" />
+        <span class="flex-1 min-w-0">
+          <span class="block font-display font-extrabold text-ocean-700">Hall of Champions</span>
+          <span class="block text-sm text-ocean-600/70">Every team that's earned the title</span>
+        </span>
+        <svg class="w-5 h-5 text-ocean-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
+    </div>
+  </section>
+  <section class="hidden md:block py-12 md:py-16 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <h2 class="section-heading text-center mb-4">Hall of Champions</h2>
       <p class="section-subheading text-center mb-8">Celebrating our league winners.</p>
@@ -461,8 +476,9 @@ const heroDatesText = HAS_UPCOMING_SEASON_STARTED
           .filter((g) => (g['6'] as number) >= startOfTodaySec)
           .sort((a, b) => (a['6'] as number) - (b['6'] as number));
 
-        // Keep the homepage compact by only showing the next few game dates.
-        const MAX_DATES_TO_SHOW = 4;
+        // Keep the homepage compact by only showing the next few game dates;
+        // phones get just the next night (the full schedule is one tap away).
+        const MAX_DATES_TO_SHOW = matchMedia('(min-width: 640px)').matches ? 4 : 1;
         const allowedDates = new Set<string>();
         for (const game of upcomingGames) {
           if (allowedDates.size >= MAX_DATES_TO_SHOW && !allowedDates.has(game['0'] as string)) {
