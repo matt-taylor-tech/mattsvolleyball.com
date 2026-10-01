@@ -185,6 +185,21 @@ const heroDatesText = HAS_UPCOMING_SEASON_STARTED
     </svg>
   </section>
 
+  <!-- Your next game (filled in by script when a team is saved) -->
+  <section id="next-game" class="hidden pt-2 pb-4 md:pt-4" aria-labelledby="next-game-heading">
+    <div class="max-w-xl mx-auto px-4 sm:px-6">
+      <div class="card border-l-4 border-l-coral-500 p-4 sm:p-5">
+        <p id="next-game-heading" class="text-xs font-bold uppercase tracking-widest text-coral-500 mb-1">
+          Your next game · <a id="next-game-team" class="text-ocean-600 hover:text-ocean-800 normal-case tracking-normal" href="/leagues/team/"></a>
+        </p>
+        <p id="next-game-when" class="font-display font-extrabold text-xl text-ocean-800"></p>
+        <p id="next-game-matchup" class="text-ocean-700 font-semibold"></p>
+        <p id="next-game-where" class="text-sm text-ocean-600/70 mb-4"></p>
+        <div id="next-game-calendar"></div>
+      </div>
+    </div>
+  </section>
+
   <!-- Welcome -->
   <section class="pt-4 pb-12 md:pt-6 md:pb-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -648,5 +663,46 @@ const heroDatesText = HAS_UPCOMING_SEASON_STARTED
   <script>
     import { renderSpotCounters } from '../lib/spotsCounter';
     renderSpotCounters();
+  </script>
+
+  <script>
+    import { EVENTS_API } from '../lib/seasonConfig';
+    import { getMyTeam } from '../lib/myTeam';
+    import { renderCalendarActions } from '../lib/calendarLinks';
+
+    // TeamLinkt team cells wrap the name in a tooltip span.
+    function cellText(html: string): string {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      const span = tmp.querySelector('.tooltips');
+      return (span?.getAttribute('data-original-title') || tmp.textContent || '').trim();
+    }
+
+    (async () => {
+      const team = getMyTeam();
+      if (!team) return;
+      try {
+        const body = new URLSearchParams({ start: '0', length: '1', status: 'upcoming', team_id: String(team.id) });
+        const res = await fetch(EVENTS_API, { method: 'POST', body });
+        if (!res.ok) return;
+        const row = (await res.json()).data?.[0];
+        // Nothing upcoming, or a team saved last season (ids are per season).
+        if (!row || (Number(row.home_association_team_id) !== team.id && Number(row.away_assocation_team_id) !== team.id)) return;
+
+        const isHome = Number(row.home_association_team_id) === team.id;
+        const opponent = cellText(String(isHome ? row['4'] : row['3']));
+        const teamLink = document.getElementById('next-game-team') as HTMLAnchorElement;
+        teamLink.textContent = team.name;
+        teamLink.href = `/leagues/team/?id=${team.id}&name=${encodeURIComponent(team.name)}`;
+        document.getElementById('next-game-when')!.textContent =
+          `${String(row['0']).replace(/,\s*\d{4}$/, '')} · ${String(row['1']).split(' - ')[0]}`;
+        document.getElementById('next-game-matchup')!.textContent = `${isHome ? 'vs' : '@'} ${opponent || 'TBD'}`;
+        document.getElementById('next-game-where')!.textContent = cellText(String(row['5']));
+        renderCalendarActions(document.getElementById('next-game-calendar')!, team.id);
+        document.getElementById('next-game')!.classList.remove('hidden');
+      } catch {
+        // The card is a bonus; leave it hidden.
+      }
+    })();
   </script>
 </Layout>

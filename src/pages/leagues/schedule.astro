@@ -59,6 +59,14 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
         </a>
       </div>
 
+      <!-- My team filter (shown when a team is saved on its team page) -->
+      <div id="my-team-filter" class="hidden mb-3 sm:mb-4">
+        <button type="button" id="my-team-toggle" aria-pressed="true" class="tab-btn active inline-flex items-center gap-1.5">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2-5.5-2.9-5.5 2.9 1-6.2L3 9.6l6.2-.9z"/></svg>
+          <span>Only <span id="my-team-name" class="font-bold"></span></span>
+        </button>
+      </div>
+
       <!-- Day Filter -->
       <div class="flex flex-wrap gap-2 mb-3 sm:mb-4" id="day-tabs">
         <button data-day="all" class="tab-btn active">All Days</button>
@@ -124,8 +132,12 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
     PLAYOFFS_ACTIVE, PLAYOFF_ID, isPlayoffDate,
   } from '../../lib/seasonConfig';
   import { escapeHtml, safeUrl } from '../../lib/html';
+  import { getMyTeam } from '../../lib/myTeam';
 
   const API_URL = EVENTS_API;
+  const myTeam = getMyTeam();
+  // On by default when a team is saved; the chip turns it off.
+  let myTeamOnly = !!myTeam;
 
   let currentDivision = 'all';
   let currentDay = 'all';
@@ -363,7 +375,7 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
                 ? `<span class="inline-block bg-coral-500 text-white text-xs font-bold px-2 py-0.5 rounded-full shrink-0">PLAYOFFS</span>`
                 : '';
               return `
-                <div class="card border-l-4 ${stripeClass} p-2">
+                <div class="card border-l-4 ${stripeClass} p-2 ${isMine(g) && !myTeamOnly ? 'ring-2 ring-coral-500' : ''}">
                   <div class="flex items-center gap-1.5 text-xs text-ocean-500 mb-1">
                     <span class="inline-block bg-ocean-600 text-white font-semibold px-2 py-0.5 rounded-full shrink-0">${escapeHtml(g.time.split(' - ')[0])}</span>
                     <a href="${escapeHtml(safeUrl(g.location.url))}" target="_blank" rel="noopener noreferrer"
@@ -383,7 +395,8 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
               // Skip bye display for days that are all playoff games
               const allPlayoff = dateGames.every((g) => g.isPlayoff);
               if (allPlayoff) return '';
-              const byes = getByeTeams(date, dateGames);
+              // With the my-team filter on, other teams' byes are noise.
+              const byes = myTeamOnly ? [] : getByeTeams(date, dateGames);
               if (byes.length === 0) return '';
               return `
                 <div class="card border-l-4 border-l-amber-400 p-2 sm:col-span-2">
@@ -404,8 +417,16 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
     container.innerHTML = html;
   }
 
+  function isMine(g: GameEvent): boolean {
+    return !!myTeam && (g.homeId === myTeam.id || g.awayId === myTeam.id);
+  }
+
   function filterAndRender() {
     let filtered = allGames;
+
+    if (myTeamOnly) {
+      filtered = filtered.filter(isMine);
+    }
 
     if (currentDay !== 'all') {
       filtered = filtered.filter((g: GameEvent) => g.date.startsWith(currentDay));
@@ -434,6 +455,12 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
 
     try {
       allGames = await fetchAllSchedule();
+      // A team saved last season (ids are per season) or one with no games
+      // left: drop the filter rather than show an empty schedule.
+      if (myTeam && !allGames.some(isMine)) {
+        myTeamOnly = false;
+        document.getElementById('my-team-filter')!.classList.add('hidden');
+      }
       filterAndRender();
       setSyncStamp('schedule-sync');
     } catch {
@@ -492,6 +519,20 @@ import { GROUPME_MAIN_URL } from '../../lib/community';
       filterAndRender();
     });
   });
+
+  // My team chip
+  if (myTeam) {
+    const wrap = document.getElementById('my-team-filter')!;
+    const toggle = document.getElementById('my-team-toggle')!;
+    document.getElementById('my-team-name')!.textContent = myTeam.name;
+    wrap.classList.remove('hidden');
+    toggle.addEventListener('click', () => {
+      myTeamOnly = !myTeamOnly;
+      toggle.classList.toggle('active', myTeamOnly);
+      toggle.setAttribute('aria-pressed', String(myTeamOnly));
+      filterAndRender();
+    });
+  }
 
   // Team search
   const searchInput = document.getElementById('team-search') as HTMLInputElement;
