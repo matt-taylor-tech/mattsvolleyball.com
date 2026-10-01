@@ -1,21 +1,48 @@
 ---
-import { registrationPageUrlForDay } from '../../lib/seasonConfig';
+import { DAY_FULL_LABEL, REGISTRATION_PAGE_URL, registrationPageUrlForDay, shuffleDays } from '../../lib/seasonConfig';
 import Layout from '../../layouts/Layout.astro';
 import { Shuffle as ShuffleIcon, Layers, BookOpen, Sparkles, Dices, Users, Scale, TrendingUp, Check, ArrowRight, MapPin, Gift } from 'lucide-astro';
 import { getRegistrationData } from '../../lib/registration';
+import { HANDICAP_LEVELS } from '../../lib/handicaps';
 
 const { regStatus } = await getRegistrationData();
+
+// Shuffle can run on more than one night, so nothing here names a day except
+// the line that says which nights it runs, which comes from the season config.
+const days = shuffleDays();
+const nightsLabel = days.map((d) => `${DAY_FULL_LABEL[d] ?? d}s`).join(' & ');
+// One night: land on its form. More than one: let them pick.
+const registerUrl = days.length === 1 ? registrationPageUrlForDay(days[0]) : REGISTRATION_PAGE_URL;
+const handicapCount = HANDICAP_LEVELS.reduce((sum, l) => sum + l.handicaps.length, 0);
 ---
 
-<Layout title="Shuffle League | Matt's Volleyball" description="Learn about the Wednesday shuffle league format at Matt's Volleyball. Teams are re-drafted weekly with the Level Up handicap system, plus free prize raffles every night.">
+<Layout title="Shuffle League | Matt's Volleyball" description="Learn about the Shuffle league format at Matt's Volleyball. Sign up solo, get balanced teams every night, and play through the Level Up handicaps, plus free prize raffles every night.">
   <!-- Hero -->
   <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white pt-20 md:pt-28">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">Shuffle League</h1>
       <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
-        Social league first, volleyball second. Check in Wednesday night and get placed on balanced teams built from who's there.
+        Social league first, volleyball second. Check in on league night and get placed on balanced teams built from who's there. Then the handicaps kick in.
       </p>
-      <p class="text-white/50 text-sm mt-4">
+      {nightsLabel && <p class="text-white/70 text-sm font-semibold uppercase tracking-wide mt-4">{nightsLabel}</p>}
+      <div class="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+        <a href="/leagues/shuffle-handicaps/" class="btn-primary inline-flex items-center justify-center gap-2">
+          <Dices class="w-5 h-5" />
+          See the Handicaps
+        </a>
+        {regStatus === 'open' && (
+          <a
+            href={registerUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center justify-center gap-2 border-2 border-white/70 hover:bg-white/10 text-white font-bold py-3 px-8 rounded-lg transition-colors text-lg"
+          >
+            Register
+            <ArrowRight class="w-4 h-4" />
+          </a>
+        )}
+      </div>
+      <p class="text-white/50 text-sm mt-6">
         Powered by <a href="https://volleyballengine.com" target="_blank" rel="noopener noreferrer" class="underline hover:text-white/80 transition-colors">Volleyball Engine</a>
       </p>
     </div>
@@ -32,7 +59,7 @@ const { regStatus } = await getRegistrationData();
         <h2 class="section-heading mb-6"><ShuffleIcon class="w-6 h-6 inline-block mr-2 -mt-1 text-ocean-500" />The Format</h2>
         <div class="text-ocean-700 leading-relaxed space-y-4">
           <p>
-            Everyone signs up as an individual. Each Wednesday, teams are generated from checked-in players so you'll play with and against different people over the season. All skill levels are welcome.
+            Everyone signs up as an individual. Each league night, teams are generated from checked-in players so you'll play with and against different people over the season. All skill levels are welcome.
           </p>
           <p>
             The format is called "Level Up." Teams start each night at Level 1. Win a game and your team levels up, picking up a tougher handicap. Nights top out at 4 games, so there are 4 levels. The better you do, the harder it gets, which keeps matches competitive.
@@ -47,6 +74,58 @@ const { regStatus } = await getRegistrationData();
             Play runs for about 2 hours each night. Come late or leave early, no problem. On-time check-in helps us place you in the first wave of balanced teams.
           </p>
         </div>
+      </div>
+
+      <!-- The Four Levels -->
+      <div class="mb-16">
+        <h2 class="section-heading mb-4"><Layers class="w-6 h-6 inline-block mr-2 -mt-1 text-ocean-500" />The Handicaps</h2>
+        <p class="text-ocean-700 leading-relaxed mb-6">
+          This is the best part of the night. Every game, each team plays with a handicap drawn from a pool of {handicapCount}: icebreakers and silly bits at Level 1, real volleyball twists by Level 4. Win and yours gets tougher. Here's a taste:
+        </p>
+        <div class="space-y-4">
+          <div class="card p-6 border-l-4 border-sand-300">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="w-10 h-10 bg-sand-300 rounded-full flex items-center justify-center text-white font-display font-bold">1</span>
+              <h3 class="font-display font-bold text-xl text-ocean-600">Level 1: Standard Play</h3>
+            </div>
+            <p class="text-ocean-700 leading-relaxed">Social and silly handicaps to break the ice fast. Examples: <em>tell your worst joke before serving (if anyone laughs, you earn a point)</em> or <em>offer an opponent unsolicited coaching advice before each rotation's first serve</em>.</p>
+          </div>
+
+          <div class="card p-6 border-l-4 border-sand-400">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="w-10 h-10 bg-sand-400 rounded-full flex items-center justify-center text-white font-display font-bold">2</span>
+              <h3 class="font-display font-bold text-xl text-ocean-600">Level 2: Mild Restrictions</h3>
+            </div>
+            <p class="text-ocean-700 leading-relaxed">Light gameplay restrictions, many built on fundamentals good teams already use. Examples: <em>every pass needs an audible "mine" or "got it"</em> or <em>the server must call out who they're serving to</em>.</p>
+          </div>
+
+          <div class="card p-6 border-l-4 border-coral-400">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="w-10 h-10 bg-coral-400 rounded-full flex items-center justify-center text-white font-display font-bold">3</span>
+              <h3 class="font-display font-bold text-xl text-ocean-600">Level 3: Moderate Restrictions</h3>
+            </div>
+            <p class="text-ocean-700 leading-relaxed">Tighter gameplay restrictions. Examples: <em>only female players can attack</em> or <em>the opposing team designates your strongest hitter, who must play defense the entire game</em>.</p>
+          </div>
+
+          <div class="card p-6 border-l-4 border-ocean-600">
+            <div class="flex items-center gap-3 mb-2">
+              <span class="w-10 h-10 bg-ocean-600 rounded-full flex items-center justify-center text-white font-display font-bold">4</span>
+              <h3 class="font-display font-bold text-xl text-ocean-600">Level 4: Tough Restrictions</h3>
+            </div>
+            <p class="text-ocean-700 leading-relaxed">The top level. Tough restrictions that take away your best weapons or flip how volleyball works. Examples: <em>no front-row attacks</em>, <em>no one on your team is allowed to jump</em>, or <em>only two touches to get the ball back over</em>.</p>
+          </div>
+        </div>
+        <a href="/leagues/shuffle-handicaps/" class="group mt-6 card p-6 md:p-8 flex flex-col sm:flex-row sm:items-center gap-4 bg-ocean-700 text-white hover:shadow-xl">
+          <Dices class="w-10 h-10 text-coral-400 shrink-0" />
+          <div class="flex-1">
+            <p class="font-display font-extrabold text-xl md:text-2xl">See all {handicapCount} handicaps</p>
+            <p class="text-white/70 text-sm mt-1">Browse every level, filter by type, and find the ones you're hoping to draw.</p>
+          </div>
+          <span class="inline-flex items-center gap-2 font-bold text-coral-400 group-hover:translate-x-1 transition-transform">
+            Browse
+            <ArrowRight class="w-5 h-5" />
+          </span>
+        </a>
       </div>
 
       <!-- What to Expect -->
@@ -94,51 +173,6 @@ const { regStatus } = await getRegistrationData();
           <p>
             Drawings happen between games throughout the night, with winners announced on the TV displays. To win you have to be checked in and still at the courts, so stick around. Each player can win once per night, which spreads the prizes around.
           </p>
-        </div>
-      </div>
-
-      <!-- The Four Levels -->
-      <div class="mb-16">
-        <h2 class="section-heading mb-8"><Layers class="w-6 h-6 inline-block mr-2 -mt-1 text-ocean-500" />Sample Restrictions by Level</h2>
-        <div class="space-y-4">
-          <div class="card p-6 border-l-4 border-sand-300">
-            <div class="flex items-center gap-3 mb-2">
-              <span class="w-10 h-10 bg-sand-300 rounded-full flex items-center justify-center text-white font-display font-bold">1</span>
-              <h3 class="font-display font-bold text-xl text-ocean-600">Level 1: Standard Play</h3>
-            </div>
-            <p class="text-ocean-700 leading-relaxed">Social and silly handicaps to break the ice fast. Examples: <em>tell your worst joke before serving (if anyone laughs, you earn a point)</em> or <em>offer an opponent unsolicited coaching advice before each rotation's first serve</em>.</p>
-          </div>
-
-          <div class="card p-6 border-l-4 border-sand-400">
-            <div class="flex items-center gap-3 mb-2">
-              <span class="w-10 h-10 bg-sand-400 rounded-full flex items-center justify-center text-white font-display font-bold">2</span>
-              <h3 class="font-display font-bold text-xl text-ocean-600">Level 2: Mild Restrictions</h3>
-            </div>
-            <p class="text-ocean-700 leading-relaxed">Light gameplay restrictions, many built on fundamentals good teams already use. Examples: <em>every pass needs an audible "mine" or "got it"</em> or <em>the server must call out who they're serving to</em>.</p>
-          </div>
-
-          <div class="card p-6 border-l-4 border-coral-400">
-            <div class="flex items-center gap-3 mb-2">
-              <span class="w-10 h-10 bg-coral-400 rounded-full flex items-center justify-center text-white font-display font-bold">3</span>
-              <h3 class="font-display font-bold text-xl text-ocean-600">Level 3: Moderate Restrictions</h3>
-            </div>
-            <p class="text-ocean-700 leading-relaxed">Tighter gameplay restrictions. Examples: <em>only female players can attack</em> or <em>the opposing team designates your strongest hitter, who must play defense the entire game</em>.</p>
-          </div>
-
-          <div class="card p-6 border-l-4 border-ocean-600">
-            <div class="flex items-center gap-3 mb-2">
-              <span class="w-10 h-10 bg-ocean-600 rounded-full flex items-center justify-center text-white font-display font-bold">4</span>
-              <h3 class="font-display font-bold text-xl text-ocean-600">Level 4: Tough Restrictions</h3>
-            </div>
-            <p class="text-ocean-700 leading-relaxed">The top level. Tough restrictions that take away your best weapons or flip how volleyball works. Examples: <em>no front-row attacks</em>, <em>no one on your team is allowed to jump</em>, or <em>only two touches to get the ball back over</em>.</p>
-          </div>
-        </div>
-        <div class="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <p class="text-ocean-600/70 text-sm italic">These are just examples from the full pool.</p>
-          <a href="/leagues/shuffle-handicaps/" class="btn-secondary inline-flex items-center justify-center gap-2 text-sm">
-            See All Handicaps
-            <ArrowRight class="w-4 h-4" />
-          </a>
         </div>
       </div>
 
@@ -210,12 +244,12 @@ const { regStatus } = await getRegistrationData();
       </h2>
       <p class="text-ocean-600/80 text-lg mb-8">
         {regStatus === 'open'
-          ? 'Join Wednesday Shuffle for balanced games, rotating teammates, and a great social night.'
-          : 'Check out Wednesday Shuffle for balanced games, rotating teammates, and a great social night.'}
+          ? 'Join Shuffle for balanced games, rotating teammates, and a great social night.'
+          : 'Check out Shuffle for balanced games, rotating teammates, and a great social night.'}
       </p>
       {regStatus === 'open' ? (
         <a
-          href={registrationPageUrlForDay('Wed')}
+          href={registerUrl}
           target="_blank"
           rel="noopener noreferrer"
           class="btn-primary inline-flex items-center gap-2"
