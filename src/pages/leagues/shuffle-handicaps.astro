@@ -1,0 +1,187 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { ArrowLeft, MessageSquare } from 'lucide-astro';
+import { HANDICAP_LEVELS, TAG_LABELS, type HandicapTag } from '../../lib/handicaps';
+
+const allHandicaps = HANDICAP_LEVELS.flatMap((l) => l.handicaps);
+const total = allHandicaps.length;
+
+// Full class strings so Tailwind picks them up. `active` applies when the filter button is pressed.
+const tagStyles: Record<HandicapTag, { chip: string; dot: string; active: string }> = {
+  icebreaker: { chip: 'bg-sky-100 text-sky-800', dot: 'bg-sky-500', active: 'aria-pressed:bg-sky-600 aria-pressed:border-sky-600' },
+  banter: { chip: 'bg-red-100 text-red-800', dot: 'bg-red-500', active: 'aria-pressed:bg-red-600 aria-pressed:border-red-600' },
+  silly: { chip: 'bg-yellow-100 text-yellow-800', dot: 'bg-yellow-400', active: 'aria-pressed:bg-yellow-500 aria-pressed:border-yellow-500' },
+  communication: { chip: 'bg-violet-100 text-violet-800', dot: 'bg-violet-500', active: 'aria-pressed:bg-violet-600 aria-pressed:border-violet-600' },
+  teamspirit: { chip: 'bg-orange-100 text-orange-800', dot: 'bg-orange-500', active: 'aria-pressed:bg-orange-600 aria-pressed:border-orange-600' },
+  booster: { chip: 'bg-green-100 text-green-800', dot: 'bg-green-500', active: 'aria-pressed:bg-green-600 aria-pressed:border-green-600' },
+  fundamentals: { chip: 'bg-indigo-100 text-indigo-800', dot: 'bg-indigo-500', active: 'aria-pressed:bg-indigo-600 aria-pressed:border-indigo-600' },
+  gameplay: { chip: 'bg-slate-100 text-slate-700', dot: 'bg-ocean-500', active: 'aria-pressed:bg-ocean-600 aria-pressed:border-ocean-600' },
+};
+
+// Gameplay covers all of Levels 3-5, so items don't repeat the chip.
+const levelWideTags = new Set<HandicapTag>(['gameplay']);
+
+const tagCounts = (Object.keys(TAG_LABELS) as HandicapTag[])
+  .map((tag) => ({ tag, count: allHandicaps.filter((h) => h.tag === tag).length }))
+  .filter((t) => t.count > 0);
+
+// Same level colors as the "Sample Restrictions by Level" cards on the shuffle page
+const levelStyles: Record<number, { border: string; bg: string; text: string }> = {
+  1: { border: 'border-sand-300', bg: 'bg-sand-300', text: 'text-ocean-700' },
+  2: { border: 'border-sand-400', bg: 'bg-sand-400', text: 'text-white' },
+  3: { border: 'border-coral-400', bg: 'bg-coral-400', text: 'text-white' },
+  4: { border: 'border-coral-500', bg: 'bg-coral-500', text: 'text-white' },
+  5: { border: 'border-ocean-600', bg: 'bg-ocean-600', text: 'text-white' },
+};
+---
+
+<Layout title="Shuffle Handicaps | Matt's Volleyball" description={`The full Level Up handicap pool for the Wednesday Shuffle league at Matt's Volleyball: all ${total} handicaps across 5 levels.`}>
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-ocean-600 to-ocean-800 text-white pt-20 md:pt-28">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h1 class="font-display font-black text-4xl sm:text-5xl md:text-6xl mb-4">Shuffle Handicaps</h1>
+      <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto">
+        The full Level Up handicap pool: {total} handicaps across 5 levels.
+      </p>
+    </div>
+    <svg viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full">
+      <path d="M0 40C360 80 720 0 1080 40C1260 60 1380 50 1440 40V80H0V40Z" fill="#F7F6F3" />
+    </svg>
+  </section>
+
+  <section class="py-12 md:py-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <a href="/leagues/shuffle/" class="inline-flex items-center gap-1 text-sm font-semibold text-ocean-500 hover:text-ocean-700 transition-colors mb-8">
+        <ArrowLeft class="w-4 h-4" />
+        Back to Shuffle League
+      </a>
+
+      <div class="text-ocean-700 leading-relaxed space-y-4 mb-8">
+        <p>
+          Every team starts the night at Level 1. Win a game and your team moves up a level, drawing a handicap from that level's pool for the next game. Lose and you stay put. Handicaps are removed for the playoff bracket.
+        </p>
+      </div>
+
+      <div class="bg-sand-100 rounded-2xl p-6 border border-sand-200 mb-10 flex gap-4 items-start">
+        <MessageSquare class="w-6 h-6 text-ocean-500 shrink-0 mt-0.5" />
+        <p class="text-ocean-700 text-sm leading-relaxed">
+          Every handicap has a code: the level, then its number within that level. <strong>3-7</strong> is the 7th handicap in Level 3. Have feedback? Reference the code so we know exactly which one you mean, like "3-7 is too hard" or "love 1-19."
+        </p>
+      </div>
+
+      <!-- Level jump nav -->
+      <h2 class="text-xs font-semibold uppercase tracking-wide text-ocean-500 mb-2">Jump to level</h2>
+      <nav aria-label="Jump to level" class="flex flex-wrap gap-2 mb-6">
+        {HANDICAP_LEVELS.map(({ level, handicaps }) => (
+          <a
+            href={`#level-${level}`}
+            data-level-link={level}
+            class={`${levelStyles[level].bg} ${levelStyles[level].text} font-display font-bold text-sm px-4 py-2 rounded-full hover:opacity-90 transition-opacity`}
+          >
+            Level {level} <span class="opacity-75 font-normal">(<span data-level-count>{handicaps.length}</span>)</span>
+          </a>
+        ))}
+      </nav>
+
+      <!-- Category filters -->
+      <h2 class="text-xs font-semibold uppercase tracking-wide text-ocean-500 mb-2">Filter by type</h2>
+      <div role="group" aria-label="Filter by type" class="flex flex-wrap gap-2 mb-12">
+        <button
+          type="button"
+          data-filter="all"
+          aria-pressed="true"
+          class="text-sm font-semibold px-3 py-1.5 rounded-full border border-sand-300 bg-white text-ocean-700 hover:border-ocean-500 transition-colors aria-pressed:bg-ocean-700 aria-pressed:border-ocean-700 aria-pressed:text-white"
+        >
+          All <span class="opacity-70 font-normal">{total}</span>
+        </button>
+        {tagCounts.map(({ tag, count }) => (
+          <button
+            type="button"
+            data-filter={tag}
+            aria-pressed="false"
+            class={`group inline-flex items-center gap-2 text-sm font-semibold px-3 py-1.5 rounded-full border border-sand-300 bg-white text-ocean-700 hover:border-ocean-500 transition-colors aria-pressed:text-white ${tagStyles[tag].active}`}
+          >
+            <span class={`w-2.5 h-2.5 rounded-full ${tagStyles[tag].dot} group-aria-pressed:bg-white`}></span>
+            {TAG_LABELS[tag]} <span class="opacity-70 font-normal">{count}</span>
+          </button>
+        ))}
+      </div>
+
+      <div class="space-y-14">
+        {HANDICAP_LEVELS.map(({ level, name, description, handicaps }) => (
+          <div id={`level-${level}`} data-level={level} class="scroll-mt-24">
+            <div class="flex items-center gap-3 mb-3">
+              <span class={`w-10 h-10 ${levelStyles[level].bg} ${levelStyles[level].text} rounded-full flex items-center justify-center font-display font-bold shrink-0`}>{level}</span>
+              <h2 class="font-display font-extrabold text-2xl md:text-3xl text-ocean-600">Level {level}: {name}</h2>
+            </div>
+            <p class="text-ocean-700 leading-relaxed mb-5">{description}</p>
+
+            <ul class={`card border-l-4 ${levelStyles[level].border} divide-y divide-sand-200`}>
+              {handicaps.map((h) => (
+                <li id={h.code} data-tag={h.tag} class="flex gap-4 items-start p-4 md:px-6 scroll-mt-24 target:bg-sand-100">
+                  <a
+                    href={`#${h.code}`}
+                    class="font-display font-bold text-sm text-ocean-600 bg-sand-100 border border-sand-300 rounded-md w-12 py-1 text-center shrink-0 hover:border-ocean-500 transition-colors"
+                    title={`Link to handicap ${h.code}`}
+                  >
+                    {h.code}
+                  </a>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-ocean-700 leading-relaxed">{h.text}</p>
+                    {(!levelWideTags.has(h.tag) || h.formats) && (
+                      <div class="flex flex-wrap gap-2 mt-2">
+                        {!levelWideTags.has(h.tag) && (
+                          <span class={`text-xs font-semibold uppercase tracking-wide rounded px-2 py-0.5 ${tagStyles[h.tag].chip}`}>{TAG_LABELS[h.tag]}</span>
+                        )}
+                        {h.formats && (
+                          <span class="text-xs font-semibold uppercase tracking-wide text-coral-600 bg-sand-100 rounded px-2 py-0.5">{h.formats} only</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-16 md:py-20 bg-sand-200">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <p class="text-ocean-600/80 text-lg mb-6">Want the full rundown on how Shuffle nights work?</p>
+      <a href="/leagues/shuffle/" class="btn-primary">About Shuffle League</a>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
+  const levels = document.querySelectorAll<HTMLElement>('[data-level]');
+
+  function applyFilter(filter: string) {
+    buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.filter === filter)));
+
+    levels.forEach((levelEl) => {
+      let visible = 0;
+      levelEl.querySelectorAll<HTMLElement>('[data-tag]').forEach((item) => {
+        item.hidden = filter !== 'all' && item.dataset.tag !== filter;
+        if (!item.hidden) visible++;
+      });
+      levelEl.hidden = visible === 0;
+
+      const link = document.querySelector<HTMLElement>(`[data-level-link="${levelEl.dataset.level}"]`);
+      if (link) {
+        link.hidden = visible === 0;
+        const count = link.querySelector('[data-level-count]');
+        if (count) count.textContent = String(visible);
+      }
+    });
+  }
+
+  buttons.forEach((b) => b.addEventListener('click', () => applyFilter(b.dataset.filter ?? 'all')));
+</script>
