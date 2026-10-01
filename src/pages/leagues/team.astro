@@ -32,6 +32,20 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
         Back to all teams
       </a>
 
+      <!-- My team + calendar (shown once the team's id is known) -->
+      <div id="team-actions" class="hidden mb-8 card p-4 sm:p-5">
+        <button
+          type="button"
+          id="my-team-btn"
+          aria-pressed="false"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold transition-colors mb-4"
+        >
+          <svg class="w-4 h-4" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path id="my-team-star" fill="none" stroke-linejoin="round" d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2-5.5-2.9-5.5 2.9 1-6.2L3 9.6l6.2-.9z"/></svg>
+          <span id="my-team-label">Save as my team</span>
+        </button>
+        <div id="team-calendar"></div>
+      </div>
+
       <!-- Status Tabs -->
       <div class="flex flex-wrap gap-2 mb-8" id="status-tabs">
         <button data-status="upcoming" class="tab-btn active">Upcoming</button>
@@ -73,6 +87,8 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
 <script>
   import { EVENTS_API, TEAMS_API_URL, DIVISION_IDS, ACTIVE_SEASON_ID } from '../../lib/seasonConfig';
   import { escapeHtml, safeUrl } from '../../lib/html';
+  import { getMyTeam, setMyTeam, type MyTeam } from '../../lib/myTeam';
+  import { renderCalendarActions } from '../../lib/calendarLinks';
 
   const TEAMS_API = TEAMS_API_URL;
 
@@ -113,12 +129,38 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
           logo.alt = team.name;
           logo.classList.remove('hidden');
           document.getElementById('team-division')!.textContent = team.groups;
+          showTeamActions({ id: team.id, name: team.name });
           break;
         }
       } catch {
         // try next division
       }
     }
+  }
+
+  function showTeamActions(team: MyTeam) {
+    const btn = document.getElementById('my-team-btn')!;
+    const label = document.getElementById('my-team-label')!;
+    const star = document.getElementById('my-team-star')!;
+    const paint = () => {
+      const saved = getMyTeam()?.id === team.id;
+      btn.setAttribute('aria-pressed', String(saved));
+      label.textContent = saved ? 'My team' : 'Save as my team';
+      star.setAttribute('fill', saved ? 'currentColor' : 'none');
+      btn.classList.toggle('bg-coral-500', saved);
+      btn.classList.toggle('border-coral-500', saved);
+      btn.classList.toggle('text-white', saved);
+      btn.classList.toggle('bg-white', !saved);
+      btn.classList.toggle('border-sand-300', !saved);
+      btn.classList.toggle('text-ocean-700', !saved);
+    };
+    btn.addEventListener('click', () => {
+      setMyTeam(getMyTeam()?.id === team.id ? null : team);
+      paint();
+    });
+    paint();
+    renderCalendarActions(document.getElementById('team-calendar')!, team.id);
+    document.getElementById('team-actions')!.classList.remove('hidden');
   }
 
   function stripHtml(html: string): string {

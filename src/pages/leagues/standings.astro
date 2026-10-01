@@ -103,6 +103,7 @@ import {
 <script>
   import { STANDINGS_API_URL, DIVISION_IDS, ACTIVE_SEASON_ID } from '../../lib/seasonConfig';
   import { escapeHtml } from '../../lib/html';
+  import { isMyTeamName } from '../../lib/myTeam';
 
   const API_URL = STANDINGS_API_URL;
   let currentDivision = DIVISION_IDS[0];
@@ -229,7 +230,7 @@ import {
       <!-- Mobile View -->
       <div class="sm:hidden space-y-3">
         ${standings.map((s, i) => `
-          <div class="card p-4">
+          <div class="card p-4 ${isMyTeamName(s.Team.name) ? 'ring-2 ring-coral-500' : ''}">
             <div class="flex items-center justify-between mb-2">
               <div class="flex items-center gap-3">
                 <span class="text-sm font-bold text-ocean-500 w-6">${i + 1}</span>
@@ -261,7 +262,7 @@ import {
           </thead>
           <tbody>
             ${standings.map((s, i) => `
-              <tr class="border-b border-sand-200 ${i % 2 === 1 ? 'bg-sand-50' : ''}">
+              <tr class="border-b border-sand-200 ${isMyTeamName(s.Team.name) ? 'bg-coral-500/10' : i % 2 === 1 ? 'bg-sand-50' : ''}">
                 <td class="px-4 py-2 text-sm font-bold text-ocean-500">${i + 1}</td>
                 <td class="px-4 py-2 text-sm font-bold whitespace-nowrap"><a href="/leagues/team/?name=${encodeURIComponent(s.Team.name)}" class="text-ocean-700 hover:text-ocean-500 transition-colors">${escapeHtml(s.Team.name)}</a></td>
                 ${orderedColumns.map((col, idx) => `
