@@ -9,6 +9,11 @@
     scroll-behavior: smooth;
   }
 
+  /* Keep the hidden attribute winning over display utilities like `flex` */
+  [hidden] {
+    display: none !important;
+  }
+
   body {
     @apply bg-sand-50 text-ocean-800 font-sans;
   }
