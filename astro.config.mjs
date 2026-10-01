@@ -24,6 +24,13 @@ export default defineConfig({
   build: {
     assets: '_assets',
   },
+  // Start loading a page before it's opened: on hover/focus by default, and
+  // as soon as the mobile menu shows its links (see Header.astro). Astro skips
+  // this on data-saver and very slow connections.
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'hover',
+  },
   vite: {
     // Pins the date-driven season switches in src/lib/seasonConfig.ts to the
     // build, in the server render and the browser bundle alike.
