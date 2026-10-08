@@ -171,7 +171,16 @@ const levelStyles: Record<number, { border: string; bg: string; text: string }> 
         if (!item.hidden) visible++;
       });
       levelEl.hidden = visible === 0;
+    });
+    updateLevelLinks();
+  }
 
+  // "Jump to level" links count what's actually on screen: the type filter
+  // and the search together. A level the search emptied loses its link.
+  function updateLevelLinks() {
+    levels.forEach((levelEl) => {
+      const visible = Array.from(levelEl.querySelectorAll<HTMLElement>('[data-tag]'))
+        .filter((item) => !item.hidden && !item.hasAttribute('data-nomatch')).length;
       const link = document.querySelector<HTMLElement>(`[data-level-link="${levelEl.dataset.level}"]`);
       if (link) {
         link.hidden = visible === 0;
@@ -180,6 +189,8 @@ const levelStyles: Record<number, { border: string; bg: string; text: string }> 
       }
     });
   }
+
+  document.addEventListener('page-search:done', updateLevelLinks);
 
   function refresh(filter: string) {
     applyFilter(filter);

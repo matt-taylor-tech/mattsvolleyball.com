@@ -31,24 +31,59 @@ const { label, items, groups, class: className = '' } = Astro.props;
   const empty = root?.querySelector<HTMLElement>('[data-search-empty]');
 
   if (root && input && empty) {
-    const items = document.querySelectorAll<HTMLElement>(root.dataset.items!);
-    const groups = document.querySelectorAll<HTMLElement>(root.dataset.groups!);
+    const itemSelector = root.dataset.items!;
+    const groups = Array.from(document.querySelectorAll<HTMLElement>(root.dataset.groups!));
+
+    // Each item is searched together with the headings it sits under, so a
+    // search for a section's title ("female", "substitutions") finds the
+    // section even when its items never repeat the title.
+    type Entry = { el: HTMLElement; text: string };
+    type Sub = { heading: HTMLElement; items: HTMLElement[] };
+    const index = groups.map((group) => {
+      const entries: Entry[] = [];
+      const subs: Sub[] = [];
+      let h2 = '';
+      let sub: Sub | null = null;
+      group.querySelectorAll<HTMLElement>(`h2, h3, ${itemSelector}`).forEach((el) => {
+        if (el.matches('h2')) {
+          h2 = el.textContent ?? '';
+          sub = null;
+        } else if (el.matches('h3')) {
+          sub = { heading: el, items: [] };
+          subs.push(sub);
+        } else {
+          entries.push({ el, text: `${h2} ${sub?.heading.textContent ?? ''} ${el.textContent ?? ''}`.toLowerCase() });
+          sub?.items.push(el);
+        }
+      });
+      // Lists and tables that hold items, so one emptied by the search goes too.
+      const containers = Array.from(group.querySelectorAll<HTMLElement>('ul, ol, table'))
+        .filter((c) => c.querySelector(itemSelector));
+      return { group, entries, subs, containers };
+    });
+
+    const showing = (el: HTMLElement) => !el.hidden && !el.hasAttribute('data-nomatch');
 
     const run = () => {
       const terms = input.value.toLowerCase().split(/\s+/).filter(Boolean);
-      items.forEach((el) => {
-        const text = (el.textContent ?? '').toLowerCase();
-        el.toggleAttribute('data-nomatch', !terms.every((t) => text.includes(t)));
-      });
       let shown = 0;
-      groups.forEach((g) => {
-        const any = Array.from(g.querySelectorAll<HTMLElement>(root.dataset.items!)).some(
-          (el) => !el.hidden && !el.hasAttribute('data-nomatch'),
-        );
-        g.toggleAttribute('data-nomatch', !any);
+      index.forEach(({ group, entries, subs, containers }) => {
+        entries.forEach(({ el, text }) => {
+          el.toggleAttribute('data-nomatch', !terms.every((t) => text.includes(t)));
+        });
+        subs.forEach(({ heading, items }) => {
+          heading.toggleAttribute('data-nomatch', items.length > 0 && !items.some(showing));
+        });
+        containers.forEach((c) => {
+          c.toggleAttribute('data-nomatch', !Array.from(c.querySelectorAll<HTMLElement>(itemSelector)).some(showing));
+        });
+        const any = entries.some(({ el }) => showing(el));
+        group.toggleAttribute('data-nomatch', !any);
         if (any) shown++;
       });
       empty.hidden = shown > 0 || terms.length === 0;
+      // Lets the page update anything that summarizes what's visible.
+      document.dispatchEvent(new Event('page-search:done'));
     };
 
     input.addEventListener('input', run);
