@@ -1,7 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import PageHero from '../../components/PageHero.astro';
-import { Trophy } from 'lucide-astro';
+import { Trophy } from '@lucide/astro';
 import { DIVISIONS as ALL_DIVISIONS, DAY_FULL_LABEL, ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
 const playoffDays = [...new Set(ALL_DIVISIONS.filter(d => d.hasPlayoffs).map(d => d.day))];
 ---
@@ -56,14 +56,6 @@ const playoffDays = [...new Set(ALL_DIVISIONS.filter(d => d.hasPlayoffs).map(d =
 </Layout>
 
 <style is:global>
-  .tab-btn {
-    @apply px-3 py-2 rounded-full text-xs sm:text-sm font-medium transition-colors;
-    @apply bg-white text-ocean-600 border border-sand-300 hover:bg-sand-50;
-  }
-  .tab-btn.active {
-    @apply bg-ocean-600 text-white border-ocean-600;
-  }
-
   /* ── Bracketry match card styling ── */
   .match-body {
     background: linear-gradient(180deg, #FFFFFF 0%, #FCFCFA 100%);

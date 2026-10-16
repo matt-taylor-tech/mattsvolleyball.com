@@ -1,5 +1,4 @@
 import { defineConfig } from 'astro/config';
-import tailwind from '@astrojs/tailwind';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
@@ -9,7 +8,6 @@ export default defineConfig({
     '/home/': '/',
   },
   integrations: [
-    tailwind(),
     sitemap({
       filter: (page) => {
         const excludes = ['/leagues/schedule', '/leagues/teams', '/leagues/team/', '/leagues/standings', '/leagues/scores', '/leagues/playoffs', '/image-gallery', '/home', '/register', '/404', '/offline'];
@@ -24,6 +22,9 @@ export default defineConfig({
   build: {
     assets: '_assets',
   },
+  // Keep spaces between inline elements. Astro 7's default ('jsx') strips
+  // them, which runs words together around links and bold text.
+  compressHTML: true,
   // Start loading a page before it's opened: on hover/focus by default, and
   // as soon as the mobile menu shows its links (see Header.astro). Astro skips
   // this on data-saver and very slow connections.
@@ -36,6 +37,13 @@ export default defineConfig({
     // build, in the server render and the browser bundle alike.
     define: {
       __BUILD_TIME__: JSON.stringify(Date.now()),
+    },
+    // Vite 8 targets Safari 16.4+ by default: it writes breakpoints as
+    // `@media (width>=640px)`, which older Safari ignores (so an older iPad
+    // or Mac gets the phone layout), and lets newer JS syntax through. Keep
+    // the targets Vite used before Astro 7.
+    build: {
+      target: ['edge88', 'firefox78', 'chrome87', 'safari14'],
     },
   },
 });

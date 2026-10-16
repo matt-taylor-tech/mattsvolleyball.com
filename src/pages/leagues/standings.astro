@@ -1,7 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import PageHero from '../../components/PageHero.astro';
-import { Trophy } from 'lucide-astro';
+import { Trophy } from '@lucide/astro';
 import {
   DIVISIONS,
   DIVISION_IDS,
@@ -81,15 +81,6 @@ import {
   </section>
 </Layout>
 
-<style>
-  .tab-btn {
-    @apply px-3 py-2 rounded-full text-xs sm:text-sm font-medium transition-colors;
-    @apply bg-white text-ocean-600 border border-sand-300 hover:bg-sand-50;
-  }
-  .tab-btn.active {
-    @apply bg-ocean-600 text-white border-ocean-600;
-  }
-</style>
 
 <script>
   import { STANDINGS_API_URL, DIVISION_IDS, ACTIVE_SEASON_ID } from '../../lib/seasonConfig';

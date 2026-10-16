@@ -30,3 +30,6 @@ Thumbs.db
 
 # playwright mcp verification artifacts
 .playwright-mcp/
+
+# wrangler pages dev local state
+.wrangler/

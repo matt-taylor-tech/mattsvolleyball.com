@@ -60,4 +60,14 @@
     @apply bg-gradient-to-br from-sand-200 via-sand-300 to-sand-400
            flex items-center justify-center text-sand-600/50;
   }
+
+  /* Filter pills on the league pages (day, division, playoff night) */
+  .tab-btn {
+    @apply px-3 py-2 rounded-full text-xs sm:text-sm font-medium transition-colors
+           bg-white text-ocean-600 border border-sand-300 hover:bg-sand-50;
+  }
+
+  .tab-btn.active {
+    @apply bg-ocean-600 text-white border-ocean-600;
+  }
 }
