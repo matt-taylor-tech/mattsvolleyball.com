@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url';
 import { loadSeasons, fetchStandings, fetchTeamsFromGames, PLACEHOLDER_TEAMS } from './lib/mv.mjs';
 import {
   REPO_ROOT, BUCKET_PREFIX, createR2, listChampions, writeFallback, objectExists, uploadChampion,
-  processImage, buildKey, SEASON_DISPLAY,
+  processImage, buildKey, SEASON_DISPLAY, PHOTO_SIZE,
 } from './lib/champions-r2.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -194,6 +194,7 @@ async function buildContext() {
     seasonOptions: Object.entries(SEASON_DISPLAY).map(([value, label]) => ({ value, label })),
     canRebuild: Boolean(deployHook),
     photosDir,
+    photoSize: PHOTO_SIZE,
   };
 }
 
@@ -248,7 +249,8 @@ const routes = {
   },
 
   'GET /api/champions': async (req, res) => {
-    send(res, 200, { champions: await listChampions(r2) });
+    const champions = await listChampions(r2);
+    send(res, 200, { champions: champions.map((c) => ({ ...c, url: publicBase ? `${publicBase}${c.photo}` : '' })) });
   },
 
   'POST /api/preview-key': async (req, res) => {

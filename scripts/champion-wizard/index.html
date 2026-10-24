@@ -68,6 +68,9 @@
   .checklist li { display: flex; gap: 8px; align-items: center; }
   .checklist li.done { color: var(--ok); }
   .checklist li.todo { color: var(--muted); }
+  .checklist li > span { min-width: 0; }
+  .thumbs { display: flex; gap: 4px; margin-left: auto; }
+  .thumbs img { display: block; width: 36px; height: 36px; object-fit: cover; border-radius: 3px; border: 1px solid var(--line); }
 
   .drop {
     border: 2px dashed var(--line); border-radius: 4px; padding: 32px 16px; text-align: center;
@@ -190,6 +193,8 @@
         <div class="key">—</div>
       </div>
       <div class="note status" hidden></div>
+      <div class="note res" hidden></div>
+      <div class="note dup" hidden></div>
       <div class="row">
         <button class="primary upload">Upload</button>
         <button class="remove">Remove</button>
@@ -217,6 +222,7 @@
   let context = null;
   let season = null;          // selected season from context.seasons
   let champions = [];         // everything currently in R2
+  let championsStamp = 0;     // when champions was last fetched
   const items = [];           // queued photos
 
   async function api(path, options = {}) {
@@ -256,10 +262,14 @@
     box.append(select);
   }
 
-  function hasChampion(year, seasonValue, day, division) {
+  function championsFor(year, seasonValue, day, division) {
     const name = seasonLabel(seasonValue);
-    return champions.find((c) => c.year === Number(year) && c.season === name
+    return champions.filter((c) => c.year === Number(year) && c.season === name
       && slug(c.day) === slug(day) && slug(c.division) === slug(division));
+  }
+
+  function hasChampion(year, seasonValue, day, division) {
+    return championsFor(year, seasonValue, day, division)[0];
   }
 
   function renderChecklist() {
@@ -269,11 +279,31 @@
     const list = $('#checklistItems');
     list.innerHTML = '';
     for (const d of season.divisions) {
-      const found = hasChampion(season.year, season.season, d.day, d.division);
+      const found = championsFor(season.year, season.season, d.day, d.division);
       const li = document.createElement('li');
-      li.className = found ? 'done' : 'todo';
-      li.innerHTML = found ? ICONS.check : ICONS.empty;
-      li.append(document.createTextNode(found ? `${d.label}: ${found.teamName}` : `${d.label}: no photo yet`));
+      li.className = found.length ? 'done' : 'todo';
+      li.innerHTML = found.length ? ICONS.check : ICONS.empty;
+      const text = document.createElement('span');
+      text.textContent = found.length
+        ? `${d.label}: ${found.map((c) => c.teamName).join(', ')}${found.length > 1 ? ` (${found.length} photos)` : ''}`
+        : `${d.label}: no photo yet`;
+      li.append(text);
+      const thumbs = document.createElement('span');
+      thumbs.className = 'thumbs';
+      for (const c of found.filter((c) => c.url)) {
+        const a = document.createElement('a');
+        a.href = c.url;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.title = c.teamName;
+        const img = document.createElement('img');
+        img.src = `${c.url}?v=${championsStamp}`; // bust the cache when a photo was replaced
+        img.alt = c.teamName;
+        img.loading = 'lazy';
+        a.append(img);
+        thumbs.append(a);
+      }
+      li.append(thumbs);
       list.append(li);
     }
   }
@@ -281,6 +311,7 @@
   async function refreshChampions() {
     try {
       champions = (await api('/api/champions')).champions;
+      championsStamp = Date.now();
       renderChecklist();
     } catch (err) {
       console.warn('Could not list champions', err);
@@ -290,6 +321,7 @@
   // ── Queue items ────────────────────────────────────────────────────────────
 
   function addFiles(fileList) {
+    if (!context) return; // seasons not loaded (or failed to load)
     for (const file of fileList) {
       if (!file.type.startsWith('image/')) continue;
       addItem(file);
@@ -312,14 +344,21 @@
       aspectRatio: 1, viewMode: 1, autoCropArea: 1, dragMode: 'move',
       checkOrientation: false, // the browser already shows photos upright
       background: false, zoomable: false, movable: false,
+      crop: (e) => renderResolution(item, e.detail),
     });
 
     const seasonSelect = $('.f-season', el);
     for (const o of context.seasonOptions) seasonSelect.add(new Option(o.label, o.value));
 
     renderTeamOptions(item);
+    const guess = guessChoice(file.name);
+    if (guess) {
+      $('.team', el).value = guess;
+      applyChoice(item);
+      $('.file-name', el).textContent = `${file.name} · team guessed from the file name`;
+    }
 
-    $('.team', el).onchange = () => applyChoice(item);
+    $('.team', el).onchange = () => applyChoice(item, true);
     $('.other-name', el).oninput = () => { setField(item, 'team', $('.other-name', el).value, true); };
     $('.edit-toggle', el).onclick = () => {
       const d = $('.details', el);
@@ -348,13 +387,53 @@
       group.append(new Option(d.teams.length ? `Another team in ${d.label}…` : `Type a team for ${d.label}…`, `${di}|other`));
       select.append(group);
     });
+    // After a season switch, keep the photo's team if this season has it; otherwise
+    // say plainly that the old details still apply rather than showing "Choose…".
+    if (item.fields.team) {
+      const match = matchChoice(item.fields);
+      if (match) {
+        if (match.endsWith('|other')) $('.other-name', item.el).value = item.fields.team;
+        select.value = match;
+      } else {
+        select.add(new Option(`Keep: ${summaryText(item.fields)}`, 'keep'), 1);
+        select.value = 'keep';
+      }
+    }
     applyChoice(item);
   }
 
-  function applyChoice(item) {
+  /** Dropdown value for these details in the selected season, or ''. */
+  function matchChoice(f) {
+    if (Number(f.year) !== season.year || f.season !== season.season) return '';
+    const di = season.divisions.findIndex((d) => slug(d.day) === slug(f.day) && slug(d.division) === slug(f.division));
+    if (di < 0) return '';
+    const ti = season.divisions[di].teams.findIndex((t) => slug(t) === slug(f.team));
+    return ti >= 0 ? `${di}|${ti}` : `${di}|other`;
+  }
+
+  /**
+   * Dropdown value for the team named in a file name like
+   * "summer-i_tuesday_competitive_sand-sharks.jpg", or '' if no single team fits.
+   */
+  function guessChoice(fileName) {
+    const base = `-${slug(fileName.replace(/\.[^.]+$/, ''))}-`;
+    const has = (text) => base.includes(`-${slug(text)}-`);
+    const candidates = [];
+    season.divisions.forEach((d, di) => d.teams.forEach((t, ti) => {
+      if (slug(t).length < 3 || !has(t)) return;
+      // Night and division break ties; a longer team name beats one it contains.
+      const score = (has(d.day) ? 1000 : 0) + (has(d.division) ? 1000 : 0) + slug(t).length;
+      candidates.push({ value: `${di}|${ti}`, score });
+    }));
+    candidates.sort((a, b) => b.score - a.score);
+    if (!candidates.length || candidates[1]?.score === candidates[0].score) return '';
+    return candidates[0].value;
+  }
+
+  function applyChoice(item, userPicked = false) {
     const value = $('.team', item.el).value;
     const other = $('.other', item.el);
-    if (!value) {
+    if (!value || value === 'keep') {
       other.hidden = true;
       return;
     }
@@ -369,7 +448,7 @@
       division: d.division,
       team: isOther ? $('.other-name', item.el).value : d.teams[Number(ti)],
     });
-    if (isOther) $('.other-name', item.el).focus();
+    if (isOther && userPicked) $('.other-name', item.el).focus();
     syncDetailInputs(item);
     renderSummary(item);
   }
@@ -384,10 +463,13 @@
     for (const [name, value] of Object.entries(item.fields)) $(`.f-${name}`, item.el).value = value;
   }
 
+  function summaryText(f) {
+    return [f.year && `${seasonLabel(f.season)} ${f.year}`, f.day, f.division, f.team].filter(Boolean).join(' · ');
+  }
+
   function renderSummary(item) {
     const f = item.fields;
-    const parts = [f.year && `${seasonLabel(f.season)} ${f.year}`, f.day, f.division, f.team].filter(Boolean);
-    $('.summary-text', item.el).textContent = parts.length ? parts.join(' · ') : 'Details fill in when you pick a team.';
+    $('.summary-text', item.el).textContent = summaryText(f) || 'Details fill in when you pick a team.';
     // Open the details automatically if the season couldn't be guessed from the TeamLinkt label.
     if (f.year && !f.season) {
       $('.details', item.el).hidden = false;
@@ -424,27 +506,46 @@
       keyEl.textContent = r.key ? r.key.replace(/^mattsvolleyball\/images\/champions\//, '') : '—';
       if (r.error) setStatus(item, 'err', r.error);
       else if (r.exists) setStatus(item, 'warn', 'A photo with this name is already in R2. Uploading replaces it.');
-      else if (hasChampion(f.year, f.season, f.day, f.division)) {
+      else {
         const c = hasChampion(f.year, f.season, f.day, f.division);
-        setStatus(item, 'warn', `This division already has a champion photo (${c.teamName}). Uploading adds a second one; delete the old one in R2 if it was wrong.`);
-      } else setStatus(item);
+        if (c) setStatus(item, 'warn', `This division already has a champion photo (${c.teamName}). Uploading adds a second one; delete the old one in R2 if it was wrong.`);
+        else setStatus(item);
+      }
     } catch (err) {
       if (token === item.previewToken) setStatus(item, 'err', err.message);
     }
     updateToolbar();
   }
 
-  function setStatus(item, kind, text) {
-    const el = $('.status', item.el);
+  function showNote(el, kind, text) {
     el.hidden = !kind;
     if (!kind) return;
-    el.className = `note status ${kind}`;
+    el.classList.remove('ok', 'warn', 'err');
+    el.classList.add(kind);
     el.innerHTML = ICONS[kind];
     el.append(document.createTextNode(text));
   }
 
+  function setStatus(item, kind, text) {
+    showNote($('.status', item.el), kind, text);
+  }
+
+  // The server never scales photos up, so a small crop is saved below full size.
+  function renderResolution(item, { width, height }) {
+    if (item.done) return;
+    const size = Math.round(Math.min(width, height));
+    const low = size > 0 && size < context.photoSize;
+    showNote($('.res', item.el), low ? 'warn' : null,
+      `Crop is ${size}×${size} px, below ${context.photoSize}. It may look soft on the site.`);
+  }
+
+  /** Another queued photo that would be saved under the same name. */
+  function duplicateOf(item) {
+    return item.key && items.find((o) => o !== item && !o.done && o.key === item.key);
+  }
+
   function isReady(item) {
-    return !item.done && !item.busy && Boolean(item.key);
+    return !item.done && !item.busy && Boolean(item.key) && !duplicateOf(item);
   }
 
   function updateToolbar() {
@@ -456,6 +557,8 @@
     for (const i of items) {
       const button = $('.upload', i.el); // gone once the photo is uploaded
       if (button) button.disabled = !isReady(i);
+      showNote($('.dup', i.el), !i.done && duplicateOf(i) ? 'warn' : null,
+        'Another photo in the queue has the same name. Remove one or pick a different team.');
     }
   }
 
@@ -488,6 +591,7 @@
       item.done = true;
       item.el.classList.add('uploaded');
       item.cropper?.disable();
+      showNote($('.res', item.el), null);
       $('.row', item.el).innerHTML = r.url ? `<a class="btn" target="_blank" rel="noopener" href="${r.url}">View uploaded photo</a>` : '';
       const kb = (n) => `${Math.round(n / 1024).toLocaleString()} KB`;
       setStatus(item, 'ok', `${r.replaced ? 'Replaced' : 'Uploaded'} (${kb(r.originalBytes)} → ${kb(r.bytes)}).`);
@@ -524,9 +628,16 @@
   drop.onclick = () => fileInput.click();
   drop.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } };
   fileInput.onchange = () => { addFiles(fileInput.files); fileInput.value = ''; };
-  drop.ondragover = (e) => { e.preventDefault(); drop.classList.add('over'); };
-  drop.ondragleave = () => drop.classList.remove('over');
-  drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove('over'); if (context) addFiles(e.dataTransfer.files); };
+  // Count enter/leave pairs: moving over the text inside the box fires both.
+  let dragDepth = 0;
+  drop.ondragenter = (e) => { e.preventDefault(); dragDepth++; drop.classList.add('over'); };
+  drop.ondragover = (e) => e.preventDefault();
+  drop.ondragleave = () => { if (--dragDepth <= 0) { dragDepth = 0; drop.classList.remove('over'); } };
+  drop.ondrop = (e) => { e.preventDefault(); dragDepth = 0; drop.classList.remove('over'); addFiles(e.dataTransfer.files); };
+
+  window.addEventListener('beforeunload', (e) => {
+    if (items.some((i) => !i.done)) e.preventDefault();
+  });
 
   $('#uploadAll').onclick = async () => {
     for (const item of items.filter(isReady)) await upload(item);
