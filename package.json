@@ -19,7 +19,9 @@
     "check:registration": "node scripts/post-registration-status.mjs",
     "check:weather": "node scripts/check-weather.mjs",
     "champions": "node scripts/champion-wizard.mjs",
-    "sync:champions": "node scripts/sync-champions-cache.mjs"
+    "sync:champions": "node scripts/sync-champions-cache.mjs",
+    "test:visual": "playwright test",
+    "test:visual:baseline": "playwright test --update-snapshots=all"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
@@ -35,6 +37,7 @@
     "tailwindcss": "^3.4.19"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "playwright": "^1.64.1"
   }
 }
