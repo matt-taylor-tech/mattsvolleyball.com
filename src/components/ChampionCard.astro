@@ -1,5 +1,6 @@
 ---
 import { Trophy } from '@lucide/astro';
+import { Picture, inferRemoteSize } from 'astro:assets';
 
 interface Props {
   teamName: string;
@@ -8,25 +9,65 @@ interface Props {
   day: string;
   division: string;
   photo?: string;
+  /** Rendered width of the card, for picking a photo size. Defaults to the champions page grid. */
+  sizes?: string;
 }
 
-const { teamName, season, year, day, division, photo } = Astro.props;
+const {
+  teamName, season, year, day, division, photo,
+  sizes = '(min-width: 1024px) 390px, (min-width: 640px) 50vw, 100vw',
+} = Astro.props;
 const r2Base = import.meta.env.PUBLIC_R2_BASE_URL || '';
+const src = photo ? `${r2Base}${photo}` : '';
+const alt = `${teamName} - ${season} ${year} Champions`;
+const imgClass = 'w-full h-full object-cover motion-safe:group-hover:scale-105 motion-safe:transition-transform motion-safe:duration-300';
+
+// Resize and convert the photo at build time (image.domains in astro.config.mjs).
+// A photo that can't be downloaded then would fail the whole build, so check
+// it here first and serve the original from R2 if it's unreachable.
+let size: { width: number; height: number } | null = null;
+if (src && r2Base) {
+  try {
+    size = await inferRemoteSize(src);
+  } catch (err) {
+    console.warn(`[champions] Could not read ${src} - serving it unoptimized:`, err);
+  }
+}
+const maxWidth = size?.width ?? 0;
+const widths = [300, 400, 600, 800, 1200].filter((w) => w <= maxWidth);
+if (!widths.length && maxWidth) widths.push(maxWidth);
 ---
 
 <div class="card group">
   <!-- Photo -->
   {photo ? (
     <div class="aspect-square overflow-hidden">
-      <img
-        src={`${r2Base}${photo}`}
-        alt={`${teamName} - ${season} ${year} Champions`}
-        width="600"
-        height="600"
-        class="w-full h-full object-cover motion-safe:group-hover:scale-105 motion-safe:transition-transform motion-safe:duration-300"
-        loading="lazy"
-        decoding="async"
-      />
+      {size ? (
+        <Picture
+          src={src}
+          width={size.width}
+          height={size.height}
+          widths={widths}
+          sizes={sizes}
+          formats={['avif']}
+          fallbackFormat="webp"
+          alt={alt}
+          class={imgClass}
+          pictureAttributes={{ class: 'block w-full h-full' }}
+          loading="lazy"
+          decoding="async"
+        />
+      ) : (
+        <img
+          src={src}
+          alt={alt}
+          width="600"
+          height="600"
+          class={imgClass}
+          loading="lazy"
+          decoding="async"
+        />
+      )}
     </div>
   ) : (
     <div class="aspect-square img-placeholder">

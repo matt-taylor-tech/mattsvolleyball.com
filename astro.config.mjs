@@ -1,5 +1,26 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import { readFileSync } from 'node:fs';
+import { parseEnv } from 'node:util';
+
+// The R2 host champion photos are served from, so <Picture> in
+// ChampionCard.astro can resize them. Cloudflare sets the variable in the
+// build environment; locally it comes from .env.
+function r2Host() {
+  let base = process.env.PUBLIC_R2_BASE_URL;
+  if (!base) {
+    try {
+      base = parseEnv(readFileSync('.env', 'utf8')).PUBLIC_R2_BASE_URL;
+    } catch {
+      // no .env
+    }
+  }
+  try {
+    return [new URL(base.trim()).hostname];
+  } catch {
+    return [];
+  }
+}
 
 export default defineConfig({
   site: 'https://mattsvolleyball.com',
@@ -21,6 +42,9 @@ export default defineConfig({
   ],
   build: {
     assets: '_assets',
+  },
+  image: {
+    domains: r2Host(),
   },
   // Keep spaces between inline elements. Astro 7's default ('jsx') strips
   // them, which runs words together around links and bold text.
