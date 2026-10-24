@@ -1,4 +1,5 @@
 ---
+import LoadingSkeleton from '../../components/LoadingSkeleton.astro';
 import Layout from '../../layouts/Layout.astro';
 import PageHero from '../../components/PageHero.astro';
 import { Trophy } from '@lucide/astro';
@@ -43,10 +44,7 @@ import {
       </div>
 
       <!-- Loading State -->
-      <div id="standings-loading" class="text-center py-12">
-        <div class="inline-block w-8 h-8 border-4 border-sand-300 border-t-ocean-600 rounded-full animate-spin"></div>
-        <p class="text-ocean-600/70 mt-3">Loading standings...</p>
-      </div>
+      <LoadingSkeleton id="standings-loading" label="Loading standings" rows={6} heading={false} />
 
       <!-- Empty State -->
       <div id="standings-empty" class="text-center py-12 hidden">
