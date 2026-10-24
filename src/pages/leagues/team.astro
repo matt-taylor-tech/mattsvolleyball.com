@@ -1,4 +1,5 @@
 ---
+import LoadingSkeleton from '../../components/LoadingSkeleton.astro';
 import Layout from '../../layouts/Layout.astro';
 import PageHero from '../../components/PageHero.astro';
 import { ArrowLeft, CalendarDays, ClipboardList } from '@lucide/astro';
@@ -49,10 +50,7 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
       </div>
 
       <!-- Loading State -->
-      <div id="team-loading" class="text-center py-12">
-        <div class="inline-block w-8 h-8 border-4 border-sand-300 border-t-ocean-600 rounded-full animate-spin"></div>
-        <p class="text-ocean-600/70 mt-3">Loading schedule...</p>
-      </div>
+      <LoadingSkeleton id="team-loading" label="Loading schedule" rows={4} />
 
       <!-- Empty State -->
       <div id="team-empty" class="text-center py-12 hidden">
@@ -73,6 +71,7 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
 
 <script>
   import { EVENTS_API, TEAMS_API_URL, DIVISION_IDS, ACTIVE_SEASON_ID } from '../../lib/seasonConfig';
+  import { teamlinktFetch } from '../../lib/teamlinktFetch';
   import { escapeHtml, safeUrl } from '../../lib/html';
   import { getMyTeam, setMyTeam, type MyTeam } from '../../lib/myTeam';
   import { renderCalendarActions } from '../../lib/calendarLinks';
@@ -103,7 +102,7 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
         body.set('group_ids[division]', divId);
         body.set('season_id', ACTIVE_SEASON_ID);
 
-        const res = await fetch(TEAMS_API, { method: 'POST', body });
+        const res = await teamlinktFetch(TEAMS_API, { method: 'POST', body });
         if (!res.ok) continue;
         const teams: { id: number; name: string; imageUrl: string; groups: string }[] = await res.json();
         const team = teamId
@@ -192,7 +191,7 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
       body.set('show_games_only', '1');
     }
 
-    const res = await fetch(EVENTS_API, { method: 'POST', body });
+    const res = await teamlinktFetch(EVENTS_API, { method: 'POST', body });
     if (!res.ok) throw new Error(`Events request failed: ${res.status}`);
     const json = await res.json();
 

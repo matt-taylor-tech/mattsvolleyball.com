@@ -1,4 +1,5 @@
 ---
+import LoadingSkeleton from './LoadingSkeleton.astro';
 // "Next on the schedule" for the season being played right now. The list is
 // filled in by the widget script on the home page, which finds these elements
 // by id, so this component holds markup only.
@@ -9,9 +10,7 @@
       <h2 class="section-heading text-center mb-4">Upcoming Games</h2>
       <p class="section-subheading text-center mb-8">Next on the schedule.</p>
 
-      <div id="upcoming-loading" class="text-center py-8">
-        <div class="inline-block w-8 h-8 border-4 border-sand-300 border-t-ocean-600 rounded-full animate-spin"></div>
-      </div>
+      <LoadingSkeleton id="upcoming-loading" label="Loading upcoming games" rows={4} gridClass="grid sm:grid-cols-2 gap-2" />
 
       <div id="upcoming-container" class="hidden"></div>
 

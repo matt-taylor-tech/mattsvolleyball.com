@@ -185,7 +185,7 @@ export function activeSeasonAt(now: Date) {
     seasonId,
     divisions,
     days: [...new Set(divisions.map((d) => d.day))],
-    standingsUrl: `${API_BASE}/getStandings/${ORG_ID}/${seasonId}`,
+    standingsUrl: `${TEAMLINKT_API_BASE}/getStandings/${ORG_ID}/${seasonId}`,
   };
 }
 
@@ -247,7 +247,9 @@ export function shuffleDays(): string[] {
 
 // ── API URLs ──────────────────────────────────────────────────────────────────
 const ORG_ID = '10757';
-const API_BASE = 'https://app.mattsvolleyball.com/leagues';
+// TeamLinkt's API. Server code calls it directly; browser code goes through
+// teamlinktFetch() (src/lib/teamlinktFetch.ts), which uses the edge cache.
+export const TEAMLINKT_API_BASE = 'https://app.mattsvolleyball.com/leagues';
 // TeamLinkt registration containers for the upcoming season, one per night.
 // The id is TeamLinkt's association_registration_container_id, which its own
 // links pass as the `cid` query parameter.
@@ -306,10 +308,10 @@ export const REGISTRATION_SCRAPE_URLS: string[] = [
   ]),
 ];
 
-export const EVENTS_API    = `${API_BASE}/getAllEvents/${ORG_ID}`;
-export const TEAMS_API_URL = `${API_BASE}/getTeams/${ORG_ID}/${ACTIVE_SEASON_ID}`;
-export const STANDINGS_API_URL = `${API_BASE}/getStandings/${ORG_ID}/${ACTIVE_SEASON_ID}`;
-export const UPCOMING_TEAMS_API_URL = `${API_BASE}/getTeams/${ORG_ID}/${UPCOMING_SEASON_ID}`;
+export const EVENTS_API    = `${TEAMLINKT_API_BASE}/getAllEvents/${ORG_ID}`;
+export const TEAMS_API_URL = `${TEAMLINKT_API_BASE}/getTeams/${ORG_ID}/${ACTIVE_SEASON_ID}`;
+export const STANDINGS_API_URL = `${TEAMLINKT_API_BASE}/getStandings/${ORG_ID}/${ACTIVE_SEASON_ID}`;
+export const UPCOMING_TEAMS_API_URL = `${TEAMLINKT_API_BASE}/getTeams/${ORG_ID}/${UPCOMING_SEASON_ID}`;
 
 // ── Playoffs ──────────────────────────────────────────────────────────────────
 // Playoff nights are listed by date on each season above, and everything else

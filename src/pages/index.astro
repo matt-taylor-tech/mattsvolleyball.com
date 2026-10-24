@@ -398,6 +398,7 @@ const heroDatesText = HAS_UPCOMING_SEASON_STARTED
       try {
         const { DIVISION_IDS, TEAMS_API_URL, DIVISIONS_BY_DAY, DIVISION_NAME, EVENTS_API, ACTIVE_SEASON_ID, isPlayoffDate } = await import('../lib/seasonConfig');
         const { escapeHtml } = await import('../lib/html');
+        const { teamlinktFetch } = await import('../lib/teamlinktFetch');
         const teamsByDivision = new Map<string, { id: number; name: string }[]>();
 
         async function fetchAllTeams(): Promise<void> {
@@ -406,7 +407,7 @@ const heroDatesText = HAS_UPCOMING_SEASON_STARTED
               const body = new URLSearchParams();
               body.set('group_ids[division]', id);
               body.set('season_id', ACTIVE_SEASON_ID);
-              const res = await fetch(TEAMS_API_URL, { method: 'POST', body });
+              const res = await teamlinktFetch(TEAMS_API_URL, { method: 'POST', body });
               if (!res.ok) throw new Error(`Teams request failed: ${res.status}`);
               const teams: { id: number; name: string }[] = await res.json();
               return { id, teams };
@@ -462,7 +463,7 @@ const heroDatesText = HAS_UPCOMING_SEASON_STARTED
             body.set('length', '50');
             body.set('status', 'upcoming');
             body.set(`filters[${divId}]`, divId);
-            const res = await fetch(EVENTS_API, { method: 'POST', body });
+            const res = await teamlinktFetch(EVENTS_API, { method: 'POST', body });
             if (!res.ok) throw new Error(`Events request failed: ${res.status}`);
             const json = await res.json();
             for (const row of (json.data || [])) {
@@ -684,6 +685,7 @@ const heroDatesText = HAS_UPCOMING_SEASON_STARTED
 
   <script>
     import { EVENTS_API } from '../lib/seasonConfig';
+    import { teamlinktFetch } from '../lib/teamlinktFetch';
     import { getMyTeam } from '../lib/myTeam';
     import { renderCalendarActions } from '../lib/calendarLinks';
 
@@ -700,7 +702,7 @@ const heroDatesText = HAS_UPCOMING_SEASON_STARTED
       if (!team) return;
       try {
         const body = new URLSearchParams({ start: '0', length: '1', status: 'upcoming', team_id: String(team.id) });
-        const res = await fetch(EVENTS_API, { method: 'POST', body });
+        const res = await teamlinktFetch(EVENTS_API, { method: 'POST', body });
         if (!res.ok) return;
         const row = (await res.json()).data?.[0];
         // Nothing upcoming, or a team saved last season (ids are per season).

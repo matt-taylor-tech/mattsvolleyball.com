@@ -1,4 +1,5 @@
 ---
+import LoadingSkeleton from '../../components/LoadingSkeleton.astro';
 import Layout from '../../layouts/Layout.astro';
 import PageHero from '../../components/PageHero.astro';
 import { ClipboardList } from '@lucide/astro';
@@ -53,10 +54,7 @@ import {
       </div>
 
       <!-- Loading State -->
-      <div id="scores-loading" class="text-center py-12">
-        <div class="inline-block w-8 h-8 border-4 border-sand-300 border-t-ocean-600 rounded-full animate-spin"></div>
-        <p class="text-ocean-600/70 mt-3">Loading scores...</p>
-      </div>
+      <LoadingSkeleton id="scores-loading" label="Loading scores" rows={4} />
 
       <!-- Empty State -->
       <div id="scores-empty" class="text-center py-12 hidden">
@@ -77,6 +75,7 @@ import {
 
 <script>
   import { DIVISION_IDS, DIVISION_NAME, EVENTS_API } from '../../lib/seasonConfig';
+  import { teamlinktFetch } from '../../lib/teamlinktFetch';
   import { escapeHtml, safeUrl } from '../../lib/html';
   import { isMyTeamName } from '../../lib/myTeam';
 
@@ -140,7 +139,7 @@ import {
     body.set('show_games_only', '1');
     body.set(`filters[${divisionId}]`, divisionId);
 
-    const res = await fetch(API_URL, { method: 'POST', body });
+    const res = await teamlinktFetch(API_URL, { method: 'POST', body });
     if (!res.ok) throw new Error(`Scores request failed: ${res.status}`);
     const json = await res.json();
 

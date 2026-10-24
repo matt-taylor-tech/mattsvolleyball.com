@@ -43,6 +43,12 @@ for (const { name, path } of PAGES) {
       update: recording,
       updateContent: 'embed',
     });
+    // `astro preview` doesn't run the caching proxy (functions/api/teamlinkt),
+    // so send its requests on to TeamLinkt, where the HAR records and replays them.
+    await page.route('**/api/teamlinkt/**', (route) => {
+      const path = new URL(route.request().url()).pathname.replace('/api/teamlinkt/', '');
+      return route.fallback({ url: `https://app.mattsvolleyball.com/leagues/${path}` });
+    });
 
     await page.goto(path, { waitUntil: 'networkidle' });
     // Load the lazy images (champion photos) now, so a full-page shot never
