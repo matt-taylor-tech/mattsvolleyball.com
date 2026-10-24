@@ -33,3 +33,8 @@ Thumbs.db
 
 # wrangler pages dev local state
 .wrangler/
+
+# visual regression baselines, results and report (local, see tests/visual)
+tests/visual/.baseline/
+tests/visual/.results/
+tests/visual/.report/
