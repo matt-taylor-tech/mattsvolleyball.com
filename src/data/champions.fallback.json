@@ -2,10 +2,46 @@
   {
     "year": 2026,
     "season": "Summer II",
+    "day": "Thursday",
+    "division": "Competitive",
+    "teamName": "Hit For Brains",
+    "photo": "/images/champions/2026/summer-ii_thursday_competitive_hit-for-brains.jpg",
+    "_seasonOrder": 3
+  },
+  {
+    "year": 2026,
+    "season": "Summer II",
+    "day": "Thursday",
+    "division": "Recreational",
+    "teamName": "Meow Or Never",
+    "photo": "/images/champions/2026/summer-ii_thursday_recreational_meow-or-never.jpg",
+    "_seasonOrder": 3
+  },
+  {
+    "year": 2026,
+    "season": "Summer II",
     "day": "Tuesday",
     "division": "Competitive",
     "teamName": "Big Dig Energy",
     "photo": "/images/champions/2026/summer-ii_tuesday_competitive_big-dig-energy.jpg",
+    "_seasonOrder": 3
+  },
+  {
+    "year": 2026,
+    "season": "Summer II",
+    "day": "Tuesday",
+    "division": "Recreational",
+    "teamName": "Tuesday Tappers",
+    "photo": "/images/champions/2026/summer-ii_tuesday_recreational_tuesday-tappers.jpg",
+    "_seasonOrder": 3
+  },
+  {
+    "year": 2026,
+    "season": "Summer II",
+    "day": "Wednesday",
+    "division": "Shuffle",
+    "teamName": "One Big Happy Team",
+    "photo": "/images/champions/2026/summer-ii_wednesday_shuffle_one-big-happy-team.jpg",
     "_seasonOrder": 3
   },
   {
