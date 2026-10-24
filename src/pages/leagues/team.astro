@@ -1,4 +1,5 @@
 ---
+import LoadingSkeleton from '../../components/LoadingSkeleton.astro';
 import Layout from '../../layouts/Layout.astro';
 import PageHero from '../../components/PageHero.astro';
 import { ArrowLeft, CalendarDays, ClipboardList } from '@lucide/astro';
@@ -49,10 +50,7 @@ import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
       </div>
 
       <!-- Loading State -->
-      <div id="team-loading" class="text-center py-12">
-        <div class="inline-block w-8 h-8 border-4 border-sand-300 border-t-ocean-600 rounded-full animate-spin"></div>
-        <p class="text-ocean-600/70 mt-3">Loading schedule...</p>
-      </div>
+      <LoadingSkeleton id="team-loading" label="Loading schedule" rows={4} />
 
       <!-- Empty State -->
       <div id="team-empty" class="text-center py-12 hidden">
