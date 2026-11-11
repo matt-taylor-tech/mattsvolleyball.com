@@ -93,10 +93,7 @@ export async function loadConfig(asOf) {
   const currentDivisions = extractDivisions(source, 'CURRENT_DIVISIONS');
   const upcomingDivisions = extractDivisions(source, 'UPCOMING_DIVISIONS');
 
-  const rolloverDate = source.match(/export const ACTIVE_ROLLOVER_DATE = '([^']*)'/)?.[1] ?? '';
-  const rolloverAt = new Date(rolloverDate);
-  const rolloverValid = !Number.isNaN(rolloverAt.getTime());
-  const hasRolledOver = rolloverValid && (asOf ? asOf >= etDateKey(rolloverAt) : new Date() >= rolloverAt);
+  const hasRolledOver = hasRolledOverIn(source, asOf);
 
   // Playoff nights are listed by date on each season in seasonConfig.ts, and
   // PLAYOFFS_ACTIVE is worked out from them. Mirror that here rather than
@@ -117,17 +114,33 @@ export async function loadConfig(asOf) {
 }
 
 /**
- * Both configured seasons, current first, ignoring the rollover date:
- * [{ which, id, label, divisions }]. Seasons without a numeric id are skipped.
- * Used by the champion wizard, which works on whichever season just finished.
+ * True once ACTIVE_ROLLOVER_DATE in this seasonConfig.ts source has passed, i.e.
+ * the site's live pages have moved from CURRENT_SEASON to NEXT_SEASON. Pass
+ * `asOf` ('YYYY-MM-DD', Eastern) to ask about a past date instead of now.
+ */
+export function hasRolledOverIn(source, asOf) {
+  const rolloverDate = source.match(/export const ACTIVE_ROLLOVER_DATE = '([^']*)'/)?.[1] ?? '';
+  const rolloverAt = new Date(rolloverDate);
+  if (Number.isNaN(rolloverAt.getTime())) return false;
+  return asOf ? asOf >= etDateKey(rolloverAt) : new Date() >= rolloverAt;
+}
+
+/**
+ * Both configured seasons, the one the site is showing first:
+ * [{ which, id, label, divisions }]. That is CURRENT_SEASON until
+ * ACTIVE_ROLLOVER_DATE, then NEXT_SEASON. CURRENT_SEASON usually isn't edited
+ * at rollover, so without this the champion wizard kept defaulting to a season
+ * that had ended weeks before. Seasons without a numeric id are skipped.
  * Pass `source` to parse an older copy of seasonConfig.ts (e.g. from git history).
  */
 export async function loadSeasons(source) {
   source ??= await readFile(SEASON_CONFIG_PATH, 'utf8');
-  return [
+  const both = [
     ['current', 'CURRENT_SEASON', 'CURRENT_DIVISIONS'],
     ['next', 'NEXT_SEASON', 'UPCOMING_DIVISIONS'],
-  ]
+  ];
+  if (hasRolledOverIn(source)) both.reverse();
+  return both
     .map(([which, seasonVar, divisionsVar]) => ({
       which,
       id: extractSingleId(source, seasonVar),
