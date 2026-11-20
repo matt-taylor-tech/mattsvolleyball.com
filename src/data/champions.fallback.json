@@ -2,10 +2,46 @@
   {
     "year": 2026,
     "season": "Fall",
+    "day": "Thursday",
+    "division": "Competitive",
+    "teamName": "The Funky Bunch",
+    "photo": "/images/champions/2026/fall_thursday_competitive_the-funky-bunch.jpg",
+    "_seasonOrder": 4
+  },
+  {
+    "year": 2026,
+    "season": "Fall",
+    "day": "Thursday",
+    "division": "Recreational",
+    "teamName": "Turtle Power",
+    "photo": "/images/champions/2026/fall_thursday_recreational_turtle-power.jpg",
+    "_seasonOrder": 4
+  },
+  {
+    "year": 2026,
+    "season": "Fall",
     "day": "Tuesday",
     "division": "Competitive",
     "teamName": "Big Dig Energy",
     "photo": "/images/champions/2026/fall_tuesday_competitive_big-dig-energy.jpg",
+    "_seasonOrder": 4
+  },
+  {
+    "year": 2026,
+    "season": "Fall",
+    "day": "Tuesday",
+    "division": "Recreational",
+    "teamName": "Skyball For The Win",
+    "photo": "/images/champions/2026/fall_tuesday_recreational_skyball-for-the-win.jpg",
+    "_seasonOrder": 4
+  },
+  {
+    "year": 2026,
+    "season": "Fall",
+    "day": "Wednesday",
+    "division": "Shuffle",
+    "teamName": "One Big Happy Team",
+    "photo": "/images/champions/2026/fall_wednesday_shuffle_one-big-happy-team.jpg",
     "_seasonOrder": 4
   },
   {
