@@ -1,13 +1,13 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import WaveDivider from '../components/WaveDivider.astro';
-import ChampionCard from '../components/ChampionCard.astro';
+import HomeChampions from '../components/HomeChampions.astro';
 import UpcomingGames from '../components/UpcomingGames.astro';
 import FindYourNight from '../components/FindYourNight.astro';
 import { getChampions } from '../lib/champions';
 import { getRegistrationData, formatDate, formatFullDate, getDayFromName } from '../lib/registration';
-import { REGISTRATION_PAGE_URL, UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL, UPCOMING_REGULAR_SEASON_WEEKS, HAS_UPCOMING_SEASON_STARTED, hasEtDatetimePassed, NEXT_NEXT_SEASON_LABEL, ACTIVE_SEASON_LABEL } from '../lib/seasonConfig';
-import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart, Volleyball, Trophy } from '@lucide/astro';
+import { REGISTRATION_PAGE_URL, UPCOMING_SEASON_ID, UPCOMING_SEASON_LABEL, UPCOMING_REG_OPEN_DATETIME, UPCOMING_SEASON_START_LABEL, UPCOMING_REGULAR_SEASON_WEEKS, HAS_UPCOMING_SEASON_STARTED, hasEtDatetimePassed, NEXT_NEXT_SEASON_LABEL, ACTIVE_SEASON_LABEL, IS_OFFSEASON, springSeasonAt } from '../lib/seasonConfig';
+import { Beer, UtensilsCrossed, Umbrella, Music, Users, CalendarDays, Heart, Volleyball } from '@lucide/astro';
 import { GROUPME_MAIN_URL, GROUPME_ICON_PATH } from '../lib/community';
 import type { RegCard } from '../lib/registration';
 
@@ -72,7 +72,15 @@ const seasonDatesLine = UPCOMING_SEASON_START_LABEL
   : '';
 // Registration leads the page until the season's first game day.
 const registrationIsFocus = !HAS_UPCOMING_SEASON_STARTED;
-const heroDatesText = HAS_UPCOMING_SEASON_STARTED
+// Off-season: the last season is over and the next one is not set up yet. The
+// hero points at spring (dates from the time change), the champions move up,
+// and the empty schedule sections step aside. See IS_OFFSEASON.
+const spring = springSeasonAt();
+const offseasonPromo = `${UPCOMING_SEASON_LABEL} is a wrap. Leagues return the week of ${spring.startLabel}.`;
+const offseasonSignupNote = `Sign-ups open in ${spring.signupsMonth}`;
+const heroDatesText = IS_OFFSEASON
+  ? `${offseasonSignupNote} · Join the GroupMe to hear first.`
+  : HAS_UPCOMING_SEASON_STARTED
   ? ''
   : (seasonLabel || showComingSoon ? seasonDatesLine : '');
 ---
@@ -102,6 +110,9 @@ const heroDatesText = HAS_UPCOMING_SEASON_STARTED
         Lake Norman's Premier Sand Volleyball League
       </p>
       <h1 class="font-display font-black text-4xl sm:text-5xl md:text-7xl mb-6 leading-tight" data-home-hero-heading>
+        {IS_OFFSEASON ? (
+          <Fragment><span class="text-coral-400">{spring.label.toUpperCase()}</span><br />Is Coming!</Fragment>
+        ) : (<Fragment>
         {heroRegStatus === 'open' && heroSeasonLabel && (
           <Fragment>Sign Up for<br /><span class="text-coral-400">{heroSeasonLabel.toUpperCase()}!</span></Fragment>
         )}
@@ -117,12 +128,13 @@ const heroDatesText = HAS_UPCOMING_SEASON_STARTED
         {!heroSeasonLabel && (
           <Fragment><span class="text-coral-400">Lake Norman</span><br />Sand Volleyball</Fragment>
         )}
+        </Fragment>)}
       </h1>
       <p class="text-white/80 text-lg md:text-xl max-w-2xl mx-auto mb-4">
         Get ready to dig, dive, and dominate with Matt's Volleyball - home to the hottest coed sand volleyball leagues in the Lake Norman area!
       </p>
       <p class="text-coral-400 text-xl md:text-2xl font-bold max-w-2xl mx-auto mb-8" data-home-hero-promo>
-        {heroPromoText}
+        {IS_OFFSEASON ? offseasonPromo : heroPromoText}
       </p>
 
       <p class:list={['text-white/60 text-sm md:text-base mb-6', !heroDatesText && 'hidden']} data-home-hero-season-dates>
@@ -130,7 +142,16 @@ const heroDatesText = HAS_UPCOMING_SEASON_STARTED
       </p>
 
       <div class="flex flex-col sm:flex-row gap-4 justify-center" data-home-hero-cta-group>
-        {hasOpenRegistration ? (
+        {IS_OFFSEASON ? (
+          <Fragment>
+            <a href="/champions/" class="btn-primary text-xl py-4 px-10" data-cta-type="view-champions">
+              Meet the Champions
+            </a>
+            <a href={GROUPME_MAIN_URL} target="_blank" rel="noopener noreferrer" class="btn-secondary text-xl py-4 px-10" data-cta-type="join-groupme">
+              Join the GroupMe
+            </a>
+          </Fragment>
+        ) : hasOpenRegistration ? (
           <Fragment>
             <a
               href={heroRegisterUrl}
@@ -199,13 +220,17 @@ const heroDatesText = HAS_UPCOMING_SEASON_STARTED
     </div>
   </section>
 
+  {IS_OFFSEASON && (
+    <HomeChampions champions={champions} subheading={`Congrats to our latest champions. See you in ${spring.label.split(' ')[0].toLowerCase()}.`} />
+  )}
+
   <!-- Welcome -->
   <section class="pt-4 pb-12 md:pt-6 md:pb-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="max-w-3xl mx-auto text-center">
         <h2 class="section-heading">Welcome to Matt's Volleyball</h2>
         <p class="text-ocean-600/80 text-lg leading-relaxed mb-6">
-          We play year-round at Saeed's Bar &amp; Grill in Cornelius and Blythe Landing in Huntersville, with leagues and pickup running throughout the week.
+          We play at Saeed's Bar &amp; Grill in Cornelius and Blythe Landing in Huntersville, with leagues running spring through fall on weeknights.
         </p>
         <p class="text-ocean-600/80 text-lg leading-relaxed">
           Our leagues are social first, volleyball second. All skill levels welcome - whether you're a seasoned player or picking up a volleyball for the first time.
@@ -215,8 +240,8 @@ const heroDatesText = HAS_UPCOMING_SEASON_STARTED
   </section>
 
   <!-- Keep the schedule above league discovery in every season state. -->
-  <UpcomingGames />
-  <FindYourNight regByDay={regByDay} registrationKnown={registrationKnown} />
+  {!IS_OFFSEASON && <UpcomingGames />}
+  <FindYourNight regByDay={regByDay} registrationKnown={registrationKnown} offseasonNote={IS_OFFSEASON ? offseasonSignupNote : undefined} />
 
   <!-- Why Play Here -->
   <section class="py-12 md:py-16 bg-white">
@@ -287,95 +312,7 @@ const heroDatesText = HAS_UPCOMING_SEASON_STARTED
     </div>
   </section>
 
-  <!-- Champions: the photo slider on tablet and up; phones get a single link
-       (the slider was ~700px of scrolling on a phone) -->
-  <section class="md:hidden pb-8 bg-white">
-    <div class="px-4">
-      <a href="/champions/" class="card flex items-center gap-4 p-4">
-        <Trophy class="w-8 h-8 text-coral-500 shrink-0" aria-hidden="true" />
-        <span class="flex-1 min-w-0">
-          <span class="block font-display font-extrabold text-ocean-700">Hall of Champions</span>
-          <span class="block text-sm text-ocean-600/70">Every team that's earned the title</span>
-        </span>
-        <svg class="w-5 h-5 text-ocean-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg>
-      </a>
-    </div>
-  </section>
-  <section class="hidden md:block py-12 md:py-16 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="section-heading text-center mb-4">Hall of Champions</h2>
-      <p class="section-subheading text-center mb-8">Celebrating our league winners.</p>
-
-      <!-- Horizontal slider -->
-      <div class="relative group/slider">
-        <div
-          id="champions-slider"
-          class="flex gap-6 overflow-x-auto motion-safe:scroll-smooth snap-x snap-mandatory pb-4 -mx-4 px-4"
-          style="scrollbar-width: thin; scrollbar-color: #C2BFB8 transparent;"
-        >
-          {champions.map((champ) => (
-            <div class="snap-start shrink-0 w-72 sm:w-80">
-              <ChampionCard
-                teamName={champ.teamName}
-                season={champ.season}
-                year={champ.year}
-                division={champ.division}
-                day={champ.day}
-                photo={champ.photo}
-                sizes="320px"
-              />
-            </div>
-          ))}
-        </div>
-
-        <!-- Scroll buttons -->
-        <button
-          id="champ-prev"
-          class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 bg-white shadow-lg rounded-full items-center justify-center text-ocean-600 hover:bg-sand-100 transition-colors opacity-0 group-hover/slider:opacity-100 focus-visible:opacity-100"
-          aria-label="Scroll left"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <button
-          id="champ-next"
-          class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 bg-white shadow-lg rounded-full items-center justify-center text-ocean-600 hover:bg-sand-100 transition-colors opacity-0 group-hover/slider:opacity-100 focus-visible:opacity-100"
-          aria-label="Scroll right"
-        >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
-
-      <div class="text-center mt-8">
-        <a href="/champions/" class="inline-flex items-center gap-2 text-ocean-600 hover:text-ocean-700 font-semibold transition-colors">
-          View All Champions
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </a>
-      </div>
-    </div>
-  </section>
-
-  <script>
-    const slider = document.getElementById('champions-slider');
-    const prev = document.getElementById('champ-prev');
-    const next = document.getElementById('champ-next');
-    const scrollAmount = 340;
-    const behavior: ScrollBehavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
-
-    prev?.addEventListener('click', () => {
-      slider?.scrollBy({ left: -scrollAmount, behavior });
-    });
-    next?.addEventListener('click', () => {
-      slider?.scrollBy({ left: scrollAmount, behavior });
-    });
-  </script>
+  {!IS_OFFSEASON && <HomeChampions champions={champions} />}
 
   <script>
     (async () => {
@@ -662,18 +599,31 @@ const heroDatesText = HAS_UPCOMING_SEASON_STARTED
       <h2 class="font-display font-extrabold text-3xl md:text-4xl text-ocean-600 mb-4">
         Don't miss out!
       </h2>
-      <p class="text-ocean-600/80 text-lg mb-8">
-        Sign up now and serve up some excitement with us.
-      </p>
-      <a
-        href={REGISTRATION_PAGE_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        class="btn-primary text-xl py-4 px-12"
-        data-cta-type="register-now"
-      >
-        Register Now
-      </a>
+      {IS_OFFSEASON ? (
+        <Fragment>
+          <p class="text-ocean-600/80 text-lg mb-8">
+            {spring.label} starts the week of {spring.startLabel}. {offseasonSignupNote}, and the GroupMe hears about it first.
+          </p>
+          <a href={GROUPME_MAIN_URL} target="_blank" rel="noopener noreferrer" class="btn-primary text-xl py-4 px-12" data-cta-type="join-groupme">
+            Join the GroupMe
+          </a>
+        </Fragment>
+      ) : (
+        <Fragment>
+          <p class="text-ocean-600/80 text-lg mb-8">
+            Sign up now and serve up some excitement with us.
+          </p>
+          <a
+            href={REGISTRATION_PAGE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-primary text-xl py-4 px-12"
+            data-cta-type="register-now"
+          >
+            Register Now
+          </a>
+        </Fragment>
+      )}
     </div>
   </section>
 

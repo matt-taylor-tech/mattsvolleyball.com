@@ -60,7 +60,13 @@ const CURRENT_SEASON = {
 const NEXT_SEASON = {
   id: '60566',
   label: 'Fall 2026',
-  playoffDates: [] as string[], // Fill in when the Fall playoff nights are set
+  // Competitive played its playoffs Nov 10/12, Recreational Nov 17/19. They were
+  // entered in TeamLinkt as regular games, so these dates are what label them.
+  playoffDates: ['2026-11-10', '2026-11-12', '2026-11-17', '2026-11-19'],
+  // Date of the season's final game (any division), as YYYY-MM-DD. From the
+  // day after, the home page switches to its off-season look (IS_OFFSEASON).
+  // Leave '' for a new season until its schedule is final.
+  lastGameDate: '2026-11-19',
 };
 
 const NEXT_NEXT_SEASON = {
@@ -126,6 +132,42 @@ export const UPCOMING_REG_OPEN_DATETIME = '2026-09-03 00:00:00';
 // by promo copy on the home and leagues pages so the week count lives in one
 // place. Fall 2026: 6 game weeks, no bye, then a separate playoff week.
 export const UPCOMING_REGULAR_SEASON_WEEKS = 6;
+
+// ── Off-season ────────────────────────────────────────────────────────────────
+// True once the season that is underway has played its last game. It turns
+// itself off when the next season is set up above: the new NEXT_SEASON has not
+// started yet (or has no lastGameDate), so the normal registration hero returns.
+export const IS_OFFSEASON =
+  HAS_UPCOMING_SEASON_STARTED
+  && NEXT_SEASON.lastGameDate !== ''
+  && etNowString(BUILD_NOW).slice(0, 10) > NEXT_SEASON.lastGameDate;
+
+/**
+ * The spring season, worked out from the calendar: leagues start the week the
+ * clocks change (US daylight saving starts the second Sunday of March), and
+ * sign-ups open 4-5 weeks before that. Picks this year's spring until its first
+ * week has passed, then next year's.
+ */
+export function springSeasonAt(now: Date = BUILD_NOW) {
+  const today = etNowString(now).slice(0, 10);
+  const firstWeekOf = (year: number) => {
+    const march1 = new Date(Date.UTC(year, 2, 1));
+    const secondSunday = 1 + ((7 - march1.getUTCDay()) % 7) + 7;
+    return new Date(Date.UTC(year, 2, secondSunday + 1)); // the Monday after
+  };
+  const year = Number(today.slice(0, 4));
+  let start = firstWeekOf(year);
+  if (start.toISOString().slice(0, 10) <= today) start = firstWeekOf(year + 1);
+  const monthDay = (d: Date) => d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', timeZone: 'UTC' });
+  const signupsOpen = new Date(start.getTime() - 35 * 86_400_000);
+  return {
+    label: `Spring ${start.getUTCFullYear()}`,
+    /** e.g. "March 15" */
+    startLabel: monthDay(start),
+    /** e.g. "February", the month sign-ups open in (always early-mid February) */
+    signupsMonth: signupsOpen.toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' }),
+  };
+}
 
 // ── Future Seasons (for promotional display when current closes) ──────────────
 export const NEXT_NEXT_SEASON_LABEL = NEXT_NEXT_SEASON.label;

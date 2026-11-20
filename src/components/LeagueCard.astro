@@ -15,9 +15,11 @@ interface Props {
   registrationKnown?: boolean;
   link?: { href: string; label: string };
   regEntries?: RegCard[];
+  /** Off-season: replaces the sign-up buttons, e.g. "Sign-ups open in February". */
+  offseasonNote?: string;
 }
 
-const { day, format, description, details, highlight, price, registrationUrl, registrationKnown = false, link, regEntries } = Astro.props;
+const { day, format, description, details, highlight, price, registrationUrl, registrationKnown = false, link, regEntries, offseasonNote } = Astro.props;
 const dayKey = day.slice(0, 3);
 // A league card always speaks for one night, so its fallback sign-up link is
 // that night's registration page, not the general one.
@@ -100,7 +102,11 @@ const gradientClass = dayColors[day] || 'from-ocean-500 to-ocean-600';
 
     <!-- Registration CTA -->
     <div class="reg-cta space-y-3">
-      {hasRegEntries ? (
+      {offseasonNote ? (
+        <span class="block text-center w-full py-2 rounded-lg bg-sand-200 text-ocean-600/70 font-semibold text-sm">
+          {offseasonNote}
+        </span>
+      ) : hasRegEntries ? (
         regEntries.map((entry) => {
           const label = entry.divisionLabel || entry.name;
           const matchedDiv = divisionFor(entry);
@@ -166,7 +172,7 @@ const gradientClass = dayColors[day] || 'from-ocean-500 to-ocean-600';
           Sign Up for {day} Now
         </a>
       )}
-      {hasNightCap && anyRegOpen && (
+      {!offseasonNote && hasNightCap && anyRegOpen && (
         <SpotsCounter day={dayKey} class="text-xs text-ocean-700 opacity-60 italic text-center min-h-[1rem]" />
       )}
     </div>

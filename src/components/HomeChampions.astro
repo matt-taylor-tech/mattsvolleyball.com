@@ -1,0 +1,105 @@
+---
+// Hall of Champions for the home page: a photo slider on tablet and up, a
+// single link on phones. Its own component so the page can lift it to the top
+// in the off-season, when the latest champions are the freshest news.
+import ChampionCard from './ChampionCard.astro';
+import { Trophy } from '@lucide/astro';
+import type { Champion } from '../lib/champions';
+
+interface Props {
+  champions: Champion[];
+  subheading?: string;
+}
+
+const { champions, subheading = 'Celebrating our league winners.' } = Astro.props;
+---
+
+  <!-- Champions: the photo slider on tablet and up; phones get a single link
+       (the slider was ~700px of scrolling on a phone) -->
+  <section class="md:hidden pb-8 bg-white">
+    <div class="px-4">
+      <a href="/champions/" class="card flex items-center gap-4 p-4">
+        <Trophy class="w-8 h-8 text-coral-500 shrink-0" aria-hidden="true" />
+        <span class="flex-1 min-w-0">
+          <span class="block font-display font-extrabold text-ocean-700">Hall of Champions</span>
+          <span class="block text-sm text-ocean-600/70">Every team that's earned the title</span>
+        </span>
+        <svg class="w-5 h-5 text-ocean-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
+    </div>
+  </section>
+  <section class="hidden md:block py-12 md:py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="section-heading text-center mb-4">Hall of Champions</h2>
+      <p class="section-subheading text-center mb-8">{subheading}</p>
+
+      <!-- Horizontal slider -->
+      <div class="relative group/slider">
+        <div
+          id="champions-slider"
+          class="flex gap-6 overflow-x-auto motion-safe:scroll-smooth snap-x snap-mandatory pb-4 -mx-4 px-4"
+          style="scrollbar-width: thin; scrollbar-color: #C2BFB8 transparent;"
+        >
+          {champions.map((champ) => (
+            <div class="snap-start shrink-0 w-72 sm:w-80">
+              <ChampionCard
+                teamName={champ.teamName}
+                season={champ.season}
+                year={champ.year}
+                division={champ.division}
+                day={champ.day}
+                photo={champ.photo}
+                sizes="320px"
+              />
+            </div>
+          ))}
+        </div>
+
+        <!-- Scroll buttons -->
+        <button
+          id="champ-prev"
+          class="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-10 h-10 bg-white shadow-lg rounded-full items-center justify-center text-ocean-600 hover:bg-sand-100 transition-colors opacity-0 group-hover/slider:opacity-100 focus-visible:opacity-100"
+          aria-label="Scroll left"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <button
+          id="champ-next"
+          class="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-10 h-10 bg-white shadow-lg rounded-full items-center justify-center text-ocean-600 hover:bg-sand-100 transition-colors opacity-0 group-hover/slider:opacity-100 focus-visible:opacity-100"
+          aria-label="Scroll right"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="text-center mt-8">
+        <a href="/champions/" class="inline-flex items-center gap-2 text-ocean-600 hover:text-ocean-700 font-semibold transition-colors">
+          View All Champions
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const slider = document.getElementById('champions-slider');
+    const prev = document.getElementById('champ-prev');
+    const next = document.getElementById('champ-next');
+    const scrollAmount = 340;
+    const behavior: ScrollBehavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+
+    prev?.addEventListener('click', () => {
+      slider?.scrollBy({ left: -scrollAmount, behavior });
+    });
+    next?.addEventListener('click', () => {
+      slider?.scrollBy({ left: scrollAmount, behavior });
+    });
+  </script>

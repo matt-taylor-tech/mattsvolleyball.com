@@ -8,9 +8,11 @@ import type { RegCard } from '../lib/registration';
 interface Props {
   regByDay: Record<string, RegCard[]>;
   registrationKnown: boolean;
+  /** Off-season: shown on every card in place of the sign-up buttons. */
+  offseasonNote?: string;
 }
 
-const { regByDay, registrationKnown } = Astro.props;
+const { regByDay, registrationKnown, offseasonNote } = Astro.props;
 ---
 
   <section class="py-12 md:py-16">
@@ -24,6 +26,7 @@ const { regByDay, registrationKnown } = Astro.props;
           description="Requires 1 female minimum per team. Welcomes all skill levels, typically intermediate to competitive."
           highlight="Two divisions: recreational and competitive with separate playoff nights."
           registrationKnown={registrationKnown}
+          offseasonNote={offseasonNote}
           regEntries={regByDay['tuesday']}
           details={[
             '6 regular season games over 6 weeks plus a division-specific playoff night',
@@ -41,6 +44,7 @@ const { regByDay, registrationKnown } = Astro.props;
           link={{ href: '/leagues/shuffle/', label: 'Learn how shuffle works →' }}
           highlight='Level Up format: winning teams advance and receive handicaps, keeping every match competitive.'
           registrationKnown={registrationKnown}
+          offseasonNote={offseasonNote}
           regEntries={regByDay['wednesday']}
           details={[
             'Individual sign-ups. Teams re-drafted each week',
@@ -57,6 +61,7 @@ const { regByDay, registrationKnown } = Astro.props;
           description="Requires 1 female minimum per team. Welcomes all skill levels, typically intermediate to competitive."
           highlight="Two divisions: recreational and competitive with separate playoff nights."
           registrationKnown={registrationKnown}
+          offseasonNote={offseasonNote}
           regEntries={regByDay['thursday']}
           details={[
             '6 regular season games over 6 weeks plus a division-specific playoff night',
