@@ -3,42 +3,34 @@ import LoadingSkeleton from '../../components/LoadingSkeleton.astro';
 import Layout from '../../layouts/Layout.astro';
 import PageHero from '../../components/PageHero.astro';
 import { Trophy } from '@lucide/astro';
-import { DIVISIONS as ALL_DIVISIONS, DAY_FULL_LABEL, ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
-const playoffDays = [...new Set(ALL_DIVISIONS.filter(d => d.hasPlayoffs).map(d => d.day))];
+import { ACTIVE_SEASON_LABEL } from '../../lib/seasonConfig';
 ---
 
 <Layout title="Playoffs | Matt's Volleyball" description="Playoff brackets for Matt's Volleyball leagues - single elimination tournaments by division with separate playoff nights for recreational and competitive divisions.">
   <!-- Hero -->
   <PageHero class="print:hidden" title="Playoffs" subtitle="Single elimination brackets by division, with separate playoff nights for recreational and competitive leagues." />
 
-  <section class="py-12 md:py-20 print:py-4">
+  <section class="py-12 md:py-20 print:py-0">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
       <div class="mb-6 rounded-xl border border-sand-300 bg-sand-100/70 px-4 py-3 text-sm text-ocean-700 print:hidden">
-        Playoff brackets are generated from <span class="font-semibold">{ACTIVE_SEASON_LABEL}</span> standings and schedule data.
+        {ACTIVE_SEASON_LABEL} playoffs. Brackets update as results come in on playoff night.
       </div>
 
-      <!-- Day Tabs -->
-      <div class="flex flex-wrap gap-2 mb-8 print:hidden" id="day-tabs">
-        {playoffDays.map((day, i) => (
-          <button data-day={day} class={`tab-btn${i === 0 ? ' active' : ''}`}>{DAY_FULL_LABEL[day] ?? day}</button>
-        ))}
-      </div>
+      <!-- Night / day tabs, filled in by the script -->
+      <div class="flex flex-wrap gap-2 mb-6 print:hidden" id="group-tabs"></div>
 
-      <!-- Print Button -->
-      <div class="flex justify-end mb-4 print:hidden">
+      <div class="hidden md:flex justify-end mb-4 print:hidden" id="print-row">
         <button id="print-btn" class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-ocean-600 bg-white border border-sand-300 rounded-full hover:bg-sand-50 transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
           </svg>
           Print Brackets
         </button>
       </div>
 
-      <!-- Loading State -->
       <LoadingSkeleton id="playoffs-loading" label="Loading brackets" rows={4} />
 
-      <!-- Not Ready State -->
       <div id="playoffs-not-ready" class="text-center py-12 hidden">
         <Trophy class="w-12 h-12 text-sand-400 mx-auto mb-3" />
         <p class="text-ocean-700 font-display font-bold text-xl mb-2">Regular Season Still in Progress</p>
@@ -46,674 +38,393 @@ const playoffDays = [...new Set(ALL_DIVISIONS.filter(d => d.hasPlayoffs).map(d =
         <a href="/leagues/standings/" class="inline-block mt-4 text-sm font-medium text-ocean-600 hover:text-ocean-800 underline underline-offset-2">View Current Standings →</a>
       </div>
 
-      <!-- Brackets Container -->
-      <div id="brackets-container" class="hidden"></div>
+      <div id="brackets-container" class="hidden space-y-8"></div>
 
     </div>
   </section>
 </Layout>
 
 <style is:global>
-  /* ── Bracketry match card styling ── */
-  .match-body {
-    background: linear-gradient(180deg, #FFFFFF 0%, #FCFCFA 100%);
-    border: 1px solid #D8D4CC;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(35, 31, 32, 0.08);
-    padding: 7px;
+  /* ── Bracket tree (desktop and print) ──
+     Every round column is split into equal-height slots, one per match, so a
+     match always sits centered between the two matches that feed it. Lines are
+     drawn from the slots: a stub out of each match, a vertical joining each
+     pair, and a stub into the next round. */
+  .bk-tree {
+    --bk-gap: 2.5rem;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(13rem, 1fr);
+    column-gap: var(--bk-gap);
   }
-
-  .sides {
+  .bk-col-body {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    position: relative;
+    min-height: calc(var(--bk-rows) * 6.75rem);
   }
-
-  .sides::before {
+  .bk-slot {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0.4rem 0;
+  }
+  .bk-col:not(:last-child) .bk-slot::after {
     content: '';
     position: absolute;
-    left: 5%;
-    right: 5%;
-    top: 50%;
-    height: 1px;
-    background: #E3DED6;
-    pointer-events: none;
+    right: calc(var(--bk-gap) / -2);
+    width: calc(var(--bk-gap) / 2);
+    height: 50%;
+    border-color: theme('colors.sand.300');
+    border-style: solid;
+    border-width: 0;
+    border-right-width: 2px;
   }
-
-  .sides::after {
-    content: 'vs';
+  .bk-col:not(:last-child) .bk-slot:nth-child(odd)::after { top: 50%; border-top-width: 2px; border-top-right-radius: 6px; }
+  .bk-col:not(:last-child) .bk-slot:nth-child(even)::after { bottom: 50%; border-bottom-width: 2px; border-bottom-right-radius: 6px; }
+  .bk-col:not(:first-child) .bk-slot::before {
+    content: '';
     position: absolute;
-    left: 50%;
+    left: calc(var(--bk-gap) / -2);
+    width: calc(var(--bk-gap) / 2);
     top: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 0.52rem;
-    font-weight: 800;
-    font-family: 'Montserrat', sans-serif;
-    color: #B0A89E;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    background: #FCFCFA;
-    padding: 1px 7px;
-    line-height: 1.5;
-    border-radius: 999px;
-    pointer-events: none;
-    z-index: 1;
+    border-top: 2px solid theme('colors.sand.300');
   }
 
-  .side-wrapper {
-    padding: 9px 10px 9px 0;
-    border: 1px solid #E3DED6;
-    border-radius: 8px;
-    background: #FFFFFF;
-    display: flex;
-    align-items: center;
-    transition: background 0.15s;
-  }
-
-  .side-wrapper .entry-status {
-    width: 26px;
-    min-width: 26px;
-    height: 18px;
-    line-height: 18px;
-    text-align: center;
-    font-weight: 700;
-    font-size: 0.66rem;
-    color: #7A746D;
-    background: #F2F0EC;
-    border-radius: 999px;
-    padding: 0;
-    margin: 0 4px;
-    font-family: 'Montserrat', sans-serif;
-  }
-
-  .side-wrapper .player-title {
-    font-weight: 600;
-    font-size: 0.82rem;
-    color: #363133;
-    white-space: normal !important;
-    overflow: visible !important;
-    text-overflow: clip !important;
-    line-height: 1.2;
-    word-break: break-word;
-    font-family: 'Inter', sans-serif;
-  }
-
-  .team-title-wrap {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: baseline;
-    gap: 8px;
-    width: 100%;
-  }
-
-  .team-name-full {
-    white-space: normal;
-    overflow: visible;
-    text-overflow: clip;
-    word-break: break-word;
-    line-height: 1.2;
-    min-width: 0;
-    flex: 1;
-  }
-
-  .team-record-inline {
-    font-size: 0.68rem;
-    color: #A5A29B;
-    white-space: nowrap;
-    flex-shrink: 0;
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* Winning side gets coral left bar + slightly warm bg */
-  .side-wrapper.winner {
-    background: #FFF8F7;
-    border-color: #E6B0A7;
-    box-shadow: inset 3px 0 0 #BB4430;
-  }
-
-  .side-wrapper.winner .entry-status {
-    color: #BB4430;
-  }
-
-  .side-wrapper.winner .player-title {
-    color: #231F20;
-    font-weight: 700;
-  }
-
-  /* TBD / empty sides */
-  .side-wrapper:not(.winner):not(:has(.player-title:not(:empty))) {
-    background: #F7F6F3;
-  }
-
-  /* Round title bar */
-  .round-title {
-    font-family: 'Montserrat', sans-serif !important;
-    font-weight: 700 !important;
-    font-size: 0.65rem !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.08em !important;
-    color: #87847D !important;
-  }
-
-  /* Connection lines */
-  .match-lines-area svg line,
-  .match-lines-area svg path {
-    stroke: #DAD8D2 !important;
-  }
-
-  .match-status {
-    display: inline-block;
-    margin: 0 0 6px 2px;
-    padding: 2px 8px;
-    border: 1px solid #E8E6E1;
-    border-radius: 999px;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.62rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: #87847D;
-    background: #F7F6F3;
-  }
-
-  .print-division-meta {
-    display: none;
-  }
-
-  /* ── Screen-only polish ── */
-  @media screen {
-    #brackets-container {
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-    }
-
-    .bracket-division {
-      border: 1px solid #DFD9D0;
-      border-radius: 8px;
-      background:
-        radial-gradient(1000px 300px at 5% -20%, rgba(187, 68, 48, 0.08) 0%, rgba(187, 68, 48, 0) 45%),
-        radial-gradient(900px 260px at 95% -25%, rgba(54, 49, 51, 0.08) 0%, rgba(54, 49, 51, 0) 42%),
-        #FFFEFC;
-      box-shadow: 0 10px 26px rgba(35, 31, 32, 0.08);
-      padding: 1rem 1rem 1.15rem;
-    }
-
-    .bracket-division > .flex {
-      border-bottom: 1px solid #ECE6DD;
-      margin-bottom: 0.85rem;
-      padding-bottom: 0.6rem;
-    }
-
-    .round-title {
-      color: #6B7D93 !important;
-      font-size: 0.72rem !important;
-      letter-spacing: 0.11em !important;
-    }
-
-    .match-body {
-      border-color: #D7D0C6;
-      box-shadow: 0 4px 14px rgba(35, 31, 32, 0.1);
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
-    }
-
-    .match-body:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 7px 18px rgba(35, 31, 32, 0.14);
-    }
-
-    .sides::after {
-      background: #FDFCFA;
-    }
-
-    .side-wrapper {
-      border-color: #DED8CF;
-      background: linear-gradient(180deg, #FFFFFF 0%, #FBFAF8 100%);
-    }
-
-    .side-wrapper .player-title {
-      font-size: 0.84rem;
-      color: #3A3536;
-    }
-
-    .team-record-inline {
-      color: #8B857E;
-      font-weight: 600;
-    }
-
-    .match-status {
-      border-color: #D8CFC5;
-      background: #FFF8F2;
-      color: #8A6A4F;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-    }
-
-    .match-lines-area svg line,
-    .match-lines-area svg path {
-      stroke: #D4CDC4 !important;
-      stroke-width: 2.4px !important;
-    }
-
-    @media (prefers-reduced-motion: no-preference) {
-      .bracket-division {
-        animation: bracket-enter 360ms ease both;
-      }
-    }
-
-    @keyframes bracket-enter {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-  }
-
-  /* ── Print styles ── */
   @media print {
-    @page {
-      size: landscape;
-      margin: 0.5in;
-    }
-
+    @page { size: landscape; margin: 0.4in; }
     header, footer, nav { display: none !important; }
     body { background: white !important; }
-    section { padding-top: 0 !important; }
-    .bracket-division {
-      break-inside: avoid;
-      page-break-inside: avoid;
-      margin-bottom: 1rem;
-      break-before: page;
-      page-break-before: always;
-    }
-
-    .bracket-division:first-of-type {
-      break-before: auto;
-      page-break-before: auto;
-    }
-
-    #day-tabs,
-    #print-btn {
-      display: none !important;
-    }
-
-    #playoff-format-note {
-      display: none !important;
-    }
-
-    .print-division-meta {
-      display: block;
-      margin: 0 0 0.35in;
-      border-bottom: 1.5px solid #444;
-      padding-bottom: 0.12in;
-    }
-
-    .print-division-day {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 14pt;
-      font-weight: 700;
-      line-height: 1.1;
-      color: #111;
-      margin: 0 0 2px;
-    }
-
-    .print-division-subline {
-      font-family: 'Inter', sans-serif;
-      font-size: 9pt;
-      color: #222;
-      margin: 0;
-    }
-
-    .overflow-x-auto {
-      overflow: visible !important;
-    }
-
-    .match-body {
-      background: #fff !important;
-      border: 1.25px solid #5B5B5B !important;
-      border-radius: 3px !important;
-      box-shadow: none !important;
-      overflow: visible !important;
-    }
-
-    .sides {
-      overflow: visible !important;
-    }
-
-    .sides::before,
-    .sides::after {
-      display: none !important;
-    }
-
-    .side-wrapper {
-      padding: 6px 7px 6px 0 !important;
-      border: 1px solid #7A7A7A !important;
-      border-radius: 2px !important;
-      align-items: flex-start;
-    }
-
-    .side-wrapper .entry-status {
-      background: transparent !important;
-      color: #111 !important;
-      border-radius: 0 !important;
-      width: 18px;
-      min-width: 18px;
-      margin: 0 6px 0 2px;
-      height: auto;
-      line-height: 1.1;
-      font-size: 8.5pt;
-    }
-
-    .side-wrapper .player-title,
-    .team-name-full {
-      white-space: normal !important;
-      overflow: visible !important;
-      text-overflow: clip !important;
-      word-break: break-word !important;
-    }
-
-    .team-title-wrap {
-      display: grid !important;
-      grid-template-columns: minmax(0, 1fr) !important;
-      gap: 2px !important;
-    }
-
-    .team-record-inline {
-      display: block;
-      margin-top: 0;
-      white-space: normal;
-      font-size: 7.5pt;
-      color: #444;
-      padding-left: 0;
-    }
-
-    .team-name-full {
-      font-size: 9.2pt;
-      line-height: 1.15;
-    }
-
-    .match-status {
-      border: 1px solid #777 !important;
-      color: #222 !important;
-      background: #fff !important;
-      font-size: 7.5pt;
-      padding: 1px 6px;
-      margin-bottom: 4px;
-    }
+    .bk-division { break-inside: avoid; break-before: page; box-shadow: none !important; }
+    .bk-division:first-child { break-before: auto; }
+    .bk-tree { --bk-gap: 1.75rem; }
   }
 </style>
 
 <script>
-  import { createBracket } from 'bracketry';
   import {
-    DIVISIONS as ALL_SEASON_DIVISIONS,
-    STANDINGS_API_URL as STANDINGS_API,
-    EVENTS_API as SCHEDULE_API,
+    DIVISIONS as ALL_DIVISIONS,
+    STANDINGS_API_URL,
+    EVENTS_API,
     ACTIVE_SEASON_ID,
-    DAY_FULL_LABEL as DAY_LABELS,
+    DAY_FULL_LABEL,
     PLAYOFFS_ACTIVE,
+    etNowString,
   } from '../../lib/seasonConfig';
   import { escapeHtml } from '../../lib/html';
+  import { fromEngine, project, currentRoundIndex, type Bracket, type BracketMatch, type BracketSide } from '../../lib/bracket';
+  import { fetchPlayoffNights } from '../../lib/volleyballEngine';
 
-  const DEFAULT_PLAYOFF_TEAM_COUNT = 6;
-  const PLAYOFF_TIME_SLOTS = ['6:30 PM', '7:15 PM', '8:00 PM', '8:45 PM', '9:30 PM'];
+  // Brackets from VolleyballEngine stay up this long after their night, so the
+  // champion is still showing for a while after the season ends.
+  const RECENT_DAYS = 21;
+  const REFRESH_MS = 60_000;
 
-  // Only divisions with playoff brackets enabled
-  const DIVISIONS = ALL_SEASON_DIVISIONS.filter((d) => d.hasPlayoffs);
+  const DIVISIONS = ALL_DIVISIONS.filter((d) => d.hasPlayoffs);
 
-  interface StandingEntry {
-    Team: { name: string };
-    total_wins: number;
-    total_losses: number;
-    total_ties: number;
-    total_points: number;
-    games_played: number;
-    score_for: number;
-    score_against: number;
+  interface Group {
+    key: string;
+    label: string;
+    /** The night's date (YYYY-MM-DD), for brackets from VolleyballEngine. */
+    date: string | null;
+    brackets: Bracket[];
+    /** Regular-season records by team name, for projected brackets. */
+    records: Map<string, string>;
   }
 
-  interface BracketTeam {
-    seed: number;
-    name: string;
-    record: string;
+  let groups: Group[] = [];
+  let currentGroup = '';
+  // The round each bracket shows on a phone, once the visitor picks one.
+  const pickedRound = new Map<string, number>();
+
+  const todayKey = () => etNowString().slice(0, 10);
+
+  function daysAgoKey(days: number): string {
+    const [y, m, d] = todayKey().split('-').map(Number);
+    return new Date(Date.UTC(y, m - 1, d - days)).toISOString().slice(0, 10);
   }
 
-  let currentDay = DIVISIONS[0]?.day ?? 'Tue';
-  let allBrackets: Map<string, { config: DivisionConfig; teams: BracketTeam[] }> = new Map();
-  let seasonComplete = false;
-
-  async function fetchStandings(divisionId: string): Promise<StandingEntry[]> {
-    const body = new URLSearchParams();
-    body.set('group_ids[division]', divisionId);
-    body.set('season_id', ACTIVE_SEASON_ID);
-    const res = await fetch(STANDINGS_API, { method: 'POST', body });
-    const json = await res.json();
-    return json.standings || [];
+  function nightLabel(date: string): string {
+    return new Date(`${date}T12:00:00Z`).toLocaleDateString('en-US', {
+      weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC',
+    });
   }
 
-  async function hasUpcomingGames(divisionId: string): Promise<boolean> {
-    const body = new URLSearchParams();
-    body.set('start', '0');
-    body.set('length', '1');
-    body.set('status', 'upcoming');
-    body.set(`filters[${divisionId}]`, divisionId);
-    const res = await fetch(SCHEDULE_API, { method: 'POST', body });
-    const json = await res.json();
-    return (json.data || []).length > 0;
+  // ── Data ──────────────────────────────────────────────────────────────────
+
+  async function engineGroups(): Promise<Group[]> {
+    const nights = await fetchPlayoffNights(daysAgoKey(RECENT_DAYS));
+    return nights
+      .filter((night) => night.playoff_brackets.length > 0)
+      .map((night) => ({
+        key: night.id,
+        label: nightLabel(night.event_date),
+        date: night.event_date,
+        brackets: [...night.playoff_brackets]
+          .sort((a, b) => a.display_order - b.display_order)
+          .map((b) => fromEngine(b, b.playoff_matches)),
+        records: new Map(),
+      }));
   }
 
-  type Contestant = { entryStatus: string; players: { title: string; nationality: string }[] };
+  async function postForm(url: string, fields: Record<string, string>) {
+    const res = await fetch(url, { method: 'POST', body: new URLSearchParams(fields) });
+    if (!res.ok) throw new Error(`TeamLinkt returned ${res.status}`);
+    return res.json();
+  }
 
-  function makeContestants(teams: BracketTeam[]): Record<string, Contestant> {
-    const c: Record<string, Contestant> = {};
-    for (const team of teams) {
-      c[`t${team.seed}`] = {
-        entryStatus: String(team.seed),
-        players: [{ title: team.name, nationality: team.record }],
+  async function regularSeasonOver(): Promise<boolean> {
+    if (PLAYOFFS_ACTIVE) return true;
+    const upcoming = await Promise.all(DIVISIONS.map((d) =>
+      postForm(EVENTS_API, { start: '0', length: '1', status: 'upcoming', [`filters[${d.id}]`]: d.id })
+        .then((json) => (json.data || []).length > 0)));
+    return upcoming.every((has) => !has);
+  }
+
+  async function projectedGroups(): Promise<Group[]> {
+    const divisions = await Promise.all(DIVISIONS.map(async (config) => {
+      const json = await postForm(STANDINGS_API_URL, { 'group_ids[division]': config.id, season_id: ACTIVE_SEASON_ID });
+      return { config, standings: (json.standings || []) as any[] };
+    }));
+
+    const byDay = new Map<string, Group>();
+    for (const { config, standings } of divisions) {
+      if (standings.length < 2) continue;
+      // Every team makes the playoffs unless the division caps the field.
+      const field = standings.slice(0, config.playoffTeamCount ?? standings.length);
+      const group: Group = byDay.get(config.day) ?? {
+        key: config.day, label: DAY_FULL_LABEL[config.day] ?? config.day, date: null, brackets: [], records: new Map(),
       };
+      group.brackets.push(project(config.label, field.map((s, i) => ({ seed: i + 1, name: s.Team.name }))));
+      for (const s of field) {
+        group.records.set(s.Team.name, `${s.total_wins}-${s.total_losses}${s.total_ties > 0 ? `-${s.total_ties}` : ''}`);
+      }
+      byDay.set(config.day, group);
     }
-    return c;
+    return [...byDay.values()];
   }
 
-  // 4-team bracket: Semifinals → Finals
-  function buildBracketData4(teams: BracketTeam[]) {
-    const [t1, t2, t3, t4] = teams;
-    return {
-      rounds: [{ name: 'Semifinals' }, { name: 'Finals' }],
-      matches: [
-        { roundIndex: 0, order: 0, matchStatus: PLAYOFF_TIME_SLOTS[0], sides: [{ contestantId: `t${t1.seed}` }, { contestantId: `t${t4.seed}` }] },
-        { roundIndex: 0, order: 1, matchStatus: PLAYOFF_TIME_SLOTS[1], sides: [{ contestantId: `t${t2.seed}` }, { contestantId: `t${t3.seed}` }] },
-        { roundIndex: 1, order: 0, matchStatus: PLAYOFF_TIME_SLOTS[2] },
-      ],
-      contestants: makeContestants(teams),
-    };
+  /** Tonight's night, else the next one, else the most recent. Projected brackets open on the first night. */
+  function defaultGroup(): string {
+    const today = todayKey();
+    const dated = groups.filter((g) => g.date);
+    if (dated.length === 0) return groups[0]?.key ?? '';
+    return (dated.find((g) => g.date === today) ?? dated.find((g) => g.date! > today) ?? dated[dated.length - 1]).key;
   }
 
-  // 6-team bracket: First Round (with 2 byes) → Semifinals → Finals
-  function buildBracketData6(teams: BracketTeam[]) {
-    const [t1, t2, t3, t4, t5, t6] = teams;
-    return {
-      rounds: [{ name: 'First Round' }, { name: 'Semifinals' }, { name: 'Finals' }],
-      matches: [
-        { roundIndex: 0, order: 0, sides: [{ contestantId: `t${t1.seed}` }, { title: 'BYE' }] },
-        { roundIndex: 0, order: 1, matchStatus: PLAYOFF_TIME_SLOTS[0], sides: [{ contestantId: `t${t4.seed}` }, { contestantId: `t${t5.seed}` }] },
-        { roundIndex: 0, order: 2, matchStatus: PLAYOFF_TIME_SLOTS[1], sides: [{ contestantId: `t${t3.seed}` }, { contestantId: `t${t6.seed}` }] },
-        { roundIndex: 0, order: 3, sides: [{ contestantId: `t${t2.seed}` }, { title: 'BYE' }] },
-        { roundIndex: 1, order: 0, matchStatus: PLAYOFF_TIME_SLOTS[2], sides: [{ contestantId: `t${t1.seed}` }, {}] },
-        { roundIndex: 1, order: 1, matchStatus: PLAYOFF_TIME_SLOTS[3], sides: [{}, { contestantId: `t${t2.seed}` }] },
-        { roundIndex: 2, order: 0, matchStatus: PLAYOFF_TIME_SLOTS[4] },
-      ],
-      contestants: makeContestants(teams),
-    };
+  // ── Rendering ─────────────────────────────────────────────────────────────
+
+  function sideRow(side: BracketSide, match: BracketMatch, records: Map<string, string>, setIndex: 0 | 1): string {
+    const lost = match.state === 'final' && !side.won;
+    const record = side.name ? records.get(side.name) : undefined;
+    const sets = match.sets.map((s) =>
+      `<span class="w-5 text-center ${s[setIndex] > s[1 - setIndex] ? 'text-ocean-700 font-semibold' : 'text-ocean-400'}">${s[setIndex]}</span>`).join('');
+    return `
+      <div class="flex items-center gap-2 px-2.5 py-1.5 ${side.won ? 'bg-coral-500/5 shadow-[inset_3px_0_0] shadow-coral-500' : ''}">
+        <span class="w-5 shrink-0 text-center text-[11px] font-bold ${side.won ? 'text-coral-600' : 'text-ocean-400'}">${side.seed ?? ''}</span>
+        <span class="flex-1 min-w-0 text-sm leading-tight ${side.name
+          ? `${side.won ? 'font-bold text-ocean-800' : lost ? 'text-ocean-400' : 'font-semibold text-ocean-700'}`
+          : 'italic text-ocean-400'}">${escapeHtml(side.name ?? side.placeholder)}${record
+            ? ` <span class="text-[11px] font-normal text-ocean-400 tabular-nums">${escapeHtml(record)}</span>` : ''}</span>
+        ${sets ? `<span class="flex text-xs tabular-nums">${sets}</span>` : ''}
+        ${side.score !== null && match.state !== 'upcoming'
+          ? `<span class="w-5 text-right text-sm font-bold tabular-nums ${side.won ? 'text-coral-600' : 'text-ocean-500'}">${side.score}</span>` : ''}
+      </div>`;
   }
 
-  // 5-team bracket: #1 bye, QF: #4 vs #5 and #3 vs ... → SF → Finals
-  function buildBracketData5(teams: BracketTeam[]) {
-    const [t1, t2, t3, t4, t5] = teams;
-    return {
-      rounds: [{ name: 'First Round' }, { name: 'Semifinals' }, { name: 'Finals' }],
-      matches: [
-        { roundIndex: 0, order: 0, sides: [{ contestantId: `t${t1.seed}` }, { title: 'BYE' }] },
-        { roundIndex: 0, order: 1, matchStatus: PLAYOFF_TIME_SLOTS[0], sides: [{ contestantId: `t${t4.seed}` }, { contestantId: `t${t5.seed}` }] },
-        { roundIndex: 0, order: 2, matchStatus: PLAYOFF_TIME_SLOTS[1], sides: [{ contestantId: `t${t2.seed}` }, { contestantId: `t${t3.seed}` }] },
-        { roundIndex: 0, order: 3, sides: [{}] },
-        { roundIndex: 1, order: 0, matchStatus: PLAYOFF_TIME_SLOTS[2], sides: [{ contestantId: `t${t1.seed}` }, {}] },
-        { roundIndex: 1, order: 1, matchStatus: PLAYOFF_TIME_SLOTS[3], sides: [{}, {}] },
-        { roundIndex: 2, order: 0, matchStatus: PLAYOFF_TIME_SLOTS[4] },
-      ],
-      contestants: makeContestants(teams),
-    };
+  function matchCard(match: BracketMatch, records: Map<string, string>): string {
+    if (match.state === 'bye') {
+      return `
+        <div class="rounded-xl border border-dashed border-sand-300 bg-sand-50/60 px-2.5 py-2 flex items-center gap-2 text-sm">
+          <span class="w-5 text-center text-[11px] font-bold text-ocean-400">${match.a.seed ?? ''}</span>
+          <span class="flex-1 min-w-0 font-semibold text-ocean-600 leading-tight">${escapeHtml(match.a.name ?? '')}</span>
+          <span class="text-[11px] uppercase tracking-wider text-ocean-400">Bye</span>
+        </div>`;
+    }
+    const meta = [match.time, match.court].filter(Boolean).map((v) => escapeHtml(String(v))).join(' · ');
+    const badge = match.state === 'live'
+      ? '<span class="inline-flex items-center gap-1 rounded-full bg-coral-500 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white"><span class="w-1.5 h-1.5 rounded-full bg-white motion-safe:animate-pulse"></span>Live</span>'
+      : match.state === 'final'
+        ? '<span class="rounded-full bg-sand-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-ocean-500">Final</span>'
+        : '';
+    return `
+      <div class="rounded-xl bg-white shadow-sm border ${match.state === 'live' ? 'border-coral-400 ring-1 ring-coral-400' : 'border-sand-200'} overflow-hidden">
+        ${meta || badge ? `<div class="flex items-center justify-between gap-2 px-2.5 pt-1.5 text-[11px] font-medium text-ocean-500"><span>${meta}</span>${badge}</div>` : ''}
+        <div class="divide-y divide-sand-100 py-0.5">
+          ${sideRow(match.a, match, records, 0)}
+          ${sideRow(match.b, match, records, 1)}
+        </div>
+      </div>`;
   }
 
-  function buildBracketData(teams: BracketTeam[]) {
-    if (teams.length <= 4) return buildBracketData4(teams);
-    if (teams.length === 5) return buildBracketData5(teams);
-    return buildBracketData6(teams);
+  function championBanner(bracket: Bracket): string {
+    if (!bracket.champion?.name) return '';
+    return `
+      <div class="mb-4 flex items-center gap-3 rounded-xl border border-coral-300 bg-white px-4 py-3">
+        <svg class="w-7 h-7 shrink-0 text-coral-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/>
+        </svg>
+        <div>
+          <p class="text-[11px] font-bold uppercase tracking-wider text-coral-600">Champion</p>
+          <p class="font-display font-bold text-lg text-ocean-800 leading-tight">${escapeHtml(bracket.champion.name)}</p>
+        </div>
+      </div>`;
   }
 
-  function renderPage() {
+  /** Phone view: one round at a time, picked with tabs. */
+  function roundView(bracket: Bracket, id: string, records: Map<string, string>): string {
+    const open = pickedRound.get(id) ?? currentRoundIndex(bracket);
+    const tabs = bracket.rounds.map((r, i) =>
+      `<button type="button" class="tab-btn shrink-0${i === open ? ' active' : ''}" data-bracket="${id}" data-round="${i}">${escapeHtml(r.name)}</button>`).join('');
+    const panels = bracket.rounds.map((r, i) => {
+      const games = r.matches.filter((m) => m.state !== 'bye');
+      const byes = r.matches.filter((m) => m.state === 'bye' && m.a.name);
+      const thirdPlace = i === bracket.rounds.length - 1 && bracket.thirdPlace
+        ? `<p class="mt-2 text-xs font-bold uppercase tracking-wider text-ocean-500">3rd Place</p>${matchCard(bracket.thirdPlace, records)}` : '';
+      return `
+        <div class="${i === open ? '' : 'hidden'} space-y-3" data-panel="${id}:${i}">
+          ${games.map((m) => matchCard(m, records)).join('')}
+          ${thirdPlace}
+          ${byes.length ? `<p class="text-xs text-ocean-500">Bye${byes.length > 1 ? 's' : ''} to the ${escapeHtml(bracket.rounds[i + 1]?.name ?? 'next round')}: ${byes
+            .map((m) => `<span class="font-semibold text-ocean-700">#${m.a.seed} ${escapeHtml(m.a.name ?? '')}</span>`).join(', ')}</p>` : ''}
+        </div>`;
+    }).join('');
+    return `
+      <div class="md:hidden print:hidden">
+        <div class="flex gap-2 overflow-x-auto pb-1 mb-3 -mx-1 px-1">${tabs}</div>
+        ${panels}
+      </div>`;
+  }
+
+  /** Desktop and print view: the whole tree with connector lines. */
+  function treeView(bracket: Bracket, records: Map<string, string>): string {
+    const columns = bracket.rounds.map((r, i) => {
+      const last = i === bracket.rounds.length - 1;
+      return `
+        <div class="bk-col">
+          <p class="mb-1 text-center text-[11px] font-bold uppercase tracking-wider text-ocean-500">${escapeHtml(r.name)}</p>
+          <div class="bk-col-body">
+            ${r.matches.map((m) => `<div class="bk-slot">${matchCard(m, records)}</div>`).join('')}
+          </div>
+          ${last && bracket.thirdPlace ? `<p class="mt-4 mb-1 text-center text-[11px] font-bold uppercase tracking-wider text-ocean-500">3rd Place</p>${matchCard(bracket.thirdPlace, records)}` : ''}
+        </div>`;
+    }).join('');
+    return `
+      <div class="hidden md:block print:block overflow-x-auto pb-2">
+        <div class="bk-tree" style="--bk-rows: ${bracket.rounds[0].matches.length}">${columns}</div>
+      </div>`;
+  }
+
+  function render() {
+    const tabs = document.getElementById('group-tabs')!;
+    tabs.innerHTML = groups.length > 1
+      ? groups.map((g) => `<button type="button" class="tab-btn${g.key === currentGroup ? ' active' : ''}" data-group="${escapeHtml(g.key)}">${escapeHtml(g.label)}</button>`).join('')
+      : '';
+
+    const group = groups.find((g) => g.key === currentGroup);
     const container = document.getElementById('brackets-container')!;
-    container.innerHTML = '';
-
-    const heading = document.createElement('h2');
-    heading.className = 'hidden print:block font-display font-black text-2xl text-ocean-700 mb-4';
-    heading.textContent = `${DAY_FULL_LABEL[currentDay] ?? currentDay} Playoffs`;
-    container.appendChild(heading);
-
-    const formatEl = document.createElement('div');
-    formatEl.id = 'playoff-format-note';
-    formatEl.className = 'mb-6 rounded-2xl border border-sand-200 bg-white px-4 py-3 text-sm text-ocean-700';
-    formatEl.innerHTML = `
-      <p class="font-semibold text-ocean-700">Playoff Match Format</p>
-      <p class="mt-1 text-ocean-600">One court per division. 45-minute slots: <strong>6:30</strong>, <strong>7:15</strong>, <strong>8:00</strong>, <strong>8:45</strong>, <strong>9:30</strong>.</p>
-      <p class="mt-1 text-ocean-600">Best 2 of 3 sets, played to <strong>21-21-15</strong>, win by 2.</p>
-    `;
-    container.appendChild(formatEl);
-
-    const dayDivisions = DIVISIONS.filter((d) => d.day === currentDay);
-
-    for (const config of dayDivisions) {
-      const data = allBrackets.get(config.id);
-      if (!data) continue;
-
-      const divisionEl = document.createElement('div');
-      divisionEl.className = 'bracket-division mb-12';
-      divisionEl.innerHTML = `
-        <div class="print-division-meta">
-          <p class="print-division-day">${DAY_FULL_LABEL[currentDay] ?? currentDay} Playoffs - ${config.name} (${config.court})</p>
-          <p class="print-division-subline">Best 2 of 3 sets, played to 21-21-15, win by 2.</p>
-        </div>
-        <div class="flex items-center gap-3 mb-5">
-          <h3 class="font-display font-bold text-xl text-ocean-700">${config.name}</h3>
-          <span class="text-sm text-ocean-500 bg-sand-50 px-3 py-1 rounded-full border border-sand-200">${config.court}</span>
-        </div>
-      `;
-
-      const scrollWrapper = document.createElement('div');
-      scrollWrapper.className = 'overflow-x-auto pb-2';
-
-      const bracketEl = document.createElement('div');
-
-      scrollWrapper.appendChild(bracketEl);
-      divisionEl.appendChild(scrollWrapper);
-      container.appendChild(divisionEl);
-
-      createBracket(buildBracketData(data.teams) as any, bracketEl, {
-        useClassicalLayout: true,
-        navButtonsPosition: 'hidden' as any,
-        disableHighlight: true,
-        rootBgColor: 'transparent',
-        connectionLinesColor: '#DAD8D2',
-        connectionLinesWidth: 2,
-        roundTitleColor: '#87847D',
-        roundTitlesFontSize: 11,
-        matchFontSize: 13,
-        matchMaxWidth: 300,
-        mainVerticalPadding: 16,
-        rootBorderColor: 'transparent',
-        wrapperBorderColor: 'transparent',
-        matchHorMargin: 24,
-        getNationalityHTML: () => '',
-        getPlayerTitleHTML: (player: any) => {
-          if (player.title === 'BYE') {
-            return `<span style="color:#C2BFB8;font-style:italic;font-size:0.75rem;">BYE</span>`;
-          }
-          return `<span class="team-title-wrap"><span class="team-name-full">${escapeHtml(player.title)}</span>`
-            + (player.nationality
-              ? `<span class="team-record-inline">${escapeHtml(player.nationality)}</span>`
-              : '')
-            + '</span>';
-        },
-      });
+    if (!group) {
+      container.innerHTML = '';
+      return;
     }
+    container.innerHTML = group.brackets.map((bracket, i) => {
+      const id = `${group.key}-${i}`;
+      return `
+        <div class="bk-division rounded-2xl border border-sand-200 bg-white/70 p-3 sm:p-5 shadow-sm">
+          <div class="flex flex-wrap items-center gap-2 mb-4">
+            <h2 class="font-display font-bold text-xl text-ocean-700">${escapeHtml(bracket.title)}</h2>
+            ${bracket.projected ? '<span class="rounded-full border border-sand-300 bg-sand-50 px-2.5 py-0.5 text-xs font-medium text-ocean-500">Projected from standings</span>' : ''}
+            ${group.date ? `<span class="hidden print:inline text-sm text-ocean-500">${escapeHtml(group.label)}</span>` : ''}
+          </div>
+          ${championBanner(bracket)}
+          ${roundView(bracket, id, group.records)}
+          ${treeView(bracket, group.records)}
+        </div>`;
+    }).join('');
   }
 
   function showState(state: 'loading' | 'not-ready' | 'brackets') {
     document.getElementById('playoffs-loading')!.classList.toggle('hidden', state !== 'loading');
     document.getElementById('playoffs-not-ready')!.classList.toggle('hidden', state !== 'not-ready');
     document.getElementById('brackets-container')!.classList.toggle('hidden', state !== 'brackets');
+    document.getElementById('print-row')!.classList.toggle('md:flex', state === 'brackets');
+  }
+
+  // ── Events ────────────────────────────────────────────────────────────────
+
+  document.getElementById('group-tabs')!.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-group]');
+    if (!btn) return;
+    currentGroup = btn.dataset.group!;
+    render();
+  });
+
+  document.getElementById('brackets-container')!.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-round]');
+    if (!btn) return;
+    const id = btn.dataset.bracket!;
+    const round = Number(btn.dataset.round);
+    pickedRound.set(id, round);
+    btn.parentElement!.querySelectorAll('.tab-btn').forEach((b) => b.classList.toggle('active', b === btn));
+    document.querySelectorAll<HTMLElement>(`[data-panel^="${CSS.escape(id)}:"]`).forEach((panel) => {
+      panel.classList.toggle('hidden', panel.dataset.panel !== `${id}:${round}`);
+    });
+  });
+
+  document.getElementById('print-btn')?.addEventListener('click', () => window.print());
+
+  // ── Start ─────────────────────────────────────────────────────────────────
+
+  async function load(): Promise<'engine' | 'projected' | 'not-ready'> {
+    // VolleyballEngine is the source of truth once a night is set up there.
+    try {
+      const fromEngineNights = await engineGroups();
+      if (fromEngineNights.length > 0) {
+        groups = fromEngineNights;
+        return 'engine';
+      }
+    } catch (error) {
+      console.error('Could not load playoff brackets from VolleyballEngine:', error);
+    }
+    if (!(await regularSeasonOver())) return 'not-ready';
+    groups = await projectedGroups();
+    return groups.length > 0 ? 'projected' : 'not-ready';
   }
 
   async function init() {
     showState('loading');
-
+    let source: Awaited<ReturnType<typeof load>>;
     try {
-      if (!PLAYOFFS_ACTIVE) {
-        const divisionIds = DIVISIONS.map((d) => d.id);
-        const upcomingChecks = await Promise.all(divisionIds.map(hasUpcomingGames));
-        seasonComplete = upcomingChecks.every((hasGames) => !hasGames);
-
-        if (!seasonComplete) {
-          showState('not-ready');
-          return;
-        }
-      } else {
-        seasonComplete = true;
-      }
-
-      const standingsResults = await Promise.all(
-        DIVISIONS.map(async (config) => {
-          const standings = await fetchStandings(config.id);
-          return { config, standings };
-        })
-      );
-
-      for (const { config, standings } of standingsResults) {
-        if (standings.length > 0) {
-          const teamCount = config.playoffTeamCount ?? DEFAULT_PLAYOFF_TEAM_COUNT;
-          const teams: BracketTeam[] = standings.slice(0, Math.min(teamCount, standings.length)).map((s, i) => ({
-            seed: i + 1,
-            name: s.Team.name,
-            record: `${s.total_wins}-${s.total_losses}${s.total_ties > 0 ? `-${s.total_ties}` : ''}`,
-          }));
-          allBrackets.set(config.id, { config, teams });
-        }
-      }
-
-      showState('brackets');
-      renderPage();
+      source = await load();
     } catch {
       showState('not-ready');
+      return;
+    }
+    if (source === 'not-ready') {
+      showState('not-ready');
+      return;
+    }
+    currentGroup = defaultGroup();
+    showState('brackets');
+    render();
+
+    // On a playoff night, keep the bracket current while the page is open.
+    if (source === 'engine' && groups.some((g) => g.date === todayKey())) {
+      setInterval(async () => {
+        if (document.visibilityState !== 'visible') return;
+        try {
+          const fresh = await engineGroups();
+          if (fresh.length > 0) {
+            groups = fresh;
+            render();
+          }
+        } catch {
+          // Keep showing the last good bracket.
+        }
+      }, REFRESH_MS);
     }
   }
-
-  document.querySelectorAll<HTMLButtonElement>('#day-tabs .tab-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#day-tabs .tab-btn').forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentDay = btn.dataset.day || 'Tue';
-      renderPage();
-    });
-  });
-
-  document.getElementById('print-btn')?.addEventListener('click', () => {
-    window.print();
-  });
 
   init();
 </script>
